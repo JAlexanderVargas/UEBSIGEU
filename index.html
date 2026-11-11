@@ -6,16 +6,12 @@
 <title>Elecciones · Sistema Integral</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Librerías de exportación -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<!-- Librería para Gráficos y Capturas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<!-- Librería para generar .docx real -->
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -33,7 +29,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 small{display:block;color:var(--mut);font-size:12px;line-height:1.3}
 .hide{display:none!important}
 
-/* Menú lateral */
 aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
 .brand{display:flex;flex-direction:column;align-items:center;margin:0 6px 26px;color:var(--blanco);text-align:center}
 .brand img{height:70px;width:auto;margin-bottom:12px;filter: brightness(0) invert(1);}
@@ -57,7 +52,6 @@ main{padding:28px 32px 60px;min-width:0}
 .top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--oscuro)}
 .top p{margin:2px 0 20px;color:var(--oscuro);opacity:0.8}
 
-/* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:18px}
 .kpi-card{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:20px 22px 18px;border-radius:22px;
   background:linear-gradient(150deg,#ffffff 0%,var(--soft,#f1f7f3) 160%);border:1px solid rgba(11,59,44,.07);
@@ -165,8 +159,8 @@ tr.alert-row td:first-child { border-left: 5px solid var(--alert-line) !importan
 .grid label,.lb{font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:3px}
 .grid .in,textarea.in,.dlg .in{width:100%}
 textarea.in{min-height:110px;resize:vertical}
+textarea.in[readonly]{background:#f5f5f5 !important;cursor:not-allowed;opacity:0.85}
 
-/* Acta */
 #actaOutContainer, #informeOutContainer { background: #d9d9d9; padding: 20px; border-radius: 14px; margin-top: 20px; }
 .acta-page { background: #fff; width: 21.59cm; min-height: 27.94cm; margin: 0 auto; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; position: relative; font-family: var(--font-acta); color: #000; }
 .acta-header { background: #007a3d !important; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
@@ -223,7 +217,6 @@ dialog[open]{animation:pop .18s ease-out}
 #toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,30px);background:var(--oscuro);color:var(--blanco);padding:12px 20px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:99;border-left:4px solid var(--naranja)}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 
-/* Cronograma */
 .cron-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .cron-panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; position: relative; }
 .cron-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
@@ -289,14 +282,6 @@ dialog[open]{animation:pop .18s ease-out}
 .chart-container { position: relative; width: 100%; height: 300px; margin-top: 12px; }
 .chart-container-sm { position: relative; width: 100%; height: 250px; margin-top: 12px; }
 
-.votos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px}
-.voto-item{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--card);border-left:4px solid var(--naranja)}
-.voto-item.ganador{border-left-color:var(--ok);background:var(--okb)}
-.voto-item .cand-info{font-size:12.5px;margin-bottom:8px}
-.voto-item .cand-info b{font-size:14px}
-.voto-item .voto-row{display:flex;gap:8px;align-items:center}
-.voto-item input[type=number]{width:90px}
-
 .vac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 12px; }
 .vac-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 .vac-card-header { border-bottom: 2px solid var(--line); padding-bottom: 8px; font-weight: 800; color: var(--oscuro); font-size: 15px; }
@@ -332,7 +317,7 @@ dialog[open]{animation:pop .18s ease-out}
   @page { size: letter; margin: 0; }
   html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; display: block !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   main { padding: 0 !important; }
-  aside, .top, .noprint, #vSeg, #vCron, #vAnal, #vVac, #vVotantes, #vCargaVotos, #vGanadores, #vSoporte, #toast, #topbar, #loginScreen { display: none !important; }
+  aside, .top, .noprint, #vSeg, #vCron, #vAnal, #vVac, #vVotantes, #vCargaVotos, #vGanadores, #vSoporte, #vAnexos, #toast, #topbar, #loginScreen { display: none !important; }
   #vAct { display: block !important; }
   body.printing-informe #actaOutContainer { display: none !important; }
   #actaOutContainer, #informeOutContainer { background: none !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; }
@@ -459,7 +444,6 @@ td small{font-size:12.5px}
 .cr-filtros button.on{background:linear-gradient(90deg,#0B3B2C,#0B7A4B);box-shadow:0 8px 14px -8px #0B7A4B}
 @media (prefers-reduced-motion:reduce){.cr-item,.cr-stage,.cr-stat,.cr-next,.cr-next .ic2,.progress-bar-fill,.cron-panel::before,.tl-status{animation:none !important}}
 
-/* ============ LOGIN + TOPBAR ============ */
 body.logged-out aside, body.logged-out main { filter: blur(3px); pointer-events: none; user-select: none; }
 body.logged-in main { padding-top: 60px; }
 body.logged-in #topbar { display: flex; }
@@ -480,10 +464,13 @@ body.logged-in #topbar { display: flex; }
     <label style="font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px;">Usuario</label>
     <input class="in" id="loginUser" autocomplete="username" style="width:100%;margin-bottom:12px;">
     <label style="font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px;">Contraseña</label>
-    <input class="in" id="loginPass" type="password" autocomplete="current-password" style="width:100%;margin-bottom:16px;">
+    <input class="in" id="loginPass" type="password" autocomplete="current-password" style="width:100%;margin-bottom:12px;">
     <div id="loginErr" style="color:var(--alert-line);font-size:12.5px;margin-bottom:10px;min-height:16px;"></div>
     <button class="btn p" id="loginBtn" style="width:100%;padding:12px;font-weight:800" onclick="doLogin()">Ingresar</button>
     <div id="loginLoad" class="hide" style="text-align:center;margin-top:10px;color:var(--mut);font-size:12px;">Conectando con el servidor...</div>
+    <div style="text-align:center; margin-top:14px;">
+      <a href="#" onclick="abrirRecuperarPass(); return false;" style="font-size:12.5px;color:var(--oscuro);font-weight:600;text-decoration:none;">¿Olvidaste tu contraseña?</a>
+    </div>
   </div>
 </div>
 
@@ -508,11 +495,11 @@ body.logged-in #topbar { display: flex; }
  <button class="nav" id="n4" onclick="tab(4)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analítica</button>
  <button class="nav" id="n5" onclick="tab(5)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Cargos / Vacantes</button>
  <button class="nav" id="n6" onclick="tab(6)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>Cargar Votos</button>
- <button class="nav" id="n7" onclick="tab(7)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Actas</button>
+ <button class="nav" id="n7" onclick="tab(7)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Generar Actas</button>
+ <button class="nav" id="n10" onclick="tab(10)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Anexos e Informes</button>
  <button class="nav" id="n8" onclick="tab(8)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Directorio Ganadores</button>
  <button class="nav" id="n9" onclick="tab(9)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>Registro Soporte</button>
 
- <!-- NUEVA SECCIÓN: ACCIONES DEL SISTEMA -->
  <div id="sideActions" class="hide" style="margin-top:14px;padding-top:14px;border-top:1px solid #2a5e4d;">
    <div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#9ac0b0;padding:0 12px 8px;">Acciones del sistema</div>
    <button class="nav" id="btnLimpiar" onclick="limpiarPantalla()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Limpiar pantalla</button>
@@ -555,20 +542,14 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="cron-grid">
    <div class="cron-panel" id="panelCronPub">
-     <div class="cron-header">
-       <h3>🌐 Cronograma Público</h3>
-       <button class="btn sm" onclick="descargarCronImagen('panelCronPub', 'Cronograma_Publico')">📸 Descargar Imagen</button>
-     </div>
+     <div class="cron-header"><h3>🌐 Cronograma Público</h3><button class="btn sm" onclick="descargarCronImagen('panelCronPub', 'Cronograma_Publico')">📸 Descargar Imagen</button></div>
      <p class="help" style="margin-top:0">Información de consulta pública. Las fechas pueden estar sujetas a cambios.</p>
      <div class="progress-container"><div class="progress-bar-bg"><div class="progress-bar-fill" id="cronPubProgress" style="width:0%">0%</div></div></div>
      <div id="cronNextPub"></div>
      <div id="cronPubList"></div>
    </div>
    <div class="cron-panel" id="panelCronInt">
-     <div class="cron-header">
-       <h3>🔒 Cronograma Interno</h3>
-       <button class="btn sm" onclick="descargarCronImagen('panelCronInt', 'Cronograma_Interno')">📸 Descargar Imagen</button>
-     </div>
+     <div class="cron-header"><h3>🔒 Cronograma Interno</h3><button class="btn sm" onclick="descargarCronImagen('panelCronInt', 'Cronograma_Interno')">📸 Descargar Imagen</button></div>
      <div class="bar" style="margin-bottom:10px">
        <button class="btn sm p" onclick="addActividad()">+ Actividad</button>
        <button class="btn sm" onclick="cronFileInput.click()">📂 Cargar Excel</button>
@@ -586,7 +567,7 @@ body.logged-in #topbar { display: flex; }
 
 <!-- SECCIÓN SEGUIMIENTO -->
 <section id="vSeg" class="hide">
- <div class="top"><h1>Seguimiento candidatos</h1><p>Valida requisitos, registra novedades y controla cada fórmula (principal y suplente).</p></div>
+ <div class="top"><h1>Seguimiento candidatos</h1><p>Valida requisitos, registra novedades y controla cada fórmula.</p></div>
  <div class="kpis" id="kpis"></div>
  <div class="kpis novedad" id="kpisNovedad" style="margin-bottom:16px"></div>
  <div class="prog"><div class="t"><span>Avance de validación</span><span id="pct"></span></div><div class="seg" id="seg"></div>
@@ -609,13 +590,13 @@ body.logged-in #topbar { display: flex; }
   <button class="btn" onclick="expPDF()">Descargar PDF</button>
  </div>
  <div class="wrap"><table id="tbl"><thead><tr><th>Cargo</th><th>Candidato / Contacto</th><th>Rol y órgano</th><th>Facultad y programa</th><th class="c">Sem.</th><th class="c">TH</th><th class="c">Egresados</th><th class="c">Sec. General</th><th class="c">Fac./Prog.</th><th>Novedad</th><th>Estado</th><th></th></tr></thead></table>
- <div id="vacio" class="empty hide">Aún no hay candidatos.<br>Carga un Excel, agrega uno a mano o <a href="#" onclick="demo();return false">carga datos de ejemplo</a>.</div></div>
- <p class="help">Toca una casilla para cambiarla: vacío (pendiente), ✔ (cumple) o ✕ (tiene llamado de atención). El estado se calcula solo. Las filas con alerta roja indican que algún integrante de la dupla no cumple.</p>
+ <div id="vacio" class="empty hide">Aún no hay candidatos.</div></div>
+ <p class="help">Toca una casilla para cambiarla: vacío (pendiente), ✔ (cumple) o ✕ (tiene llamado de atención).</p>
 </section>
 
 <!-- SECCIÓN ACTAS -->
 <section id="vAct" class="hide">
- <div class="top noprint"><h1>Actas</h1><p>Registra los votos, marca los ganadores y genera el acta lista para firmar.</p></div>
+ <div class="top noprint"><h1>Generar Actas</h1><p>Registra los votos, marca los ganadores y genera el acta oficial lista para firmar.</p></div>
  <div class="card noprint">
   <h3>Datos del acta</h3>
   <div class="grid">
@@ -635,14 +616,14 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="card noprint hide" id="cardVacantes1">
    <h3>⚠️ Cargos Vacantes</h3>
-   <p class="help" style="margin-top:0">Estos son los cargos que no fueron ocupados en la primera vuelta (por falta de candidatos o por voto en blanco).</p>
+   <p class="help" style="margin-top:0">Cargos que no fueron ocupados en la primera vuelta.</p>
    <div class="wrap"><table style="min-width:100%"><thead><tr><th>Órgano</th><th>Facultad</th><th>Rol</th><th>Motivo</th></tr></thead><tbody id="tablaVacantes1"></tbody></table></div>
  </div>
  <div class="card noprint">
   <h3>Votos y ganadores</h3>
   <p class="help" id="helpVotacion"></p>
   <div id="mensajePosibleGanador" class="hide" style="background:#FFF3CD; border:2px solid #FFC107; padding:10px; border-radius:10px; font-weight:bold; color:#856404; margin-bottom:10px;">
-    ⚠️ Posibles ganadores detectados (resaltados en amarillo). Confirma con el check de "Ganador" antes de generar el acta.
+    ⚠️ Posibles ganadores detectados (resaltados en amarillo). Confirma antes de generar el acta.
   </div>
   <div class="wrap"><table style="min-width:900px">
       <thead><tr>
@@ -658,9 +639,9 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="card noprint" style="background: #f7fbf8; border: 2px solid var(--oscuro);">
   <h3>📝 Texto del acta oficial (Editable)</h3>
-  <p class="help" style="margin-top:0">Este texto ya viene predefinido. Puedes editarlo y se guarda solo. El sistema reemplaza lo que esté entre <code>{{ }}</code>. Para dar formato: empieza una línea con <code>##</code> para <b>centrarla en negrilla</b>, o encierra palabras entre <code>**</code> para ponerlas en <b>negrilla</b>.</p>
+  <p class="help" style="margin-top:0">Este texto ya viene predefinido. Puedes editarlo y se guarda solo. El sistema reemplaza lo que esté entre <code>{{ }}</code>.</p>
   <textarea class="in" id="at" oninput="guardarTextoActa()" style="min-height: 600px; font-family: monospace; font-size: 13px; line-height: 1.5; background: #fff; padding: 20px;"></textarea>
-  <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()">↺ Restaurar texto predefinido</button></div>
+  <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()" id="btnRestaurarActa">↺ Restaurar texto predefinido</button></div>
   <details style="margin-top:15px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid var(--line);">
     <summary style="font-weight: 800; cursor: pointer; color: var(--oscuro);">🔍 Ver variables disponibles</summary>
     <div style="margin-top:10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 12.5px; color: var(--mut);">
@@ -669,12 +650,12 @@ body.logged-in #topbar { display: flex; }
       <div><code>{{lugar}}</code> Lugar escrito arriba</div>
       <div><code>{{numero}}</code> Número de Acta</div>
       <div><code>{{jornada}}</code> Primera o Segunda Vuelta</div>
-      <div><code>{{periodo}}</code> Periodo actual (2026-2027)</div>
-      <div><code>{{fecha_letras}}</code> Fecha completa en letras</div>
+      <div><code>{{periodo}}</code> Periodo actual</div>
+      <div><code>{{fecha_letras}}</code> Fecha en letras</div>
       <div><code>{{fecha_convocatoria}}</code> Fecha de convocatoria</div>
-      <div><code>{{f2_inscripcion}}</code> Fechas de Segunda Vuelta</div>
+      <div><code>{{f2_inscripcion}}</code> Fechas Segunda Vuelta</div>
       <div><code>{{anexos}}</code> Lista de anexos</div>
-      <div><code>{{literal_D_E}}</code> Considerandos de vacantes</div>
+      <div><code>{{literal_D_E}}</code> Considerandos vacantes</div>
       <div><code>{{tabla_ganadores}}</code> Tabla de elegidos</div>
       <div><code>{{anio}}</code> / <code>{{anio_siguiente}}</code></div>
       <div><code>{{hora_actual}}</code> / <code>{{hora_actual_letras}}</code></div>
@@ -684,28 +665,12 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="card noprint">
   <h3>Firmas de los asistentes al escrutinio</h3>
-  <p class="help" style="margin-top:0">Agrega los firmantes. Si marcas la casilla de "Delegado", el sistema te permitirá seleccionar su cargo oficial.</p>
   <div class="bar">
     <button class="btn sm" onclick="addFirma()">+ Agregar firma personalizada</button>
     <span class="sp"></span>
     <span id="firmaCount" style="font-size:12.5px;color:var(--mut)"></span>
   </div>
   <div class="firmas-grid" id="firmasGrid"></div>
- </div>
- <div class="card noprint">
-   <h3>📄 Generar Informes de Votaciones (Anexos)</h3>
-   <p class="help" style="margin-top:0">Genera el informe consolidado por rol con el diseño oficial de la Universidad.</p>
-   <div class="bar">
-     <select class="in" id="inf_jornada"><option value="1">Primera Jornada</option><option value="2">Segunda Jornada</option></select>
-     <select class="in" id="inf_rol">
-       <option value="Todos">Todos los roles</option>
-       <option value="Docente">Docentes</option>
-       <option value="Estudiante">Estudiantes</option>
-       <option value="Egresado">Egresados</option>
-     </select>
-     <button class="btn p" onclick="generarInformeVotacion()">Generar Informe</button>
-     <button class="btn" onclick="imprimirInforme()">Imprimir / PDF (horizontal)</button>
-   </div>
  </div>
  <div class="card noprint">
   <div class="bar" style="margin:0">
@@ -715,16 +680,61 @@ body.logged-in #topbar { display: flex; }
   </div>
  </div>
  <div id="actaOutContainer" class="hide"><div class="acta-page" id="actaOut"></div></div>
+</section>
+
+<!-- SECCIÓN ANEXOS -->
+<section id="vAnexos" class="hide">
+ <div class="top"><h1>Anexos e Informes</h1><p>Genera los informes consolidados de votaciones por rol, jornada y facultad.</p></div>
+ 
+ <div class="card">
+   <h3>⚙️ Configuración del Anexo</h3>
+   <p class="help" style="margin-top:0">Ajusta los filtros antes de generar el informe. El resultado es un documento oficial horizontal.</p>
+   <div class="grid">
+     <div>
+       <label>Jornada</label>
+       <select class="in" id="inf_jornada">
+         <option value="1">Primera Vuelta</option>
+         <option value="2">Segunda Vuelta</option>
+       </select>
+     </div>
+     <div>
+       <label>Rol</label>
+       <select class="in" id="inf_rol">
+         <option value="Todos">Todos los roles</option>
+         <option value="Docente">Docentes</option>
+         <option value="Estudiante">Estudiantes</option>
+         <option value="Egresado">Egresados</option>
+       </select>
+     </div>
+     <div>
+       <label>Órgano (opcional)</label>
+       <select class="in" id="inf_organo">
+         <option value="">Todos los órganos</option>
+       </select>
+     </div>
+     <div>
+       <label>Facultad (opcional)</label>
+       <select class="in" id="inf_facultad">
+         <option value="">Todas las facultades</option>
+       </select>
+     </div>
+   </div>
+   <div class="bar" style="margin-top:16px; margin-bottom:0;">
+     <button class="btn p" onclick="generarInformeVotacion()">📄 Generar anexo</button>
+     <button class="btn" onclick="imprimirInforme()">🖨 Imprimir / PDF (horizontal)</button>
+   </div>
+ </div>
+
  <div id="informeOutContainer" class="hide"><div class="acta-page" id="informeOut"></div></div>
 </section>
 
 <!-- SECCIÓN CENSO VOTANTES -->
 <section id="vVotantes" class="hide">
- <div class="top"><h1>Censo Votantes</h1><p>Gestiona el total del censo electoral y las personas habilitadas para votar.</p></div>
+ <div class="top"><h1>Censo Votantes</h1><p>Gestiona el total del censo electoral y las personas habilitadas.</p></div>
  <div class="kpis" id="censoKpisTop"></div>
   <div class="grid" style="margin-bottom:20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
     <div class="card">
-      <h3>📊 Avance de habilitación<span class="sub">Habilitados frente al censo base</span></h3>
+      <h3>📊 Avance de habilitación</h3>
       <div class="progress-container" style="margin-bottom:0">
         <div class="progress-bar-bg"><div class="progress-bar-fill" id="barVotantes" style="width:0%">0%</div></div>
       </div>
@@ -741,7 +751,6 @@ body.logged-in #topbar { display: flex; }
   </div>
   <div class="card" style="border-left: 4px solid var(--naranja);">
    <h3>📥 Carga Masiva del Censo (Excel)</h3>
-   <p class="help" style="margin-top:0">Sube el archivo con el desglose de votantes habilitados por facultad, rol, y las inclusiones especiales. Esto generará automáticamente los KPIs y gráficos.</p>
    <div class="bar">
      <input type="file" id="fileCenso" class="in" accept=".xlsx,.xls,.csv" onchange="procesarExcelCenso(this)" style="width:300px">
      <button class="btn" onclick="descargarPlantillaCenso()">Descargar Plantilla</button>
@@ -751,17 +760,11 @@ body.logged-in #topbar { display: flex; }
    <div class="kpis" id="kpisCensoFac" style="margin-top:16px"></div>
  </div>
  <div class="dash-grid wide">
-    <div class="card">
-      <h3>📈 Habilitados por Facultad<span class="sub">Composición por rol, de mayor a menor</span></h3>
-      <div class="chart-xl"><canvas id="chartCensoFac"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>🎓 Distribución por Rol<span class="sub">Participación sobre el total registrado</span></h3>
-      <div class="chart-xl" style="height:360px"><canvas id="chartCensoRol"></canvas></div>
-    </div>
+    <div class="card"><h3>📈 Habilitados por Facultad</h3><div class="chart-xl"><canvas id="chartCensoFac"></canvas></div></div>
+    <div class="card"><h3>🎓 Distribución por Rol</h3><div class="chart-xl" style="height:360px"><canvas id="chartCensoRol"></canvas></div></div>
   </div>
   <div class="card">
-    <h3>📋 Detalle de Habilitación por Facultad y Rol</h3>
+    <h3>📋 Detalle por Facultad y Rol</h3>
     <div class="wrap">
       <table class="tbl-pro" style="min-width:100%">
         <thead><tr><th class="c">#</th><th>Facultad</th><th class="c">Estudiantes</th><th class="c">Docentes</th><th class="c">Egresados</th><th class="c">Presenso / Incl.</th><th class="c">Total</th><th>% del censo</th></tr></thead>
@@ -777,21 +780,21 @@ body.logged-in #topbar { display: flex; }
  <div class="top"><h1>Analítica y Estadísticas</h1><p>Participación, comparativas y métricas del proceso electoral.</p></div>
  <div class="kpis" id="analKpis"></div>
   <div class="dash-grid">
-    <div class="card"><h3>🎓 Candidatos por Rol<span class="sub">Fórmulas inscritas por tipo de representante</span></h3><div class="chart-md"><canvas id="chartRoles"></canvas></div></div>
-    <div class="card"><h3>🏛️ Candidatos por Órgano<span class="sub">Fórmulas por órgano activo</span></h3><div class="chart-md"><canvas id="chartOrganos"></canvas></div></div>
-    <div class="card"><h3>🗳️ Participación<span class="sub">Votos válidos, en blanco y abstención</span></h3><div class="chart-md"><canvas id="chartPart"></canvas></div></div>
+    <div class="card"><h3>🎓 Candidatos por Rol</h3><div class="chart-md"><canvas id="chartRoles"></canvas></div></div>
+    <div class="card"><h3>🏛️ Candidatos por Órgano</h3><div class="chart-md"><canvas id="chartOrganos"></canvas></div></div>
+    <div class="card"><h3>🗳️ Participación</h3><div class="chart-md"><canvas id="chartPart"></canvas></div></div>
   </div>
-  <div class="card"><h3>📊 Votos válidos por Facultad<span class="sub">Ordenado de mayor a menor</span></h3><div class="chart-xl"><canvas id="chartFac"></canvas></div></div>
+  <div class="card"><h3>📊 Votos válidos por Facultad</h3><div class="chart-xl"><canvas id="chartFac"></canvas></div></div>
   <div class="dash-grid wide">
     <div class="card">
-      <h3>🏆 Resultados Electorales por Facultad<span class="sub">Ganadores y su peso dentro de cada cargo</span></h3>
+      <h3>🏆 Resultados Electorales</h3>
       <div class="wrap"><table class="tbl-pro" style="min-width:100%">
-          <thead><tr><th>Facultad</th><th>Órgano</th><th>Rol</th><th>Ganador (Principal / Suplente)</th><th class="c">Votos</th><th>% del cargo</th></tr></thead>
+          <thead><tr><th>Facultad</th><th>Órgano</th><th>Rol</th><th>Ganador</th><th class="c">Votos</th><th>% del cargo</th></tr></thead>
           <tbody id="tablaResumenResultados"></tbody>
         </table></div>
     </div>
     <div class="card">
-      <h3>🏛️ Resumen por Órgano<span class="sub">Votos válidos y en blanco</span></h3>
+      <h3>🏛️ Resumen por Órgano</h3>
       <div class="wrap"><table class="tbl-pro" style="min-width:100%">
           <thead><tr><th>Órgano</th><th class="c">Fórmulas</th><th class="c">Válidos</th><th class="c">En blanco</th><th>% del total</th></tr></thead>
           <tbody id="tablaOrganosRes"></tbody>
@@ -800,7 +803,7 @@ body.logged-in #topbar { display: flex; }
     </div>
   </div>
   <div class="dash-grid wide">
-    <div class="card"><h3>🗳️ Votos por Órgano y Rol<span class="sub">Votos válidos acumulados</span></h3><div class="chart-md" style="height:340px"><canvas id="chartHist"></canvas></div></div>
+    <div class="card"><h3>🗳️ Votos por Órgano y Rol</h3><div class="chart-md" style="height:340px"><canvas id="chartHist"></canvas></div></div>
     <div class="card"><h3>⭐ Top 10 fórmulas más votadas</h3>
       <div class="wrap"><table class="tbl-pro" style="min-width:100%">
           <thead><tr><th class="c">#</th><th>Candidato</th><th>Órgano / Facultad</th><th class="c">Votos</th></tr></thead>
@@ -812,7 +815,7 @@ body.logged-in #topbar { display: flex; }
 
 <!-- SECCIÓN CARGOS / VACANTES -->
 <section id="vVac" class="hide">
- <div class="top"><h1>Seguimiento de Cargos y Vacantes</h1><p>Verifica que todas las facultades y departamentos tengan candidatos en todos los roles y órganos obligatorios.</p></div>
+ <div class="top"><h1>Seguimiento de Cargos y Vacantes</h1><p>Verifica cobertura por facultad y rol.</p></div>
  <div class="bar">
    <span class="sp"></span>
    <button class="btn" style="background:#1d6f42;color:white;border-color:#1d6f42" onclick="expVacantesXL()">Descargar Reporte Excel</button>
@@ -824,23 +827,20 @@ body.logged-in #topbar { display: flex; }
 
 <!-- SECCIÓN CARGAR VOTOS -->
 <section id="vCargaVotos" class="hide">
- <div class="top"><h1>Cargar Archivo de Votos</h1><p>Sube los archivos Excel con los votos consolidados por órgano. Puedes subir hasta 4 archivos simultáneamente.</p></div>
+ <div class="top"><h1>Cargar Archivo de Votos</h1><p>Sube los archivos Excel con los votos consolidados por órgano.</p></div>
  <div class="grid" style="grid-template-columns: 1fr 2fr; gap: 20px;">
    <div class="card">
      <h3>1. Selecciona el Órgano (Opcional)</h3>
      <div style="margin-bottom: 20px;">
-       <label>Si los archivos no traen el tipo de órgano, selecciónalo aquí.</label>
        <select class="in" id="cargaOrgano" style="width:100%"><option value="">Detectar automáticamente</option></select>
      </div>
      <h3>2. Descarga la Plantilla</h3>
-     <p class="help" style="margin-top:0">Usa este formato exacto para que el sistema pueda leer los datos.</p>
      <button class="btn" onclick="descargarPlantillaVotos()">Descargar Plantilla Excel</button>
      <div style="margin-top:30px; padding: 15px; background: #e0f0e5; border-radius: 10px;">
        <h4 style="margin:0 0 10px; font-size:13px; color:var(--ok)">Columnas esperadas:</h4>
        <ul style="font-size:11.5px; margin:0; padding-left:15px; color:var(--mut); line-height:1.6;">
          <li>Tipo</li><li>Facultad</li><li>Rol</li><li>Doc. principal / Doc. suplente</li>
-         <li>Nombre1 / Nombre2</li><li>Email / Teléfono (opcional)</li><li>Estado</li><li>Votos</li>
-         <li><b>Voto en blanco</b> (Opcional, fila extra)</li>
+         <li>Nombre1 / Nombre2</li><li>Email / Teléfono</li><li>Estado</li><li>Votos</li>
        </ul>
      </div>
    </div>
@@ -849,12 +849,12 @@ body.logged-in #topbar { display: flex; }
      <div class="upload-zone" id="dropZone" onclick="votosFileInput.click()">
        <div class="upload-icon">📄</div>
        <b>Haz clic o arrastra tus archivos aquí</b>
-       <p class="help">Formatos permitidos: .xlsx, .xls, .csv</p>
+       <p class="help">Formatos: .xlsx, .xls, .csv</p>
        <input type="file" id="votosFileInput" class="hide" accept=".xlsx,.xls,.csv" multiple onchange="procesarArchivosVotos(this)">
      </div>
      <div id="cargaStatus" style="margin-top: 20px; text-align:center; font-weight:600; color:var(--ok); line-height:1.6"></div>
      <div id="previewContainer" class="hide" style="margin-top:20px">
-       <h3>Vista Previa de Datos Consolidados</h3>
+       <h3>Vista Previa</h3>
        <div class="wrap" style="max-height:420px;overflow:auto"><table class="tbl-pro" style="min-width:100%"><thead><tr><th>Órgano</th><th>Facultad</th><th>Rol</th><th>Candidato</th><th class="c">Votos</th><th>Registro</th></tr></thead><tbody id="previewTable"></tbody></table></div>
      </div>
    </div>
@@ -863,7 +863,7 @@ body.logged-in #topbar { display: flex; }
 
 <!-- SECCIÓN DIRECTORIO GANADORES -->
 <section id="vGanadores" class="hide">
- <div class="top"><h1>Directorio de Ganadores</h1><p>Consulta la información de contacto de los candidatos electos en cada órgano y facultad.</p></div>
+ <div class="top"><h1>Directorio de Ganadores</h1><p>Información de contacto de los electos.</p></div>
  <div class="bar">
    <select class="in" id="gOrgFilter" onchange="renderDirectorio()"><option value="">Todos los órganos</option></select>
    <select class="in" id="gFacFilter" onchange="renderDirectorio()"><option value="">Todas las facultades</option></select>
@@ -872,7 +872,7 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="wrap"><table style="min-width:1000px">
      <thead><tr>
-         <th>Cargo / Facultad</th><th>Rol</th><th>Fórmula Ganadora (Principal / Suplente)</th>
+         <th>Cargo / Facultad</th><th>Rol</th><th>Fórmula Ganadora</th>
          <th>Documentos</th><th>Correos Electrónicos</th><th>Celulares</th>
        </tr></thead>
      <tbody id="tablaGanadores"></tbody>
@@ -881,19 +881,19 @@ body.logged-in #topbar { display: flex; }
 
 <!-- SECCIÓN REGISTRO SOPORTE -->
 <section id="vSoporte" class="hide">
- <div class="top"><h1>Registro de Soporte</h1><p>Gestiona los casos, PQRS y solicitudes de soporte técnico o electoral.</p></div>
+ <div class="top"><h1>Registro de Soporte</h1><p>Gestiona los casos, PQRS y solicitudes.</p></div>
  <div class="kpis" id="sopKpis"></div>
  <div class="dash-grid">
-   <div class="card"><h3>📞 Casos por canal<span class="sub">Cómo llegan las solicitudes</span></h3><div class="chart-md"><canvas id="chartSopCanal"></canvas></div></div>
-   <div class="card"><h3>✅ Estado de los casos<span class="sub">Solucionados frente a pendientes</span></h3><div class="chart-md"><canvas id="chartSopEstado"></canvas></div></div>
-   <div class="card"><h3>📈 Casos por día<span class="sub">Últimos días con actividad</span></h3><div class="chart-md"><canvas id="chartSopDia"></canvas></div></div>
+   <div class="card"><h3>📞 Casos por canal</h3><div class="chart-md"><canvas id="chartSopCanal"></canvas></div></div>
+   <div class="card"><h3>✅ Estado de los casos</h3><div class="chart-md"><canvas id="chartSopEstado"></canvas></div></div>
+   <div class="card"><h3>📈 Casos por día</h3><div class="chart-md"><canvas id="chartSopDia"></canvas></div></div>
  </div>
  <div class="card">
    <h3>📝 Nuevo Registro de Soporte</h3>
    <div class="grid">
      <div><label>Nombre Completo</label><input class="in" id="sop_nombre" placeholder="Ej. Juan Pérez"></div>
      <div><label>Documento</label><input class="in" id="sop_doc" placeholder="Ej. 10203040"></div>
-     <div><label>Motivo del Soporte</label><input class="in" id="sop_motivo" placeholder="Ej. No aparece en el censo"></div>
+     <div><label>Motivo</label><input class="in" id="sop_motivo" placeholder="Ej. No aparece en el censo"></div>
      <div><label>¿Quién lo gestiona?</label><input class="in" id="sop_gestor" placeholder="Ej. Coordinador Electoral"></div>
    </div>
    <div style="margin-top:16px;background:#f0f7f2;padding:14px;border-radius:14px">
@@ -909,13 +909,12 @@ body.logged-in #topbar { display: flex; }
    </div>
    <div class="grid" style="margin-top:12px;">
      <div><label>¿Fue Solucionado?</label><select class="in" id="sop_solucionado"><option value="no">No</option><option value="si">Sí</option></select></div>
-     <div style="grid-column: span 2;"><label>Observaciones (Opcional)</label><input class="in" id="sop_observaciones" placeholder="Detalles de la solución o gestión"></div>
+     <div style="grid-column: span 2;"><label>Observaciones (Opcional)</label><input class="in" id="sop_observaciones" placeholder="Detalles"></div>
    </div>
    <div style="margin-top:16px"><button class="btn p" onclick="guardarSoporte()">➕ Registrar Caso</button></div>
  </div>
  <div class="card">
    <h3>📥 Cargar Excel de Forms</h3>
-   <p class="help" style="margin-top:0">Sube el archivo exportado de Microsoft Forms para importar los casos masivamente.</p>
    <div class="bar">
      <input type="file" id="formsFileInput" class="in" accept=".xlsx,.xls,.csv" onchange="procesarExcelForms(this)" style="width:300px">
      <button class="btn" onclick="descargarPlantillaForms()">Descargar Plantilla Forms</button>
@@ -926,7 +925,7 @@ body.logged-in #topbar { display: flex; }
  <div class="card">
    <h3>📋 Historial de Casos</h3>
    <div class="sop-filtros">
-     <input class="in" id="sopBuscar" placeholder="🔎 Buscar por nombre, documento, motivo o gestor" oninput="renderSoportes()" style="flex:1;min-width:240px">
+     <input class="in" id="sopBuscar" placeholder="🔎 Buscar" oninput="renderSoportes()" style="flex:1;min-width:240px">
      <select class="in" id="sopFiltroEstado" onchange="renderSoportes()"><option value="">Todos los estados</option><option value="si">Solucionados</option><option value="no">Pendientes</option></select>
      <select class="in" id="sopFiltroCanal" onchange="renderSoportes()"><option value="">Todos los canales</option><option>Teléfono</option><option>Teams</option><option>Presencial</option><option>Correo</option><option>WhatsApp</option><option>Forms</option></select>
      <button class="btn" style="background:#1d6f42;color:white;border-color:#1d6f42" onclick="expSoporteXL()">Descargar Excel</button>
@@ -1000,11 +999,13 @@ body.logged-in #topbar { display: flex; }
   <div class="dh"><h3>👥 Gestión de usuarios</h3><button onclick="dlgUsuarios.close()">✕</button></div>
   <div class="db">
     <div class="card" style="margin-bottom:12px;">
-      <h3>Nuevo usuario</h3>
+      <h3 id="u_form_title">Nuevo usuario</h3>
+      <input type="hidden" id="u_edit_id">
       <div class="grid">
         <div><label>Usuario</label><input class="in" id="u_new_user"></div>
         <div><label>Nombre completo</label><input class="in" id="u_new_nombre"></div>
-        <div><label>Contraseña</label><input class="in" id="u_new_pass" type="password"></div>
+        <div><label>Correo electrónico</label><input class="in" id="u_new_email" type="email" placeholder="usuario@unbosque.edu.co"></div>
+        <div><label>Contraseña</label><input class="in" id="u_new_pass" type="password" placeholder="Contraseña obligatoria"></div>
         <div><label>Rol</label>
           <select class="in" id="u_new_rol">
             <option value="administrador">Administrador</option>
@@ -1017,13 +1018,16 @@ body.logged-in #topbar { display: flex; }
         </div>
       </div>
       <div style="margin-top:10px;">
-        <label style="font-weight:700">Módulos permitidos (para Editor/Lectura/Agente)</label>
+        <label style="font-weight:700">Módulos permitidos</label>
         <div id="u_new_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
       </div>
-      <div style="margin-top:12px;"><button class="btn p" onclick="crearUsuario()">➕ Crear usuario</button></div>
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button class="btn p" onclick="guardarUsuario()">💾 Guardar</button>
+        <button class="btn hide" id="u_btn_cancel" onclick="resetUsuarioForm()">Cancelar edición</button>
+      </div>
     </div>
     <div class="wrap"><table class="tbl-pro" style="min-width:100%">
-      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Módulos</th><th>Estado</th><th class="c">Acción</th></tr></thead>
+      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Módulos</th><th>Estado</th><th class="c">Acciones</th></tr></thead>
       <tbody id="tablaUsuarios"></tbody>
     </table></div>
   </div>
@@ -1034,7 +1038,7 @@ body.logged-in #topbar { display: flex; }
   <div class="dh"><h3>📜 Log de auditoría</h3><button onclick="dlgLog.close()">✕</button></div>
   <div class="db">
     <div class="bar">
-      <input class="in" id="logBuscar" placeholder="🔎 Buscar por usuario, acción o módulo" oninput="renderLog()" style="flex:1;">
+      <input class="in" id="logBuscar" placeholder="🔎 Buscar" oninput="renderLog()" style="flex:1;">
       <button class="btn sm" onclick="expLogXL()">Exportar Excel</button>
       <button class="btn sm" onclick="limpiarLog()" style="color:#b03a2e;">Limpiar log</button>
     </div>
@@ -1046,21 +1050,42 @@ body.logged-in #topbar { display: flex; }
   <div class="df"><button class="btn" onclick="dlgLog.close()">Cerrar</button></div>
 </dialog>
 
+<dialog id="dlgRecuperar">
+  <div class="dh"><h3>🔑 Restablecer contraseña</h3><button onclick="dlgRecuperar.close()">✕</button></div>
+  <div class="db">
+    <div id="recuperarStep1">
+      <p class="help" style="margin-top:0">Ingresa tu correo electrónico registrado. Te enviaremos un enlace para restablecer tu contraseña.</p>
+      <label>Correo electrónico</label>
+      <input class="in" id="rec_email" type="email" placeholder="tu@unbosque.edu.co" style="width:100%">
+      <div id="rec_error" style="color:var(--alert-line);font-size:12.5px;margin-top:10px;min-height:16px;"></div>
+      <button class="btn p" onclick="enviarRecuperacion()" style="margin-top:12px;width:100%">📧 Enviar enlace</button>
+    </div>
+    <div id="recuperarStep2" class="hide">
+      <p style="color:var(--ok);font-weight:600;">✅ Si el correo está registrado, recibirás un enlace de recuperación.</p>
+      <p class="help">Revisa tu bandeja de entrada (y spam). El enlace expira en 1 hora.</p>
+      <p class="help" style="margin-top:12px;padding:10px;background:#fff3cd;border-radius:8px;color:#856404;">
+        <b>Nota administrativa:</b> Si eres administrador y necesitas restablecer la contraseña de un usuario manualmente, ve a <b>Usuarios</b> → botón 🔑.
+      </p>
+    </div>
+  </div>
+  <div class="df"><button class="btn" onclick="dlgRecuperar.close()">Cerrar</button></div>
+</dialog>
+
 <div id="toast"></div>
 
 <script>
 /* ============================================================
-   CONFIGURACIÓN SUPABASE - CAMBIA ESTOS VALORES
+   CONFIGURACIÓN SUPABASE
    ============================================================ */
-const SUPABASE_URL = 'https://doqoiporsulytaytuokc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvcW9pcG9yc3VseXRheXR1b2tjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0MTQ0NTMsImV4cCI6MjEwOTk5MDQ1M30.VBgRgNJChmzvfI4k7IXIPCZ9akbqShtP-VG-3jl7Gz4';
+const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+const SUPABASE_ANON_KEY = 'TU-ANON-KEY-AQUI';
 
-// Ajusta si tus tablas/columnas se llaman distinto
 const CONFIG = {
   tabla_usuarios: 'usuarios',
   col_user: 'username',
   col_pass: 'password_hash',
   col_nombre: 'nombre',
+  col_email: 'email',
   col_rol: 'rol',
   col_modulos: 'modulos',
   col_activo: 'activo',
@@ -1117,6 +1142,7 @@ const FACULTADES = [
 ];
 const ORG_GLOBALES = ['Consejo Directivo', 'Consejo Académico', 'Comité de Posgrado'];
 const esGlobal = (org) => ORG_GLOBALES.includes(org);
+const esVotoBlanco = (c) => String(c?.pri?.nombre || '').trim().toUpperCase() === 'VOTO EN BLANCO';
 
 let D=[],editId=null,CRON=[],FIRMAS=[];
 let VOTANTES = { totalCenso: 0, totalHabilitados: 0, fechaCorte: '', historial: [] };
@@ -1132,15 +1158,15 @@ const MODULOS = [
   {key:'vCron', label:'Cronograma'}, {key:'vSeg', label:'Seguimiento candidatos'},
   {key:'vVotantes', label:'Censo Votantes'}, {key:'vAnal', label:'Analítica'},
   {key:'vVac', label:'Cargos / Vacantes'}, {key:'vCargaVotos', label:'Cargar Votos'},
-  {key:'vAct', label:'Actas'}, {key:'vGanadores', label:'Directorio Ganadores'},
-  {key:'vSoporte', label:'Registro Soporte'}
+  {key:'vAct', label:'Generar Actas'}, {key:'vAnexos', label:'Anexos e Informes'},
+  {key:'vGanadores', label:'Directorio Ganadores'}, {key:'vSoporte', label:'Registro Soporte'}
 ];
 const ROLES = {
   administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
   editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
   lectura:       {label:'Lectura',       mods:[],  puedeEditar:[],       color:'t'},
   agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
-  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
+  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vAnexos','vVac','vGanadores','vAnal'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct','vAnexos'], color:'p'},
   auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'}
 };
 
@@ -1205,6 +1231,7 @@ async function doLogin(){
       id: data.id,
       username: data[CONFIG.col_user],
       nombre: data[CONFIG.col_nombre] || data[CONFIG.col_user],
+      email: data[CONFIG.col_email] || '',
       rol: data[CONFIG.col_rol],
       modulos: Array.isArray(data[CONFIG.col_modulos]) ? data[CONFIG.col_modulos] : []
     };
@@ -1269,7 +1296,7 @@ function aplicarSesion(){
   actualizarBannerCierre();
   const mods = getModulosPermitidos();
   if(mods.length){
-    const idx = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].indexOf(mods[0]) + 1;
+    const idx = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vAnexos','vGanadores','vSoporte'].indexOf(mods[0]) + 1;
     if(idx > 0) tab(idx);
   }
 }
@@ -1300,7 +1327,10 @@ function puedeEditar(modulo){
 }
 
 function aplicarPermisosUI(){
-  const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9'};
+  const mapa = {
+    vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',
+    vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9',vAnexos:'n10'
+  };
   const permitidos = getModulosPermitidos();
   MODULOS.forEach(m => {
     const btn = $(mapa[m.key]);
@@ -1312,6 +1342,24 @@ function aplicarPermisosUI(){
   if($('btnVerUsuarios')) $('btnVerUsuarios').style.display = esAdmin ? '' : 'none';
   if($('btnVerLog')) $('btnVerLog').style.display = (esAdmin || esAuditor) ? '' : 'none';
   if($('btnLimpiar')) $('btnLimpiar').style.display = '';
+  
+  // Bloquear textarea del acta si no tiene permiso de edición
+  const ta = $('at');
+  if(ta){
+    const puedeEditarActa = SESSION?.rol === 'administrador' || 
+      (Array.isArray(ROLES[SESSION?.rol]?.puedeEditar) && ROLES[SESSION?.rol].puedeEditar.includes('vAct')) ||
+      (SESSION?.rol === 'editor' && (SESSION?.modulos||[]).includes('vAct'));
+    ta.readOnly = (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') ? true : !puedeEditarActa;
+    ta.style.background = ta.readOnly ? '#f5f5f5' : '#fff';
+    ta.style.cursor = ta.readOnly ? 'not-allowed' : 'text';
+  }
+  const btnRestaurar = $('btnRestaurarActa');
+  if(btnRestaurar){
+    const puedeEditarActa = SESSION?.rol === 'administrador' || 
+      (Array.isArray(ROLES[SESSION?.rol]?.puedeEditar) && ROLES[SESSION?.rol].puedeEditar.includes('vAct'));
+    btnRestaurar.style.display = puedeEditarActa ? '' : 'none';
+  }
+  
   deshabilitarBotonesEdicion();
 }
 
@@ -1323,7 +1371,7 @@ function deshabilitarBotonesEdicion(){
     'button[onclick="openForm()"]','button[onclick="saveForm()"]','button[onclick="aprobarTodos()"]',
     'button[onclick="addActividad()"]','button[onclick="saveActividad()"]',
     'button[onclick="guardarVotantes()"]','button[onclick="guardarSoporte()"]',
-    'button[onclick="genActa()"]','button[onclick="crearUsuario()"]',
+    'button[onclick="genActa()"]','button[onclick="guardarUsuario()"]',
     'button[onclick="guardarTextoActa()"]'
   ];
   selectores.forEach(s => {
@@ -1338,7 +1386,7 @@ function limpiarPantalla(){
     const el = $(id); if(el) el.value = '';
   });
   const mods = getModulosPermitidos();
-  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9};
+  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9,vAnexos:10};
   if(mods.length) tab(mapa[mods[0]] || 1);
   try{ draw(); }catch(e){}
   try{ renderSoportes(); }catch(e){}
@@ -1357,7 +1405,7 @@ async function toggleCerrarElecciones(){
   await guardarEstadoElecciones(nuevo);
   registrarLog(nuevo ? 'Cerrar elecciones' : 'Reabrir elecciones', '-', 'Estado cambiado');
   actualizarBannerCierre();
-  deshabilitarBotonesEdicion();
+  aplicarPermisosUI();
   toast(nuevo ? '🔒 Elecciones cerradas.' : '🔓 Elecciones reabiertas.');
 }
 
@@ -1368,11 +1416,13 @@ function actualizarBannerCierre(){
   if(txt) txt.textContent = ELECCIONES_CERRADAS ? 'Reabrir elecciones' : 'Cerrar elecciones';
 }
 
+/* ========== USUARIOS ========== */
 async function abrirUsuarios(){
   if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
   $('u_new_mods').innerHTML = MODULOS.map(m => 
     `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`
   ).join('');
+  resetUsuarioForm();
   await cargarUsuariosDeSupabase();
   renderTablaUsuarios();
   dlgUsuarios.showModal();
@@ -1387,9 +1437,22 @@ async function cargarUsuariosDeSupabase(){
   } catch(e) { console.warn('Usuarios:', e.message); USERS_CACHE = []; }
 }
 
+function resetUsuarioForm(){
+  $('u_edit_id').value = '';
+  $('u_new_user').value = '';
+  $('u_new_nombre').value = '';
+  $('u_new_email').value = '';
+  $('u_new_pass').value = '';
+  $('u_new_rol').value = 'lectura';
+  document.querySelectorAll('.u_mod').forEach(c => c.checked = false);
+  $('u_form_title').textContent = 'Nuevo usuario';
+  $('u_btn_cancel').classList.add('hide');
+  $('u_new_pass').placeholder = 'Contraseña obligatoria';
+}
+
 function renderTablaUsuarios(){
   if(USERS_CACHE.length === 0){
-    $('tablaUsuarios').innerHTML = '<tr><td colspan="6" class="empty">No hay usuarios cargados.</td></tr>';
+    $('tablaUsuarios').innerHTML = '<tr><td colspan="6" class="empty">No hay usuarios.</td></tr>';
     return;
   }
   $('tablaUsuarios').innerHTML = USERS_CACHE.map(u => {
@@ -1400,9 +1463,11 @@ function renderTablaUsuarios(){
       <td><b>${esc(u[CONFIG.col_user])}</b></td>
       <td>${esc(u[CONFIG.col_nombre]||'')}</td>
       <td><span class="tag ${ROLES[rol]?.color||'b'}">${ROLES[rol]?.label||rol}</span></td>
-      <td style="font-size:11.5px">${(rol==='editor'||rol==='lectura') ? mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ')||'—' : '—'}</td>
+      <td style="font-size:11.5px">${(rol==='editor'||rol==='lectura'||rol==='agente_mesa') ? mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ')||'—' : '—'}</td>
       <td>${activo ? '<span class="pill ok">Activo</span>' : '<span class="pill no">Inactivo</span>'}</td>
-      <td class="c">
+      <td class="c" style="white-space:nowrap;">
+        <button class="ic" title="Editar" onclick="editarUsuario('${u.id}')">✎</button>
+        <button class="ic" title="Restablecer contraseña" onclick="restablecerPassword('${u.id}')">🔑</button>
         <button class="ic" title="Activar/Desactivar" onclick="toggleActivoUsuario('${u.id}')">${activo?'⏸':'▶'}</button>
         <button class="ic" title="Eliminar" onclick="eliminarUsuario('${u.id}')">🗑</button>
       </td>
@@ -1410,30 +1475,91 @@ function renderTablaUsuarios(){
   }).join('');
 }
 
-async function crearUsuario(){
+function editarUsuario(id){
+  const u = USERS_CACHE.find(x => x.id === id);
+  if(!u) return;
+  $('u_edit_id').value = id;
+  $('u_new_user').value = u[CONFIG.col_user] || '';
+  $('u_new_nombre').value = u[CONFIG.col_nombre] || '';
+  $('u_new_email').value = u[CONFIG.col_email] || '';
+  $('u_new_pass').value = '';
+  $('u_new_pass').placeholder = 'Dejar vacío para mantener actual';
+  $('u_new_rol').value = u[CONFIG.col_rol] || 'lectura';
+  const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
+  document.querySelectorAll('.u_mod').forEach(c => {
+    c.checked = mods.includes(c.value);
+  });
+  $('u_form_title').textContent = 'Editar usuario: ' + u[CONFIG.col_user];
+  $('u_btn_cancel').classList.remove('hide');
+  $('u_new_user').focus();
+}
+
+async function guardarUsuario(){
+  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
+  const editId = $('u_edit_id').value;
   const username = $('u_new_user').value.trim();
   const nombre = $('u_new_nombre').value.trim();
+  const email = $('u_new_email').value.trim();
   const pass = $('u_new_pass').value;
   const rol = $('u_new_rol').value;
-  if(!username || !pass){ toast('Usuario y contraseña obligatorios'); return; }
-  if(!supabaseClient){ toast('Sin conexión a la base de datos'); return; }
-  const mods = [...document.querySelectorAll('.u_mod:checked')].map(i=>i.value);
+  if(!username){ toast('El nombre de usuario es obligatorio'); return; }
+  if(!editId && !pass){ toast('La contraseña es obligatoria para nuevos usuarios'); return; }
+  
+  const mods = [...document.querySelectorAll('.u_mod:checked')].map(i => i.value);
+  
   try {
-    const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([{
-      [CONFIG.col_user]: username,
-      [CONFIG.col_nombre]: nombre,
-      [CONFIG.col_pass]: pass,
-      [CONFIG.col_rol]: rol,
-      [CONFIG.col_modulos]: mods,
-      [CONFIG.col_activo]: true
-    }]);
-    if(error) throw error;
-    registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
-    $('u_new_user').value=''; $('u_new_nombre').value=''; $('u_new_pass').value='';
+    if(editId){
+      const update = {
+        [CONFIG.col_user]: username,
+        [CONFIG.col_nombre]: nombre,
+        [CONFIG.col_email]: email,
+        [CONFIG.col_rol]: rol,
+        [CONFIG.col_modulos]: mods
+      };
+      if(pass) update[CONFIG.col_pass] = pass;
+      const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).update(update).eq('id', editId);
+      if(error) throw error;
+      registrarLog('Editar usuario', 'Usuarios', username);
+      toast('✅ Usuario actualizado');
+    } else {
+      const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([{
+        [CONFIG.col_user]: username,
+        [CONFIG.col_nombre]: nombre,
+        [CONFIG.col_email]: email,
+        [CONFIG.col_pass]: pass,
+        [CONFIG.col_rol]: rol,
+        [CONFIG.col_modulos]: mods,
+        [CONFIG.col_activo]: true
+      }]);
+      if(error) throw error;
+      registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
+      toast('✅ Usuario creado');
+    }
+    resetUsuarioForm();
     await cargarUsuariosDeSupabase();
     renderTablaUsuarios();
-    toast('✅ Usuario creado');
-  } catch(e) { toast('❌ Error: ' + (e.message || 'No se pudo crear')); }
+  } catch(e) {
+    console.error(e);
+    toast('❌ Error: ' + (e.message || 'No se pudo guardar'));
+  }
+}
+
+async function restablecerPassword(id){
+  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
+  const u = USERS_CACHE.find(x => x.id === id);
+  if(!u) return;
+  const nueva = prompt(`Nueva contraseña para "${u[CONFIG.col_user]}":\n(deja vacío para cancelar)`);
+  if(nueva === null || nueva === '') return;
+  if(nueva.length < 4){ toast('La contraseña debe tener al menos 4 caracteres'); return; }
+  try {
+    const { error } = await supabaseClient.from(CONFIG.tabla_usuarios)
+      .update({[CONFIG.col_pass]: nueva}).eq('id', id);
+    if(error) throw error;
+    registrarLog('Restablecer contraseña', 'Usuarios', u[CONFIG.col_user]);
+    toast('✅ Contraseña restablecida');
+  } catch(e) {
+    toast('❌ Error: ' + e.message);
+  }
 }
 
 async function toggleActivoUsuario(id){
@@ -1461,6 +1587,50 @@ async function eliminarUsuario(id){
   } catch(e) { toast('Error: ' + e.message); }
 }
 
+/* ========== RECUPERAR CONTRASEÑA ========== */
+function abrirRecuperarPass(){
+  $('rec_email').value = '';
+  $('rec_error').textContent = '';
+  $('recuperarStep1').classList.remove('hide');
+  $('recuperarStep2').classList.add('hide');
+  dlgRecuperar.showModal();
+}
+
+async function enviarRecuperacion(){
+  const email = $('rec_email').value.trim();
+  $('rec_error').textContent = '';
+  if(!email){ $('rec_error').textContent = 'Ingresa tu correo'; return; }
+  
+  try {
+    if(!supabaseClient) throw new Error('Sin conexión al servidor');
+    
+    // Buscar usuario por email
+    const { data } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .select(CONFIG.col_user)
+      .eq(CONFIG.col_email, email)
+      .maybeSingle();
+    
+    // Por seguridad no revelamos si el correo existe o no
+    // Intentar enviar correo de recuperación si Supabase Auth está configurado
+    if(supabaseClient.auth && supabaseClient.auth.resetPasswordForEmail){
+      try {
+        await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin
+        });
+      } catch(e) { /* silencioso */ }
+    }
+    
+    $('recuperarStep1').classList.add('hide');
+    $('recuperarStep2').classList.remove('hide');
+    registrarLog('Solicitud recuperación', 'Auth', email);
+  } catch(e) {
+    console.error(e);
+    $('rec_error').textContent = 'Error al enviar: ' + (e.message || 'Intenta de nuevo');
+  }
+}
+
+/* ========== LOG ========== */
 async function abrirLog(){
   if(!(SESSION?.rol === 'administrador' || SESSION?.rol === 'auditor')){ toast('Sin permiso'); return; }
   await cargarLogDeSupabase();
@@ -1559,32 +1729,6 @@ function normalizarNombresGlobal() {
     if(c.sup && c.sup.nombre){ const n = normNombre(c.sup.nombre); if(n !== c.sup.nombre){ c.sup.nombre = n; cambios++; } }
   });
   if(cambios) save();
-}
-function limpiarVotosEnBlancoInvalidos() {
-  const esBl = c => String(c.pri.nombre||'').replace(/\s+/g,' ').trim().toUpperCase() === 'VOTO EN BLANCO';
-  const nf = t => norm(t).replace(/\s+/g,' ');
-  const nuevoD = [];
-  const indice = new Map();
-  let cambios = 0;
-  D.forEach(c => {
-    const blanco = esBl(c);
-    if (blanco) {
-      c.pri.nombre = 'Voto en Blanco';
-      if (esGlobal(c.org) && c.votos === 0) { cambios++; return; }
-    }
-    const base = `${c.org}|${esGlobal(c.org) ? '' : nf(c.fac)}|${c.rol}`;
-    const clave = blanco ? `B|${base}` : `C|${base}|${String(c.pri.doc||'').trim() || nf(c.pri.nombre)}`;
-    if (indice.has(clave)) {
-      const i = indice.get(clave);
-      if ((c.votos||0) > (nuevoD[i].votos||0)) nuevoD[i] = c;
-      cambios++;
-      return;
-    }
-    indice.set(clave, nuevoD.length);
-    nuevoD.push(c);
-  });
-  if (cambios > 0 || D.length !== nuevoD.length) { D = nuevoD; save(); }
-  return cambios;
 }
 
 try{ const a=localStorage.getItem(K); if(a) D=JSON.parse(a); }catch(e){}
@@ -1709,57 +1853,35 @@ function toggleErr(pre){
   const v = $(pre+'_nov').value;
   $(pre+'_err_box').classList.toggle('hide', v !== 'Error postulación');
 }
-function inyectarVotosEnBlanco() {
-  const obligatorios = {
-    'Consejo de Facultad': ['Estudiante','Docente','Egresado'],
-    'Consejo Directivo': ['Estudiante','Docente'],
-    'Consejo Académico': ['Estudiante','Docente','Egresado'],
-    'Comité de Posgrado': ['Estudiante','Egresado']
-  };
-  let agregados = 0;
-  ORG_ACTIVOS.forEach(org => {
-    if (esGlobal(org)) {
-      obligatorios[org].forEach(rol => {
-        const existe = D.some(c => c.org === org && c.rol === rol && c.pri.nombre.toUpperCase() === 'VOTO EN BLANCO');
-        if (!existe) {
-          D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: 'N/A',prog: 'N/A',
-            pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null});
-          agregados++;
-        }
-      });
-    } else {
-      FACULTADES.forEach(fac => {
-        obligatorios[org].forEach(rol => {
-          const existe = D.some(c => c.org === org && norm(c.fac).replace(/\s+/g,' ') === norm(fac).replace(/\s+/g,' ') && c.rol === rol && c.pri.nombre.toUpperCase() === 'VOTO EN BLANCO');
-          if (!existe) {
-            D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: fac,prog: 'N/A',
-              pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null});
-            agregados++;
-          }
-        });
-      });
-    }
-  });
-  if (agregados > 0) save();
-}
 
 function updateOrgActivos() {
   ORG_ACTIVOS = [];
   document.querySelectorAll('.ck-org').forEach(chk => { if(chk.checked) ORG_ACTIVOS.push(chk.value); });
   localStorage.setItem(K_ORG_ACTIVOS, JSON.stringify(ORG_ACTIVOS));
-  inyectarVotosEnBlanco();
-  limpiarVotosEnBlancoInvalidos();
   fillSel(); draw(); renderVacantes(); renderDirectorio();
 }
 
 function tab(n){
-  const mapa = {1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',9:'vSoporte'};
+  const mapa = {
+    1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',
+    5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',
+    9:'vSoporte',10:'vAnexos'
+  };
   const modKey = mapa[n];
   if(SESSION && modKey && !puedeVer(modKey)){ toast('⛔ No tienes permiso para este módulo'); return; }
-  ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].forEach((id,i)=>{
-    $(id).classList.toggle('hide', i+1 !== n);
-    $('n'+(i+1)).classList.toggle('on', i+1 === n);
+  
+  ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vAnexos']
+    .forEach((id,i)=>{
+      const t = $(id);
+      if(t) t.classList.toggle('hide', (i+1) !== n);
+    });
+  
+  const botones = ['n1','n2','n3','n4','n5','n6','n7','n8','n9','n10'];
+  botones.forEach((id,i)=>{
+    const b = $(id);
+    if(b) b.classList.toggle('on', (i+1) === n);
   });
+  
   if(n===2) { draw(); }
   if(n===3) { renderCensoData(); }
   if(n===4) { renderAnalitica(); }
@@ -1767,7 +1889,18 @@ function tab(n){
   if(n===7) { updateJornada(); inicializarFirmasOficiales(); renderFirmas(); $('ad').value = new Date().toISOString().slice(0,10); ajustarTamanoLetra($('fontSizeSlider').value); }
   if(n===8) { renderDirectorio(); }
   if(n===9) { renderSoportes(); }
+  if(n===10) { renderAnexosConfig(); }
   deshabilitarBotonesEdicion();
+  aplicarPermisosUI();
+}
+
+function renderAnexosConfig(){
+  const sOrg = $('inf_organo');
+  const sFac = $('inf_facultad');
+  if(sOrg) sOrg.innerHTML = '<option value="">Todos los órganos</option>' + 
+    ORG_ACTIVOS.map(o => `<option>${o}</option>`).join('');
+  if(sFac) sFac.innerHTML = '<option value="">Todas las facultades</option>' + 
+    FACULTADES.map(f => `<option>${f}</option>`).join('');
 }
 
 function _setH(id,h){ const e=document.getElementById(id); if(e) e.innerHTML=h; }
@@ -1912,34 +2045,55 @@ function tablaActaHTML(d){
   return h;
 }
 function generarInformeVotacion() {
-  limpiarVotosEnBlancoInvalidos();
   const jornada = $('inf_jornada').value;
   const sel = $('inf_rol').value;
+  const orgFiltro = $('inf_organo')?.value || '';
+  const facFiltro = $('inf_facultad')?.value || '';
   const roles = sel === 'Todos' ? ['Estudiante','Docente','Egresado'] : [sel];
   const anio = new Date().getFullYear();
   const periodo = `${anio}-${anio+1}`;
   const rolDe = c => mRol(c.rol);
+  
   let html = ''; let secciones = 0; const sinDatos = [];
+  
   roles.forEach(rol => {
-    const L = D.filter(c => rolDe(c) === rol && ORG_ACTIVOS.includes(c.org));
+    const L = D.filter(c => 
+      rolDe(c) === rol && 
+      ORG_ACTIVOS.includes(c.org) &&
+      (!orgFiltro || c.org === orgFiltro) &&
+      (!facFiltro || c.fac === facFiltro)
+    );
     if(L.length === 0){ sinDatos.push(rol + 's'); return; }
+    
     html += `<div data-keep="1" ${secciones ? 'data-newpage="1"' : ''} style="text-align:center; margin-bottom: 14px;"><h2 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase;">Informe de votaciones ${jornada==='2'?'segunda':'primera'} jornada ${periodo}_${rol}s</h2></div>`;
     secciones++;
+    
     const gruposOrg = {};
     L.forEach(c => { (gruposOrg[c.org] = gruposOrg[c.org] || []).push(c); });
-    ORG_ACTIVOS.filter(o => gruposOrg[o]).forEach(org => {
+    
+    const orgsFiltrados = orgFiltro ? [orgFiltro] : ORG_ACTIVOS;
+    orgsFiltrados.filter(o => gruposOrg[o]).forEach(org => {
       const isG = esGlobal(org);
       let candidatos = gruposOrg[org];
       candidatos.sort((a,b) => { if(!isG && a.fac !== b.fac) return a.fac.localeCompare(b.fac); return (b.votos||0) - (a.votos||0); });
       const ganadoresPorFac = {};
-      if (isG) { const maxV = Math.max(...candidatos.map(c=>c.votos||0)); if(maxV > 0) ganadoresPorFac['GLOBAL'] = candidatos.filter(c=>c.votos===maxV); }
-      else { [...new Set(candidatos.map(c=>c.fac))].forEach(f => { const maxV = Math.max(...candidatos.filter(c=>c.fac===f).map(c=>c.votos||0)); if(maxV > 0) ganadoresPorFac[f] = candidatos.filter(c=>c.fac===f && c.votos===maxV); }); }
+      if (isG) { 
+        const maxV = Math.max(...candidatos.map(c=>c.votos||0)); 
+        if(maxV > 0) ganadoresPorFac['GLOBAL'] = candidatos.filter(c=>c.votos===maxV); 
+      } else { 
+        [...new Set(candidatos.map(c=>c.fac))].forEach(f => { 
+          const maxV = Math.max(...candidatos.filter(c=>c.fac===f).map(c=>c.votos||0)); 
+          if(maxV > 0) ganadoresPorFac[f] = candidatos.filter(c=>c.fac===f && c.votos===maxV); 
+        }); 
+      }
+      
       const TH = (w, t) => `<th style="background:#f0f0f0; border:1px solid #000; padding:4px; text-align:center; font-weight:bold; ${w?`width:${w};`:''}">${t}</th>`;
       html += `<table style="width:100%; border-collapse:collapse; font-family:Arial, sans-serif; font-size:11px; margin-bottom:20px;"><thead><tr>
               ${isG ? TH('40px','ROL') : ''}${TH('40px','CONSEJO')}
               ${!isG ? TH('22%','FACULTAD') + TH('9%','ROL') : ''}
               ${TH(isG?'35%':'25%','NOMBRE PRINCIPAL')}${TH(isG?'35%':'18%','NOMBRE SUPLENTE')}${TH('5%','VOTOS')}
             </tr></thead><tbody>`;
+      
       const rowspanCount = candidatos.length;
       candidatos.forEach((c, i) => {
         const esGanador = isG ? (ganadoresPorFac['GLOBAL'] && ganadoresPorFac['GLOBAL'].includes(c)) : (ganadoresPorFac[c.fac] && ganadoresPorFac[c.fac].includes(c));
@@ -1961,15 +2115,17 @@ function generarInformeVotacion() {
       html += `</tbody></table>`;
     });
   });
-  if(secciones === 0){ toast('No hay datos de votaciones'); return; }
+  
+  if(secciones === 0){ toast('No hay datos para los filtros seleccionados'); return; }
   $('informeOutContainer').classList.remove('hide');
   $('actaOutContainer').classList.add('hide');
   const total = paginarDoc($('informeOut'), {nodes: nodosDesdeHTML(html), landscape:true, bodyClass:'informe-body'});
-  toast(`✅ Informe generado: ${secciones} rol(es), ${total} página(s)`);
+  const aviso = sinDatos.length ? ` · sin datos: ${sinDatos.join(', ')}` : '';
+  toast(`✅ Anexo generado: ${secciones} rol(es), ${total} página(s)${aviso}`);
   setTimeout(() => { $('informeOutContainer').scrollIntoView({behavior:'smooth'}); }, 100);
 }
 function imprimirInforme() {
-  if(!$('informeOut').innerHTML.trim()) { toast('Primero genera el informe'); return; }
+  if(!$('informeOut').innerHTML.trim()) { toast('Primero genera el anexo'); return; }
   let st = document.getElementById('pgInforme');
   if(!st){ st = document.createElement('style'); st.id = 'pgInforme'; document.head.appendChild(st); }
   st.textContent = '@page { size: letter landscape; margin: 0; }';
@@ -2001,15 +2157,24 @@ function rowP(c,w,lab,p,first,n,duplaColor){
  ${first?`<td class="rs" rowspan="${n}"><button class="ic" onclick="openForm('${c.id}')" title="Editar">✎</button><button class="ic" onclick="del('${c.id}')" title="Eliminar">🗑</button></td>`:''}</tr>`;
 }
 function draw(){
- const LD = D.filter(c => ORG_ACTIVOS.includes(c.org));
- const L=filtered().filter(c => ORG_ACTIVOS.includes(c.org)),T=LD.flatMap(c=>ppl(c).map(([,p])=>estado(c,p)[0])),n=T.length||1;
+ // ✅ Excluir voto en blanco de los KPIs de fórmulas/personas
+ const LD_RAW = D.filter(c => ORG_ACTIVOS.includes(c.org));
+ const LD = LD_RAW.filter(c => !esVotoBlanco(c));
+ const L = filtered().filter(c => ORG_ACTIVOS.includes(c.org));
+ const T = LD.flatMap(c=>ppl(c).map(([,p])=>estado(c,p)[0]));
+ const n = T.length || 1;
  const cnt=x=>T.filter(t=>t===x).length,h=cnt('Habilitado'),rv=cnt('En revisión'),nh=cnt('No habilitado'),rn=cnt('Renunció');
- const formulasAprobadas = LD.filter(c=>{ const P=ppl(c); return P.every(([,p])=>estado(c,p)[0]==='Habilitado'); }).length;
+ 
+ const formulasAprobadas = LD.filter(c=>{ 
+   const P=ppl(c); 
+   return P.every(([,p])=>estado(c,p)[0]==='Habilitado'); 
+ }).length;
  const pctAprobadas = LD.length > 0 ? Math.round((formulasAprobadas / LD.length) * 100) : 0;
  const TOTAL_FORMULAS = LD.length;
  const pctH = T.length ? Math.round(h/T.length*100) : 0;
  const pctRv = T.length ? Math.round(rv/T.length*100) : 0;
  const pctNh = T.length ? Math.round((nh+rn)/T.length*100) : 0;
+ 
  const ICO = {
    ok:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>',
    users:'<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
@@ -2028,6 +2193,7 @@ function draw(){
    kcard('Personas habilitadas', h, T.length, pctH, 'cumplen requisitos', '#1f6fd1', '#5aa9f5', '#e4f0fd', ICO.users) +
    kcard('En revisión', rv, T.length, pctRv, 'pendientes de validar', '#d98a0b', '#f7b84b', '#fff2d9', ICO.clock) +
    kcard('No habilitados / renuncias', nh+rn, T.length, pctNh, 'requieren atención', '#d1433a', '#f08a82', '#fde7e5', ICO.alert);
+ 
  const novCnt = {};
  Object.keys(NOV).forEach(k=>{ if(k) novCnt[k]=0; });
  LD.forEach(c=>ppl(c).forEach(([,p])=>{ if(p.nov && novCnt[p.nov]!==undefined) novCnt[p.nov]++; }));
@@ -2040,6 +2206,8 @@ function draw(){
  $('seg').innerHTML=[[h,'var(--oscuro)'],[rv,'var(--naranja)'],[nh,'var(--no)'],[rn,'#9aa1b5']].map(s=>`<i style="width:${s[0]/n*100}%;background:${s[1]}"></i>`).join('');
  $('pct').textContent=T.length?Math.round(h/n*100)+'% habilitado':'';
  $('vacio').classList.toggle('hide',LD.length>0);
+ 
+ // La tabla SÍ muestra el voto en blanco (para visualizarlo)
  [...$('tbl').tBodies].forEach(b=>b.remove());
  $('tbl').insertAdjacentHTML('beforeend',L.map((c,i)=>{
    const P=ppl(c);
@@ -2145,7 +2313,6 @@ function importXL(inp){
    try {
      const wb=XLSX.read(e.target.result,{type:'array'});
      let n=0;
-     const antesD = D.length;
      const sheet = wb.Sheets[wb.SheetNames[0]];
      const jsonArr = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
      if(jsonArr.length < 2) { toast('El archivo no tiene datos válidos'); return; }
@@ -2181,13 +2348,9 @@ function importXL(inp){
            pri: mk(nomPri, docPri, telPri, emailPri, parsedPri),sup: nomSup ? mk(nomSup, docSup, telSup, emailSup, parsedSup) : null});
         n++;
      }
-     limpiarVotosEnBlancoInvalidos();
-     inyectarVotosEnBlanco();
-     const repetidos = Math.max(0, antesD + n - D.length);
      save(); draw();
-     const nota = repetidos ? ` (${repetidos} repetidos descartados)` : '';
-     alert(`Se cargaron ${n} registros${nota}.`);
-     toast(`✅ ${n} fórmulas cargadas${nota}`);
+     alert(`Se cargaron ${n} registros.`);
+     toast(`✅ ${n} fórmulas cargadas`);
    } catch(err) { console.error(err); alert('❌ Error al leer el archivo.'); toast('No se pudo leer el archivo.'); }
    inp.value='';
  };
@@ -2592,7 +2755,6 @@ function genActa(){
  partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
  nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${fir}${chkFirmada?`<div style="text-align:center;">${chkFirmada}</div>`:''}</div>`));
  $('actaOutContainer').classList.remove('hide');
- $('informeOutContainer').classList.add('hide');
  const total = paginarDoc($('actaOut'), {nodes, landscape:false});
  $('actaOutContainer').scrollIntoView({behavior:'smooth'});
  ajustarTamanoLetra($('fontSizeSlider').value);
@@ -3191,7 +3353,7 @@ function guardarVotantes(){
 function renderAnalitica(){
   const ACT = D.filter(c => ORG_ACTIVOS.includes(c.org));
   const esBl = c => String(c.pri.nombre||'').toUpperCase() === 'VOTO EN BLANCO';
-  const LD = ACT.filter(c => !esBl(c));
+  const LD = ACT.filter(c => !esBl(c));  // Ya excluye voto en blanco de fórmulas/personas
   const BL = ACT.filter(esBl);
   const sum = arr => arr.reduce((x,c)=>x+(c.votos||0), 0);
   const totalCand = LD.length;
@@ -3483,7 +3645,6 @@ function procesarArchivosVotos(input) {
     }
     let gan = {marcados:0, grupos:0};
     try {
-      limpiarVotosEnBlancoInvalidos();
       gan = calcularGanadores();
       save(); draw();
       try { if(typeof renderAnalitica === 'function') renderAnalitica(); } catch(e){}
@@ -3794,8 +3955,6 @@ function importarRespaldo(input) {
 normalizarFacultadesGlobal();
 normalizarNombresGlobal();
 document.querySelectorAll('.ck-org').forEach(chk => { chk.checked = ORG_ACTIVOS.includes(chk.value); });
-inyectarVotosEnBlanco(); 
-limpiarVotosEnBlancoInvalidos();
 fillSel();
 draw();
 migrarCron();
@@ -3806,6 +3965,7 @@ renderFirmas();
 renderCensoData(); 
 renderVacantes();
 renderSoportes();
+renderAnexosConfig();
 
 /* Init auth */
 (async function initAuth(){
