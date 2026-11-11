@@ -15,6 +15,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <!-- Librería para generar .docx real -->
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -47,6 +49,10 @@ aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:st
 .btn-backup.import { background: #3498db; }
 .btn-backup.import:hover { background: #2980b9; }
 
+#sideActions .nav { font-size: 13px; padding: 9px 12px; }
+#sideActions .nav svg { flex: none; }
+body.logged-in aside { padding-top: 70px; overflow-y: auto; }
+
 main{padding:28px 32px 60px;min-width:0}
 .top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--oscuro)}
 .top p{margin:2px 0 20px;color:var(--oscuro);opacity:0.8}
@@ -70,7 +76,6 @@ main{padding:28px 32px 60px;min-width:0}
 .kpi-foot{position:relative;z-index:1;font-size:12.5px;color:#6b8378;font-weight:500}
 .kpi-foot b{color:var(--acc,#0B3B2C);font-weight:800}
 
-/* Novedades */
 .kpis.novedad{grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:10px;margin-bottom:16px}
 .nov-title{grid-column:1/-1;font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:#6b8378;margin:2px 0 -2px}
 .nov-card{display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border-radius:16px;background:#fff;border:1px solid rgba(11,59,44,.08);
@@ -81,13 +86,11 @@ main{padding:28px 32px 60px;min-width:0}
 .nov-card.zero{opacity:.55;box-shadow:none}
 .nov-card.zero .n{background:#eef2ef;color:#93a69c}
 
-/* .kpi genérico */
 .kpi{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:18px;background:#fff;border:1px solid rgba(11,59,44,.07);border-left:4px solid var(--c,#0B3B2C);
   box-shadow:0 12px 26px -20px rgba(11,59,44,.35)}
 .kpi b{font-size:28px;line-height:1.05;font-weight:800;letter-spacing:-.8px;color:var(--c,#0B3B2C)}
 .kpi span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b8378}
 
-/* Otros componentes */
 .prog{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px}
 .prog .t{display:flex;justify-content:space-between;font-weight:600;margin-bottom:8px;color:var(--oscuro)}
 .seg{display:flex;height:12px;border-radius:8px;overflow:hidden;background:#e8ebf4}
@@ -225,8 +228,6 @@ dialog[open]{animation:pop .18s ease-out}
 .cron-panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; position: relative; }
 .cron-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
 .cron-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--oscuro); }
-.timeline-item { display: flex; gap: 16px; margin-bottom: 16px; padding: 14px; border:1px solid var(--line); border-radius:12px; background:var(--card); align-items:center; transition: .2s; }
-.timeline-item:hover { box-shadow:0 4px 12px rgba(11,59,44,0.08); }
 .cron-panel{border-radius:22px;padding:22px 22px 18px;background:linear-gradient(180deg,#ffffff 0%,#f9fcfa 100%);border:1px solid rgba(11,59,44,.07);box-shadow:0 22px 44px -30px rgba(11,59,44,.45)}
 .cron-header{border-bottom:0;padding-bottom:0;margin-bottom:10px}
 .cron-header h3{font-size:19px;font-weight:800;letter-spacing:-.3px}
@@ -461,7 +462,6 @@ td small{font-size:12.5px}
 /* ============ LOGIN + TOPBAR ============ */
 body.logged-out aside, body.logged-out main { filter: blur(3px); pointer-events: none; user-select: none; }
 body.logged-in main { padding-top: 60px; }
-body.logged-in aside { padding-top: 70px; }
 body.logged-in #topbar { display: flex; }
 
 #loginScreen .in { padding: 12px; }
@@ -482,22 +482,16 @@ body.logged-in #topbar { display: flex; }
     <label style="font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px;">Contraseña</label>
     <input class="in" id="loginPass" type="password" autocomplete="current-password" style="width:100%;margin-bottom:16px;">
     <div id="loginErr" style="color:var(--alert-line);font-size:12.5px;margin-bottom:10px;min-height:16px;"></div>
-    <button class="btn p" style="width:100%;padding:12px;font-weight:800" onclick="doLogin()">Ingresar</button>
-    <p style="text-align:center;font-size:11.5px;color:var(--mut);margin-top:16px;">Usuario inicial: <b>admin</b> / <b>admin123</b></p>
+    <button class="btn p" id="loginBtn" style="width:100%;padding:12px;font-weight:800" onclick="doLogin()">Ingresar</button>
+    <div id="loginLoad" class="hide" style="text-align:center;margin-top:10px;color:var(--mut);font-size:12px;">Conectando con el servidor...</div>
   </div>
 </div>
 
 <!-- ================= TOPBAR ================= -->
 <div id="topbar" class="noprint hide" style="position:fixed;top:0;right:0;left:244px;z-index:100;background:#fff;border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(11,59,44,.06);">
-  <div style="display:flex;align-items:center;gap:8px;">
-    <span id="badgeRol" class="tag b" style="font-weight:800;"></span>
-    <span id="bannerEleccion" class="tag r hide" style="font-weight:800;">🔒 ELECCIONES CERRADAS</span>
-  </div>
+  <span id="badgeRol" class="tag b" style="font-weight:800;"></span>
+  <span id="bannerEleccion" class="tag r hide" style="font-weight:800;">🔒 ELECCIONES CERRADAS</span>
   <span style="flex:1"></span>
-  <button class="btn sm" onclick="limpiarPantalla()" title="Borra filtros y vuelve a la vista inicial">🧹 Limpiar pantalla</button>
-  <button class="btn sm" id="btnCerrarElec" onclick="toggleCerrarElecciones()" style="background:#b03a2e;color:#fff;border-color:#b03a2e;">🔒 Cerrar elecciones</button>
-  <button class="btn sm" id="btnVerLog" onclick="abrirLog()">📜 Log</button>
-  <button class="btn sm" id="btnVerUsuarios" onclick="abrirUsuarios()">👥 Usuarios</button>
   <span id="userInfo" style="font-weight:700;color:var(--oscuro);"></span>
   <button class="btn sm" onclick="doLogout()">Salir</button>
 </div>
@@ -517,7 +511,16 @@ body.logged-in #topbar { display: flex; }
  <button class="nav" id="n7" onclick="tab(7)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Actas</button>
  <button class="nav" id="n8" onclick="tab(8)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Directorio Ganadores</button>
  <button class="nav" id="n9" onclick="tab(9)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>Registro Soporte</button>
- 
+
+ <!-- NUEVA SECCIÓN: ACCIONES DEL SISTEMA -->
+ <div id="sideActions" class="hide" style="margin-top:14px;padding-top:14px;border-top:1px solid #2a5e4d;">
+   <div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#9ac0b0;padding:0 12px 8px;">Acciones del sistema</div>
+   <button class="nav" id="btnLimpiar" onclick="limpiarPantalla()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Limpiar pantalla</button>
+   <button class="nav" id="btnCerrarElec" onclick="toggleCerrarElecciones()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span id="txtCerrarElec">Cerrar elecciones</span></button>
+   <button class="nav" id="btnVerLog" onclick="abrirLog()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Log de auditoría</button>
+   <button class="nav" id="btnVerUsuarios" onclick="abrirUsuarios()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Usuarios</button>
+ </div>
+
  <div class="note">
    <div class="backup-btns">
      <button class="btn-backup" onclick="descargarRespaldo()">💾 Descargar respaldo</button>
@@ -993,7 +996,6 @@ body.logged-in #topbar { display: flex; }
  <div class="df"><button class="btn" onclick="dlgAct.close()">Cancelar</button><button class="btn p" onclick="saveActividad()">Guardar</button></div>
 </dialog>
 
-<!-- ============ DIALOG USUARIOS ============ -->
 <dialog id="dlgUsuarios">
   <div class="dh"><h3>👥 Gestión de usuarios</h3><button onclick="dlgUsuarios.close()">✕</button></div>
   <div class="db">
@@ -1028,7 +1030,6 @@ body.logged-in #topbar { display: flex; }
   <div class="df"><button class="btn" onclick="dlgUsuarios.close()">Cerrar</button></div>
 </dialog>
 
-<!-- ============ DIALOG LOG ============ -->
 <dialog id="dlgLog">
   <div class="dh"><h3>📜 Log de auditoría</h3><button onclick="dlgLog.close()">✕</button></div>
   <div class="db">
@@ -1048,6 +1049,44 @@ body.logged-in #topbar { display: flex; }
 <div id="toast"></div>
 
 <script>
+/* ============================================================
+   CONFIGURACIÓN SUPABASE - CAMBIA ESTOS VALORES
+   ============================================================ */
+const SUPABASE_URL = 'https://doqoiporsulytaytuokc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvcW9pcG9yc3VseXRheXR1b2tjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0MTQ0NTMsImV4cCI6MjEwOTk5MDQ1M30.VBgRgNJChmzvfI4k7IXIPCZ9akbqShtP-VG-3jl7Gz4';
+
+// Ajusta si tus tablas/columnas se llaman distinto
+const CONFIG = {
+  tabla_usuarios: 'usuarios',
+  col_user: 'username',
+  col_pass: 'password_hash',
+  col_nombre: 'nombre',
+  col_rol: 'rol',
+  col_modulos: 'modulos',
+  col_activo: 'activo',
+  tabla_config: 'configuracion',
+  col_config_clave: 'clave',
+  col_config_valor: 'valor',
+  clave_elecciones_cerradas: 'elecciones_cerradas',
+  tabla_log: 'log_auditoria',
+  col_log_usuario: 'username',
+  col_log_rol: 'rol',
+  col_log_modulo: 'modulo',
+  col_log_accion: 'accion',
+  col_log_detalle: 'detalle',
+  col_log_fecha: 'fecha'
+};
+
+let supabaseClient = null;
+try {
+  if(window.supabase && SUPABASE_URL && !SUPABASE_URL.includes('TU-PROYECTO')) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch(e) { console.error('Supabase init error:', e); }
+
+/* ============================================================
+   CONSTANTES Y ESTADO
+   ============================================================ */
 const $=id=>document.getElementById(id);
 const ORG={'Consejo de Facultad':['Estudiante','Egresado','Docente'],'Consejo Directivo':['Estudiante','Docente'],'Consejo Académico':['Estudiante','Egresado','Docente'],'Comité de Posgrado':['Estudiante','Egresado']};
 const CH={Docente:['th'],Egresado:['eg'],Estudiante:['sg','fp']};
@@ -1062,39 +1101,13 @@ const ERRORS={
   'Nos postulamos con error equivocado':'Nos postulamos con error equivocado',
   'Me postulé pero me arrepentí':'Me postulé pero me arrepentí'
 };
-const K='cand_v2';
-const K_CRON='cronograma_v2';
-const K_FIRMAS='firmas_acta_v1';
-const K_VOTANTES='votantes_v2'; 
-const K_CENSO='censo_data_v1';
-const K_ORG_ACTIVOS='org_activos_v1';
-const K_SOPORTE='soporte_data_v1';
-const K_TEXTO_ACTA='texto_acta_v4';
-const K_FONT_SIZE='acta_font_size';
+const K='cand_v2', K_CRON='cronograma_v2', K_FIRMAS='firmas_acta_v1', K_VOTANTES='votantes_v2';
+const K_CENSO='censo_data_v1', K_ORG_ACTIVOS='org_activos_v1', K_SOPORTE='soporte_data_v1';
+const K_TEXTO_ACTA='texto_acta_v4', K_FONT_SIZE='acta_font_size';
+const K_SESSION = 'session_v1', K_CERRADA = 'elecciones_cerradas_v1', K_LOG_LOCAL = 'log_auditoria_local_v1';
 
-const CARGOS_TITULAR = [
-  'Vicerrector(a) Académico','Secretaría General','Director (a) de Tecnología',
-  'Director (a) Registro y Control Académico','Director (a) de Auditoría Interna'
-];
-const CARGOS_DELEGADO = [
-  'Delegado (a) de la Vicerrectoría Académica','Delegado (a) de la Secretaría General',
-  'Delegado (a) de la Dirección de Tecnología','Delegado (a) de la Dirección de Registro y Control Académico',
-  'Delegado (a) de la Dirección de Auditoría Interna'
-];
-function migrarFirmas(){
-  const claves = ['vicerrect','secretar','tecnolog','registro','auditor'];
-  let cambio = false;
-  FIRMAS.forEach(f=>{
-    const lista = f.esDelegado ? CARGOS_DELEGADO : CARGOS_TITULAR;
-    if(f.cargo && !lista.includes(f.cargo)){
-      const n = norm(f.cargo);
-      const i = claves.findIndex(k=>n.includes(k));
-      f.cargo = i>=0 ? lista[i] : '';
-      cambio = true;
-    }
-  });
-  if(cambio) saveFirmas();
-}
+const CARGOS_TITULAR = ['Vicerrector(a) Académico','Secretaría General','Director (a) de Tecnología','Director (a) Registro y Control Académico','Director (a) de Auditoría Interna'];
+const CARGOS_DELEGADO = ['Delegado (a) de la Vicerrectoría Académica','Delegado (a) de la Secretaría General','Delegado (a) de la Dirección de Tecnología','Delegado (a) de la Dirección de Registro y Control Académico','Delegado (a) de la Dirección de Auditoría Interna'];
 
 const FACULTADES = [
   'Facultad de Medicina', 'Facultad de Ciencias', 'Facultad de Ciencias Económicas y Administrativas',
@@ -1105,28 +1118,424 @@ const FACULTADES = [
 const ORG_GLOBALES = ['Consejo Directivo', 'Consejo Académico', 'Comité de Posgrado'];
 const esGlobal = (org) => ORG_GLOBALES.includes(org);
 
-let D=[],editId=null;
-let CRON=[];
-let FIRMAS=[];
+let D=[],editId=null,CRON=[],FIRMAS=[];
 let VOTANTES = { totalCenso: 0, totalHabilitados: 0, fechaCorte: '', historial: [] };
-let CENSO_DATA = []; 
-let SOPORTES = [];
+let CENSO_DATA = [], SOPORTES = [];
 let ORG_ACTIVOS = JSON.parse(localStorage.getItem(K_ORG_ACTIVOS) || '["Consejo de Facultad","Consejo Directivo","Consejo Académico","Comité de Posgrado"]');
 let chartRolesInstance, chartOrganosInstance, chartFacInstance, chartHistInstance, chartCensoFacInstance, chartCensoRolInstance;
 let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDiaInstance;
 
+/* ============================================================
+   AUTH STATE
+   ============================================================ */
+const MODULOS = [
+  {key:'vCron', label:'Cronograma'}, {key:'vSeg', label:'Seguimiento candidatos'},
+  {key:'vVotantes', label:'Censo Votantes'}, {key:'vAnal', label:'Analítica'},
+  {key:'vVac', label:'Cargos / Vacantes'}, {key:'vCargaVotos', label:'Cargar Votos'},
+  {key:'vAct', label:'Actas'}, {key:'vGanadores', label:'Directorio Ganadores'},
+  {key:'vSoporte', label:'Registro Soporte'}
+];
+const ROLES = {
+  administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
+  editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
+  lectura:       {label:'Lectura',       mods:[],  puedeEditar:[],       color:'t'},
+  agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
+  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
+  auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'}
+};
+
+let SESSION = null;
+try { SESSION = JSON.parse(localStorage.getItem(K_SESSION) || 'null'); } catch(e) {}
+let LOG = [];
+try { LOG = JSON.parse(localStorage.getItem(K_LOG_LOCAL) || '[]'); } catch(e) {}
+let ELECCIONES_CERRADAS = localStorage.getItem(K_CERRADA) === '1';
+let USERS_CACHE = [];
+
+const saveSession = () => localStorage.setItem(K_SESSION, JSON.stringify(SESSION));
+const saveLogLocal = () => { if(LOG.length > 3000) LOG = LOG.slice(-3000); localStorage.setItem(K_LOG_LOCAL, JSON.stringify(LOG)); };
+
+async function registrarLog(accion, modulo, detalle){
+  const entry = {
+    usuario: SESSION?.username || 'sistema',
+    rol: SESSION?.rol || '-',
+    modulo: modulo || '-',
+    accion: accion || '-',
+    detalle: String(detalle ?? '').slice(0, 400),
+    fecha: new Date().toISOString()
+  };
+  LOG.push(entry);
+  saveLogLocal();
+  if(supabaseClient){
+    try {
+      await supabaseClient.from(CONFIG.tabla_log).insert([{
+        [CONFIG.col_log_usuario]: entry.usuario,
+        [CONFIG.col_log_rol]: entry.rol === '-' ? null : entry.rol,
+        [CONFIG.col_log_modulo]: entry.modulo,
+        [CONFIG.col_log_accion]: entry.accion,
+        [CONFIG.col_log_detalle]: entry.detalle
+      }]);
+    } catch(e) { console.warn('Log Supabase:', e.message); }
+  }
+}
+
+async function doLogin(){
+  const u = $('loginUser').value.trim();
+  const p = $('loginPass').value;
+  $('loginErr').textContent = '';
+  $('loginLoad').classList.remove('hide');
+  $('loginBtn').disabled = true;
+
+  try {
+    if(!supabaseClient){
+      $('loginErr').textContent = '⚠️ No hay conexión configurada con el servidor.';
+      return;
+    }
+    const { data, error } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .select('*')
+      .eq(CONFIG.col_user, u)
+      .eq(CONFIG.col_activo, true)
+      .maybeSingle();
+    if(error) throw error;
+    if(!data){ $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
+    const storedPass = String(data[CONFIG.col_pass] || '');
+    if(storedPass !== p){ $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
+
+    SESSION = {
+      id: data.id,
+      username: data[CONFIG.col_user],
+      nombre: data[CONFIG.col_nombre] || data[CONFIG.col_user],
+      rol: data[CONFIG.col_rol],
+      modulos: Array.isArray(data[CONFIG.col_modulos]) ? data[CONFIG.col_modulos] : []
+    };
+    saveSession();
+    await registrarLog('Inicio de sesión', '-', SESSION.username);
+    await cargarEstadoElecciones();
+    aplicarSesion();
+  } catch(err) {
+    console.error(err);
+    $('loginErr').textContent = '❌ Error de conexión: ' + (err.message || 'Verifica tu conexión');
+  } finally {
+    $('loginLoad').classList.add('hide');
+    $('loginBtn').disabled = false;
+  }
+}
+
+function doLogout(){
+  if(!confirm('¿Cerrar sesión?')) return;
+  registrarLog('Cierre de sesión', '-', SESSION?.username || '');
+  SESSION = null;
+  localStorage.removeItem(K_SESSION);
+  location.reload();
+}
+
+async function cargarEstadoElecciones(){
+  if(!supabaseClient) return;
+  try {
+    const { data } = await supabaseClient
+      .from(CONFIG.tabla_config)
+      .select(CONFIG.col_config_valor)
+      .eq(CONFIG.col_config_clave, CONFIG.clave_elecciones_cerradas)
+      .maybeSingle();
+    if(data){
+      const v = data[CONFIG.col_config_valor];
+      ELECCIONES_CERRADAS = (v === true || v === 'true' || v === '1');
+      localStorage.setItem(K_CERRADA, ELECCIONES_CERRADAS ? '1' : '0');
+    }
+  } catch(e) { console.warn('Estado elecciones:', e.message); }
+}
+
+async function guardarEstadoElecciones(cerrado){
+  if(!supabaseClient) return;
+  try {
+    await supabaseClient.from(CONFIG.tabla_config).upsert({
+      [CONFIG.col_config_clave]: CONFIG.clave_elecciones_cerradas,
+      [CONFIG.col_config_valor]: cerrado
+    }, { onConflict: CONFIG.col_config_clave });
+  } catch(e) { console.warn('Guardar estado elecciones:', e.message); }
+}
+
+function aplicarSesion(){
+  document.body.classList.remove('logged-out');
+  document.body.classList.add('logged-in');
+  $('loginScreen').classList.add('hide');
+  $('topbar').classList.remove('hide');
+  $('sideActions').classList.remove('hide');
+  $('userInfo').textContent = (SESSION.nombre || SESSION.username) + ' · ' + (ROLES[SESSION.rol]?.label || SESSION.rol);
+  const badge = $('badgeRol');
+  badge.textContent = (ROLES[SESSION.rol]?.label || SESSION.rol);
+  badge.className = 'tag ' + (ROLES[SESSION.rol]?.color || 'b');
+  aplicarPermisosUI();
+  actualizarBannerCierre();
+  const mods = getModulosPermitidos();
+  if(mods.length){
+    const idx = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].indexOf(mods[0]) + 1;
+    if(idx > 0) tab(idx);
+  }
+}
+
+function getModulosPermitidos(){
+  if(!SESSION) return [];
+  const rol = ROLES[SESSION.rol];
+  if(!rol) return [];
+  if(rol.mods === '*') return MODULOS.map(m=>m.key);
+  if(SESSION.rol === 'editor' || SESSION.rol === 'lectura'){
+    return SESSION.modulos && SESSION.modulos.length ? SESSION.modulos : [];
+  }
+  return rol.mods;
+}
+function puedeVer(modulo){ if(!SESSION) return false; return getModulosPermitidos().includes(modulo); }
+function puedeEditar(modulo){
+  if(!SESSION) return false;
+  if(SESSION.rol === 'administrador') return true;
+  if(ELECCIONES_CERRADAS) return false;
+  const rol = ROLES[SESSION.rol];
+  if(!rol) return false;
+  if(rol.puedeEditar === '*') return true;
+  if(Array.isArray(rol.puedeEditar)){
+    if(SESSION.rol === 'editor') return (SESSION.modulos||[]).includes(modulo);
+    return rol.puedeEditar.includes(modulo);
+  }
+  return false;
+}
+
+function aplicarPermisosUI(){
+  const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9'};
+  const permitidos = getModulosPermitidos();
+  MODULOS.forEach(m => {
+    const btn = $(mapa[m.key]);
+    if(btn) btn.style.display = permitidos.includes(m.key) ? '' : 'none';
+  });
+  const esAdmin = SESSION?.rol === 'administrador';
+  const esAuditor = SESSION?.rol === 'auditor';
+  if($('btnCerrarElec')) $('btnCerrarElec').style.display = esAdmin ? '' : 'none';
+  if($('btnVerUsuarios')) $('btnVerUsuarios').style.display = esAdmin ? '' : 'none';
+  if($('btnVerLog')) $('btnVerLog').style.display = (esAdmin || esAuditor) ? '' : 'none';
+  if($('btnLimpiar')) $('btnLimpiar').style.display = '';
+  deshabilitarBotonesEdicion();
+}
+
+function deshabilitarBotonesEdicion(){
+  if(SESSION?.rol === 'administrador') return;
+  const noEditable = ELECCIONES_CERRADAS || SESSION?.rol === 'lectura' || SESSION?.rol === 'auditor';
+  if(!noEditable) return;
+  const selectores = [
+    'button[onclick="openForm()"]','button[onclick="saveForm()"]','button[onclick="aprobarTodos()"]',
+    'button[onclick="addActividad()"]','button[onclick="saveActividad()"]',
+    'button[onclick="guardarVotantes()"]','button[onclick="guardarSoporte()"]',
+    'button[onclick="genActa()"]','button[onclick="crearUsuario()"]',
+    'button[onclick="guardarTextoActa()"]'
+  ];
+  selectores.forEach(s => {
+    document.querySelectorAll(s).forEach(b => { b.disabled = true; b.style.opacity = 0.5; b.style.cursor = 'not-allowed'; });
+  });
+  document.querySelectorAll('#gb input, .nv, .ck').forEach(el => { el.disabled = true; });
+}
+
+function limpiarPantalla(){
+  if(!confirm('¿Limpiar la pantalla? Se borrarán búsquedas y filtros. Los datos NO se borran.')) return;
+  ['q','fo','fr','fe','fnov','sopBuscar','sopFiltroEstado','sopFiltroCanal','logBuscar','gOrgFilter','gFacFilter'].forEach(id => {
+    const el = $(id); if(el) el.value = '';
+  });
+  const mods = getModulosPermitidos();
+  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9};
+  if(mods.length) tab(mapa[mods[0]] || 1);
+  try{ draw(); }catch(e){}
+  try{ renderSoportes(); }catch(e){}
+  try{ renderCronograma(false); }catch(e){}
+  registrarLog('Limpiar pantalla', '-', 'Filtros reseteados');
+  toast('🧹 Pantalla limpia');
+}
+
+async function toggleCerrarElecciones(){
+  if(SESSION?.rol !== 'administrador'){ toast('Solo el administrador puede cerrar o reabrir elecciones'); return; }
+  const nuevo = !ELECCIONES_CERRADAS;
+  const msg = nuevo ? '⚠️ ¿CERRAR LAS ELECCIONES? NADIE podrá editar información.' : '¿Reabrir las elecciones?';
+  if(!confirm(msg)) return;
+  ELECCIONES_CERRADAS = nuevo;
+  localStorage.setItem(K_CERRADA, nuevo ? '1' : '0');
+  await guardarEstadoElecciones(nuevo);
+  registrarLog(nuevo ? 'Cerrar elecciones' : 'Reabrir elecciones', '-', 'Estado cambiado');
+  actualizarBannerCierre();
+  deshabilitarBotonesEdicion();
+  toast(nuevo ? '🔒 Elecciones cerradas.' : '🔓 Elecciones reabiertas.');
+}
+
+function actualizarBannerCierre(){
+  const b = $('bannerEleccion');
+  if(b) b.classList.toggle('hide', !ELECCIONES_CERRADAS);
+  const txt = $('txtCerrarElec');
+  if(txt) txt.textContent = ELECCIONES_CERRADAS ? 'Reabrir elecciones' : 'Cerrar elecciones';
+}
+
+async function abrirUsuarios(){
+  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
+  $('u_new_mods').innerHTML = MODULOS.map(m => 
+    `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`
+  ).join('');
+  await cargarUsuariosDeSupabase();
+  renderTablaUsuarios();
+  dlgUsuarios.showModal();
+}
+
+async function cargarUsuariosDeSupabase(){
+  if(!supabaseClient) { USERS_CACHE = []; return; }
+  try {
+    const { data, error } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*');
+    if(error) throw error;
+    USERS_CACHE = data || [];
+  } catch(e) { console.warn('Usuarios:', e.message); USERS_CACHE = []; }
+}
+
+function renderTablaUsuarios(){
+  if(USERS_CACHE.length === 0){
+    $('tablaUsuarios').innerHTML = '<tr><td colspan="6" class="empty">No hay usuarios cargados.</td></tr>';
+    return;
+  }
+  $('tablaUsuarios').innerHTML = USERS_CACHE.map(u => {
+    const rol = u[CONFIG.col_rol];
+    const activo = u[CONFIG.col_activo];
+    const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
+    return `<tr>
+      <td><b>${esc(u[CONFIG.col_user])}</b></td>
+      <td>${esc(u[CONFIG.col_nombre]||'')}</td>
+      <td><span class="tag ${ROLES[rol]?.color||'b'}">${ROLES[rol]?.label||rol}</span></td>
+      <td style="font-size:11.5px">${(rol==='editor'||rol==='lectura') ? mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ')||'—' : '—'}</td>
+      <td>${activo ? '<span class="pill ok">Activo</span>' : '<span class="pill no">Inactivo</span>'}</td>
+      <td class="c">
+        <button class="ic" title="Activar/Desactivar" onclick="toggleActivoUsuario('${u.id}')">${activo?'⏸':'▶'}</button>
+        <button class="ic" title="Eliminar" onclick="eliminarUsuario('${u.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function crearUsuario(){
+  const username = $('u_new_user').value.trim();
+  const nombre = $('u_new_nombre').value.trim();
+  const pass = $('u_new_pass').value;
+  const rol = $('u_new_rol').value;
+  if(!username || !pass){ toast('Usuario y contraseña obligatorios'); return; }
+  if(!supabaseClient){ toast('Sin conexión a la base de datos'); return; }
+  const mods = [...document.querySelectorAll('.u_mod:checked')].map(i=>i.value);
+  try {
+    const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([{
+      [CONFIG.col_user]: username,
+      [CONFIG.col_nombre]: nombre,
+      [CONFIG.col_pass]: pass,
+      [CONFIG.col_rol]: rol,
+      [CONFIG.col_modulos]: mods,
+      [CONFIG.col_activo]: true
+    }]);
+    if(error) throw error;
+    registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
+    $('u_new_user').value=''; $('u_new_nombre').value=''; $('u_new_pass').value='';
+    await cargarUsuariosDeSupabase();
+    renderTablaUsuarios();
+    toast('✅ Usuario creado');
+  } catch(e) { toast('❌ Error: ' + (e.message || 'No se pudo crear')); }
+}
+
+async function toggleActivoUsuario(id){
+  if(!supabaseClient) { toast('Sin conexión'); return; }
+  const u = USERS_CACHE.find(x=>x.id===id); if(!u) return;
+  if(u[CONFIG.col_user] === 'admin' && u[CONFIG.col_activo]){ toast('No puedes desactivar al admin principal'); return; }
+  try {
+    await supabaseClient.from(CONFIG.tabla_usuarios).update({[CONFIG.col_activo]: !u[CONFIG.col_activo]}).eq('id', id);
+    registrarLog(u[CONFIG.col_activo]?'Desactivar usuario':'Activar usuario', 'Usuarios', u[CONFIG.col_user]);
+    await cargarUsuariosDeSupabase();
+    renderTablaUsuarios();
+  } catch(e) { toast('Error: ' + e.message); }
+}
+
+async function eliminarUsuario(id){
+  if(!supabaseClient) { toast('Sin conexión'); return; }
+  const u = USERS_CACHE.find(x=>x.id===id); if(!u) return;
+  if(u[CONFIG.col_user] === 'admin'){ toast('No puedes eliminar al admin principal'); return; }
+  if(!confirm(`¿Eliminar al usuario "${u[CONFIG.col_user]}"?`)) return;
+  try {
+    await supabaseClient.from(CONFIG.tabla_usuarios).delete().eq('id', id);
+    registrarLog('Eliminar usuario', 'Usuarios', u[CONFIG.col_user]);
+    await cargarUsuariosDeSupabase();
+    renderTablaUsuarios();
+  } catch(e) { toast('Error: ' + e.message); }
+}
+
+async function abrirLog(){
+  if(!(SESSION?.rol === 'administrador' || SESSION?.rol === 'auditor')){ toast('Sin permiso'); return; }
+  await cargarLogDeSupabase();
+  renderLog();
+  dlgLog.showModal();
+}
+
+async function cargarLogDeSupabase(){
+  if(!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.from(CONFIG.tabla_log).select('*').order(CONFIG.col_log_fecha, { ascending: false }).limit(500);
+    if(error) throw error;
+    LOG = (data||[]).map(l => ({
+      fecha: l[CONFIG.col_log_fecha],
+      usuario: l[CONFIG.col_log_usuario],
+      rol: l[CONFIG.col_log_rol] || '-',
+      modulo: l[CONFIG.col_log_modulo] || '-',
+      accion: l[CONFIG.col_log_accion] || '-',
+      detalle: l[CONFIG.col_log_detalle] || ''
+    }));
+    saveLogLocal();
+  } catch(e) { console.warn('Log Supabase:', e.message); }
+}
+
+function renderLog(){
+  const q = norm(($('logBuscar')?.value) || '');
+  const lista = [...LOG].reverse().filter(l => !q || norm([l.usuario,l.accion,l.modulo,l.detalle].join(' ')).includes(q)).slice(0, 500);
+  $('tablaLog').innerHTML = lista.length ? lista.map(l=>`
+    <tr>
+      <td style="white-space:nowrap;font-size:12px">${new Date(l.fecha).toLocaleString('es-CO')}</td>
+      <td><b>${esc(l.usuario)}</b></td>
+      <td><span class="tag ${ROLES[l.rol]?.color||'b'}">${ROLES[l.rol]?.label||l.rol}</span></td>
+      <td>${esc(l.modulo)}</td>
+      <td>${esc(l.accion)}</td>
+      <td style="max-width:340px;font-size:12.5px">${esc(l.detalle)}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="empty">Sin registros.</td></tr>';
+}
+
+async function limpiarLog(){
+  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
+  if(!confirm('¿Borrar TODO el log?')) return;
+  if(supabaseClient){
+    try { await supabaseClient.from(CONFIG.tabla_log).delete().neq(CONFIG.col_log_accion, ''); } catch(e) {}
+  }
+  LOG = [];
+  saveLogLocal();
+  renderLog();
+  toast('Log borrado');
+}
+
+function expLogXL(){
+  const ws = XLSX.utils.json_to_sheet(LOG.map(l=>({
+    Fecha: new Date(l.fecha).toLocaleString('es-CO'),
+    Usuario: l.usuario, Rol: l.rol, Módulo: l.modulo, Acción: l.accion, Detalle: l.detalle
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Log');
+  XLSX.writeFile(wb, 'log-auditoria.xlsx');
+}
+
+/* ============================================================
+   NORMALIZACIÓN Y UTILIDADES
+   ============================================================ */
 const normNombre = (s) => {
   if(!s) return '';
   return String(s).trim().replace(/\s+/g, ' ').toLowerCase().split(' ').map(w => {
-      if(!w) return '';
-      if(['de','del','la','las','los','y','e','o','u','da','das','do','dos','van','von','bin','al'].includes(w)) return w;
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join(' ');
+    if(!w) return '';
+    if(['de','del','la','las','los','y','e','o','u','da','das','do','dos','van','von','bin','al'].includes(w)) return w;
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
 };
 const normFacultad = (s) => {
   if(!s) return '';
   let raw = String(s).trim();
-  raw = raw.replace(/\b(de\s+){2,}/gi, 'de '); 
+  raw = raw.replace(/\b(de\s+){2,}/gi, 'de ');
   const n = norm(raw);
   for(const f of FACULTADES){
     const nf = norm(f);
@@ -1140,23 +1549,14 @@ const normFacultad = (s) => {
 };
 function normalizarFacultadesGlobal() {
   let cambios = 0;
-  D.forEach(c => {
-    const nueva = normFacultad(c.fac);
-    if(nueva && nueva !== c.fac) { c.fac = nueva; cambios++; }
-  });
+  D.forEach(c => { const nueva = normFacultad(c.fac); if(nueva && nueva !== c.fac) { c.fac = nueva; cambios++; } });
   if(cambios) save();
 }
 function normalizarNombresGlobal() {
   let cambios = 0;
   D.forEach(c => {
-    if(c.pri && c.pri.nombre){
-      const n = normNombre(c.pri.nombre);
-      if(n !== c.pri.nombre){ c.pri.nombre = n; cambios++; }
-    }
-    if(c.sup && c.sup.nombre){
-      const n = normNombre(c.sup.nombre);
-      if(n !== c.sup.nombre){ c.sup.nombre = n; cambios++; }
-    }
+    if(c.pri && c.pri.nombre){ const n = normNombre(c.pri.nombre); if(n !== c.pri.nombre){ c.pri.nombre = n; cambios++; } }
+    if(c.sup && c.sup.nombre){ const n = normNombre(c.sup.nombre); if(n !== c.sup.nombre){ c.sup.nombre = n; cambios++; } }
   });
   if(cambios) save();
 }
@@ -1190,20 +1590,10 @@ function limpiarVotosEnBlancoInvalidos() {
 try{ const a=localStorage.getItem(K); if(a) D=JSON.parse(a); }catch(e){}
 try{ const c=localStorage.getItem(K_CRON); if(c) CRON=JSON.parse(c); else CRON = []; }catch(e){}
 try{ const f=localStorage.getItem(K_FIRMAS); if(f) FIRMAS=JSON.parse(f); else FIRMAS=[]; }catch(e){}
-try{ 
-  const v=localStorage.getItem(K_VOTANTES); 
-  if(v) {
-    const parsed = JSON.parse(v);
-    VOTANTES = { ...VOTANTES, ...parsed };
-    if(!VOTANTES.historial) VOTANTES.historial = [];
-  }
-}catch(e){}
+try{ const v=localStorage.getItem(K_VOTANTES); if(v) { const parsed = JSON.parse(v); VOTANTES = { ...VOTANTES, ...parsed }; if(!VOTANTES.historial) VOTANTES.historial = []; } }catch(e){}
 try{ const cd = localStorage.getItem(K_CENSO); if(cd) CENSO_DATA = JSON.parse(cd); }catch(e){}
 try{ const s = localStorage.getItem(K_SOPORTE); if(s) SOPORTES = JSON.parse(s); }catch(e){}
-try{
-  const fs = localStorage.getItem(K_FONT_SIZE);
-  if(fs) { $('fontSizeSlider').value = fs; ajustarTamanoLetra(fs); } else { ajustarTamanoLetra(12); }
-}catch(e){}
+try{ const fs = localStorage.getItem(K_FONT_SIZE); if(fs) { $('fontSizeSlider').value = fs; ajustarTamanoLetra(fs); } else { ajustarTamanoLetra(12); } }catch(e){}
 
 const IDB_NAME='elecciones_db', IDB_STORE='kv';
 let _idbP=null;
@@ -1215,19 +1605,14 @@ function idbOpen(){
   return _idbP;
 }
 const idbSet=(k,v)=>idbOpen().then(db=>new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(v,k);tx.oncomplete=res;tx.onerror=()=>rej(tx.error);})).catch(()=>{});
-const idbGet=k=>idbOpen().then(db=>new Promise((res,rej)=>{const rq=db.transaction(IDB_STORE).objectStore(IDB_STORE).get(k);rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);})).catch(()=>undefined);
 const idbClear=()=>idbOpen().then(db=>new Promise(res=>{const tx=db.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).clear();tx.oncomplete=res;tx.onerror=res;})).catch(()=>{});
-function wnLeer(){ try{ if(String(window.name).startsWith('ELEC_BK:')) return JSON.parse(window.name.slice(8))||{}; }catch(e){} return {}; }
-function wnGuardar(key,val,ts){ try{ const m=wnLeer(); m[key]={v:val,ts:ts}; window.name='ELEC_BK:'+JSON.stringify(m); }catch(e){} }
-let _avisoAlm=false;
-let _lsOK = true;
+let _avisoAlm=false, _lsOK = true;
 function persistir(key,val){
   const ts = Date.now();
   idbSet(key+'__ts', ts);
   try{ localStorage.setItem(key,JSON.stringify(val)); localStorage.setItem(key+'__ts', String(ts)); _lsOK = true; }
-  catch(e){ _lsOK = false; if(!_avisoAlm){ _avisoAlm=true; setTimeout(()=>{ try{ toast('⚠️ El navegador no pudo guardar en localStorage. Se guardó una copia interna.'); }catch(_){} },300); } }
+  catch(e){ _lsOK = false; if(!_avisoAlm){ _avisoAlm=true; } }
   idbSet(key,val);
-  if(key===K || key===K_CRON) wnGuardar(key,val,ts);
 }
 try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
 
@@ -1246,7 +1631,6 @@ const ppl=r=>[['Principal',r.pri],...(r.sup?[['Suplente',r.sup]]:[])];
 const optNov=(all)=>Object.entries(NOV).map(([v,l])=>`<option value="${v}">${v===''&&all?'Todas las novedades':l}</option>`).join('');
 const optErr=()=>Object.entries(ERRORS).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
 let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
-
 const cleanFac = (f) => String(f || '').replace(/^Facultad de /i, '').replace(/^Departamento de /i, '');
 
 const NUM_BASE=['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
@@ -1280,11 +1664,7 @@ function ajustarTamanoLetra(size) {
   document.documentElement.style.setProperty('--font-size-acta', size + 'px');
   try { localStorage.setItem(K_FONT_SIZE, size); } catch(e) {}
   const outDiv = $('actaOut');
-  if (outDiv) {
-     outDiv.style.fontSize = size + 'px';
-     const bodyAct = outDiv.querySelector('.acta-body');
-     if (bodyAct) bodyAct.style.fontSize = size + 'px';
-  }
+  if (outDiv) { outDiv.style.fontSize = size + 'px'; const bodyAct = outDiv.querySelector('.acta-body'); if (bodyAct) bodyAct.style.fontSize = size + 'px'; }
 }
 let audioCtx;
 function playSound(){
@@ -1299,7 +1679,7 @@ function playSound(){
     osc.start(); osc.stop(audioCtx.currentTime + 0.4);
   }catch(e){}
 }
-function testSound(){ playSound(); toast('🔊 Sonido de notificación reproducido'); }
+function testSound(){ playSound(); toast('🔊 Sonido reproducido'); }
 function solicitarPermisoNotif(){
   if(!("Notification" in window)){ toast('Este navegador no soporta notificaciones'); return; }
   Notification.requestPermission().then(p=>{ if(p==='granted'){ toast('✅ Notificaciones activadas'); playSound(); } else toast('❌ Permiso denegado'); });
@@ -1317,7 +1697,7 @@ function estado(r,p){
  if(p.nov==='Ubicación semestre')return['No habilitado','No cumple por ubicación de semestre'];
  if(p.nov==='Llamado de atención')return['No habilitado','Tiene llamado de atención'];
  if(p.nov==='Error postulación')return['No habilitado','Error de postulación: '+(p.err||'')];
- if(r.rol==='Estudiante'){const s=+p.sem,t=+p.tot;if(!(s>=2&&(!t||s<=t-1)))return['No habilitado','Semestre fuera del rango (2.º a penúltimo)']}
+ if(r.rol==='Estudiante'){const s=+p.sem,t=+p.tot;if(!(s>=2&&(!t||s<=t-1)))return['No habilitado','Semestre fuera del rango']}
  const v=(CH[r.rol]||[]).map(k=>p.ck[k]);
  if(v.includes('x'))return['No habilitado','Tiene llamado de atención'];
  if(v.every(x=>x==='ok'))return['Habilitado','Cumple todo'];
@@ -1373,13 +1753,9 @@ function updateOrgActivos() {
 }
 
 function tab(n){
-  // Verificar permisos
   const mapa = {1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',9:'vSoporte'};
   const modKey = mapa[n];
-  if(SESSION && modKey && !puedeVer(modKey)){
-    toast('⛔ No tienes permiso para este módulo');
-    return;
-  }
+  if(SESSION && modKey && !puedeVer(modKey)){ toast('⛔ No tienes permiso para este módulo'); return; }
   ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].forEach((id,i)=>{
     $(id).classList.toggle('hide', i+1 !== n);
     $('n'+(i+1)).classList.toggle('on', i+1 === n);
@@ -1388,13 +1764,7 @@ function tab(n){
   if(n===3) { renderCensoData(); }
   if(n===4) { renderAnalitica(); }
   if(n===5) renderVacantes();
-  if(n===7) { 
-    updateJornada();
-    inicializarFirmasOficiales();
-    renderFirmas(); 
-    $('ad').value = new Date().toISOString().slice(0,10); 
-    ajustarTamanoLetra($('fontSizeSlider').value);
-  }
+  if(n===7) { updateJornada(); inicializarFirmasOficiales(); renderFirmas(); $('ad').value = new Date().toISOString().slice(0,10); ajustarTamanoLetra($('fontSizeSlider').value); }
   if(n===8) { renderDirectorio(); }
   if(n===9) { renderSoportes(); }
   deshabilitarBotonesEdicion();
@@ -1448,9 +1818,9 @@ function cargarTextoActa(forzar){
 }
 function guardarTextoActa(){ try{ localStorage.setItem(K_TEXTO_ACTA,$('at').value); }catch(e){} }
 function restaurarTextoActa(){
-  if(!confirm('¿Restaurar el texto predefinido del acta? Se perderán tus cambios al texto.')) return;
+  if(!confirm('¿Restaurar el texto predefinido?')) return;
   try{ localStorage.removeItem(K_TEXTO_ACTA); }catch(e){}
-  cargarTextoActa(true); toast('Texto predefinido restaurado');
+  cargarTextoActa(true); toast('Texto restaurado');
 }
 
 function datosActa(){
@@ -1553,9 +1923,7 @@ function generarInformeVotacion() {
   roles.forEach(rol => {
     const L = D.filter(c => rolDe(c) === rol && ORG_ACTIVOS.includes(c.org));
     if(L.length === 0){ sinDatos.push(rol + 's'); return; }
-    html += `<div data-keep="1" ${secciones ? 'data-newpage="1"' : ''} style="text-align:center; margin-bottom: 14px;">
-        <h2 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase;">Informe de votaciones ${jornada==='2'?'segunda':'primera'} jornada ${periodo}_${rol}s</h2>
-      </div>`;
+    html += `<div data-keep="1" ${secciones ? 'data-newpage="1"' : ''} style="text-align:center; margin-bottom: 14px;"><h2 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase;">Informe de votaciones ${jornada==='2'?'segunda':'primera'} jornada ${periodo}_${rol}s</h2></div>`;
     secciones++;
     const gruposOrg = {};
     L.forEach(c => { (gruposOrg[c.org] = gruposOrg[c.org] || []).push(c); });
@@ -1593,12 +1961,11 @@ function generarInformeVotacion() {
       html += `</tbody></table>`;
     });
   });
-  if(secciones === 0){ toast('No hay datos de votaciones para ' + (sel === 'Todos' ? 'ningún rol' : sel.toLowerCase() + 's') + '.'); return; }
+  if(secciones === 0){ toast('No hay datos de votaciones'); return; }
   $('informeOutContainer').classList.remove('hide');
   $('actaOutContainer').classList.add('hide');
   const total = paginarDoc($('informeOut'), {nodes: nodosDesdeHTML(html), landscape:true, bodyClass:'informe-body'});
-  const aviso = sinDatos.length ? ` · sin datos: ${sinDatos.join(', ')}` : '';
-  toast(`✅ Informe generado: ${secciones} rol${secciones===1?'':'es'}, ${total} hoja${total===1?'':'s'} horizontal${total===1?'':'es'}${aviso}`);
+  toast(`✅ Informe generado: ${secciones} rol(es), ${total} página(s)`);
   setTimeout(() => { $('informeOutContainer').scrollIntoView({behavior:'smooth'}); }, 100);
 }
 function imprimirInforme() {
@@ -1664,13 +2031,7 @@ function draw(){
  const novCnt = {};
  Object.keys(NOV).forEach(k=>{ if(k) novCnt[k]=0; });
  LD.forEach(c=>ppl(c).forEach(([,p])=>{ if(p.nov && novCnt[p.nov]!==undefined) novCnt[p.nov]++; }));
- const novColors = {
-   'Renuncia':['#d9730d','#fdebd9'],
-   'Ubicación semestre':['#c0392b','#fbe4e1'],
-   'Llamado de atención':['#b5302a','#fbe1df'],
-   'Error postulación':['#d6453d','#fde6e4'],
-   'Otra novedad':['#7d3c98','#f1e4f7']
- };
+ const novColors = { 'Renuncia':['#d9730d','#fdebd9'],'Ubicación semestre':['#c0392b','#fbe4e1'],'Llamado de atención':['#b5302a','#fbe1df'],'Error postulación':['#d6453d','#fde6e4'],'Otra novedad':['#7d3c98','#f1e4f7'] };
  $('kpisNovedad').innerHTML = '<div class="nov-title">Novedades registradas</div>' + Object.keys(NOV).filter(k=>k).map(k=>{
    const col = novColors[k] || ['#34495e','#e8edf1'];
    const total = novCnt[k]||0;
@@ -1689,38 +2050,33 @@ function draw(){
 }
 const per=(c,w)=>w==='pri'?c.pri:c.sup;
 function cyc(id,w,k){
-  if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso para editar'); return; }
+  if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; }
   if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
   const p=per(D.find(x=>x.id===id),w);
   if(p.nombre.toUpperCase() === 'VOTO EN BLANCO') return;
   p.ck[k]=({'':'ok',ok:'x',x:''})[p.ck[k]||''];
   save();
-  const scrollY = window.scrollY;
-  draw();
-  window.scrollTo(0, scrollY);
+  const scrollY = window.scrollY; draw(); window.scrollTo(0, scrollY);
   const btn = document.getElementById(`ck_${id}_${w}_${k}`);
   if(btn) btn.focus({preventScroll:true});
-  if(p.ck[k]==='x'){toast('⚠️ Condición marcada como NO cumple. Revisa la alerta.');playSound();}
+  if(p.ck[k]==='x'){toast('⚠️ Condición marcada como NO cumple.');playSound();}
 }
 function setNov(id,w,v){
   if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; }
   if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
-  per(D.find(x=>x.id===id),w).nov=v;
-  save();
-  const scrollY = window.scrollY;
-  draw();
-  window.scrollTo(0, scrollY);
+  per(D.find(x=>x.id===id),w).nov=v; save();
+  const scrollY = window.scrollY; draw(); window.scrollTo(0, scrollY);
   if(v==='Renuncia'){toast('Renuncia registrada.');playSound();}
 }
 function del(id){
   if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; }
   if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
-  if(confirm('¿Eliminar esta fórmula completa (principal y suplente)?')){D=D.filter(x=>x.id!==id);save();draw();toast('Fórmula eliminada')}
+  if(confirm('¿Eliminar esta fórmula?')){D=D.filter(x=>x.id!==id);save();draw();toast('Fórmula eliminada')}
 }
 function aprobarTodos() {
   if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; }
   if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
-  if(!confirm('¿Marcar todas las validaciones como "Cumple" para todos los candidatos activos?')) return;
+  if(!confirm('¿Marcar todas las validaciones como "Cumple"?')) return;
   let count = 0;
   D.filter(c => ORG_ACTIVOS.includes(c.org) && c.pri.nombre.toUpperCase() !== 'VOTO EN BLANCO').forEach(c => {
     const act = CH[c.rol] || [];
@@ -1729,7 +2085,7 @@ function aprobarTodos() {
     count++;
   });
   save(); draw();
-  toast(`✅ Se aprobaron las validaciones para ${count} fórmulas.`);
+  toast(`✅ Se aprobaron ${count} fórmulas.`);
 }
 
 function toggleSem(){document.querySelectorAll('.semrow').forEach(e=>e.classList.toggle('hide',$('f_rol').value!=='Estudiante'))}
@@ -1751,7 +2107,7 @@ function readP(pre,old){
   };
 }
 function openForm(id){
- if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso para editar'); return; }
+ if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; }
  if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
  editId=id||null;const c=id?D.find(x=>x.id===id):{};
  $('dt').textContent=id?'Editar candidato':'Agregar candidato';
@@ -1770,7 +2126,7 @@ function saveForm(){
     const ganador1 = D.find(c => c.gan && c.rol === rol && c.org === org && c.fac === fac);
     const vacantes1 = getVacantesPrimeraVuelta();
     const esVacante = vacantes1.some(v => v.rol === rol && v.org === org && v.fac === fac);
-    if (ganador1 && !esVacante) { alert("⚠️ ERROR: Este cargo ya fue ocupado en la primera vuelta."); return; }
+    if (ganador1 && !esVacante) { alert("⚠️ Este cargo ya fue ocupado en la primera vuelta."); return; }
  }
  const sup=readP('s',editId&&D.find(x=>x.id===editId).sup);
  const d={rol,org,fac,prog:$('f_prog').value.trim(),pri,sup:sup.nombre?sup:null};
@@ -1794,21 +2150,16 @@ function importXL(inp){
      const jsonArr = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
      if(jsonArr.length < 2) { toast('El archivo no tiene datos válidos'); return; }
      const headers = jsonArr[0].map(h => norm(h).replace(/[^a-z0-9]/g, ''));
-     const findCol = (possibleNames) => { for(let name of possibleNames) { const nName = norm(name).replace(/[^a-z0-9]/g, ''); const idx = headers.findIndex(h => h.includes(nName)); if(idx !== -1) return idx; } return -1; };
-     const idxTipo = findCol(['tipo', 'organo']);
-     const idxFacPost = findCol(['facultada postularse', 'facultad']);
-     const idxRol = findCol(['rol']);
-     const idxDocPri = findCol(['docprincipal', 'documento']);
+     const findCol = (names) => { for(let name of names) { const nName = norm(name).replace(/[^a-z0-9]/g, ''); const idx = headers.findIndex(h => h.includes(nName)); if(idx !== -1) return idx; } return -1; };
+     const idxTipo = findCol(['tipo', 'organo']); const idxFacPost = findCol(['facultada postularse', 'facultad']);
+     const idxRol = findCol(['rol']); const idxDocPri = findCol(['docprincipal', 'documento']);
      const idxNomPri = findCol(['nombre1', 'nombre']);
      const idxInscripciones = headers.reduce((acc, h, i) => { if(h.includes('inscrito')) acc.push(i); return acc; }, []);
      const idxInscPri = idxInscripciones[0] !== undefined ? idxInscripciones[0] : -1;
      const idxInscSup = idxInscripciones[1] !== undefined ? idxInscripciones[1] : -1;
-     const idxEmailPri = findCol(['email1', 'correo']);
-     const idxTelPri = findCol(['telefono1', 'celular']);
-     const idxDocSup = findCol(['docsuplente']);
-     const idxNomSup = findCol(['nombre2', 'suplente']);
-     const idxEmailSup = findCol(['email2']);
-     const idxTelSup = findCol(['telefono2']);
+     const idxEmailPri = findCol(['email1', 'correo']); const idxTelPri = findCol(['telefono1', 'celular']);
+     const idxDocSup = findCol(['docsuplente']); const idxNomSup = findCol(['nombre2', 'suplente']);
+     const idxEmailSup = findCol(['email2']); const idxTelSup = findCol(['telefono2']);
      const getVal = (row, idx) => (idx !== -1 && row[idx] !== undefined) ? String(row[idx]).trim() : '';
      for(let i=1; i<jsonArr.length; i++) {
         const row = jsonArr[i];
@@ -1835,13 +2186,9 @@ function importXL(inp){
      const repetidos = Math.max(0, antesD + n - D.length);
      save(); draw();
      const nota = repetidos ? ` (${repetidos} repetidos descartados)` : '';
-     alert(`Se han cargado exitosamente ${n} registros${nota}.`);
+     alert(`Se cargaron ${n} registros${nota}.`);
      toast(`✅ ${n} fórmulas cargadas${nota}`);
-   } catch(err) {
-     console.error(err);
-     alert('❌ Error al leer el archivo.');
-     toast('No se pudo leer el archivo.');
-   }
+   } catch(err) { console.error(err); alert('❌ Error al leer el archivo.'); toast('No se pudo leer el archivo.'); }
    inp.value='';
  };
  r.readAsArrayBuffer(f);
@@ -1929,7 +2276,7 @@ function getFechasSegundaVuelta() {
 function updateJornada() {
   const jornada = $('aJornada').value;
   if (jornada === '2') {
-    $('helpVotacion').innerHTML = '<b style="color:var(--alert-line)">Estás en Segunda Vuelta.</b> Solo se muestran candidatos para vacantes de la Primera Vuelta.';
+    $('helpVotacion').innerHTML = '<b style="color:var(--alert-line)">Estás en Segunda Vuelta.</b> Solo se muestran candidatos para vacantes.';
     $('cardVacantes1').classList.remove('hide');
     const vacantes = getVacantesPrimeraVuelta();
     if(vacantes.length === 0) {
@@ -2033,9 +2380,7 @@ function renderFirmas(){
     </div>`).join('');
   $('firmaCount').textContent = FIRMAS.length + ' firma(s) configurada(s)';
 }
-function toggleDelegado(i, isChecked) {
-  FIRMAS[i].esDelegado = isChecked; FIRMAS[i].cargo = ''; saveFirmas(); renderFirmas();
-}
+function toggleDelegado(i, isChecked) { FIRMAS[i].esDelegado = isChecked; FIRMAS[i].cargo = ''; saveFirmas(); renderFirmas(); }
 function addFirma(){ FIRMAS.push({nombre:'',cargo:'',esDelegado:false}); saveFirmas(); renderFirmas(); }
 function delFirma(i){ if(FIRMAS.length<=1){toast('Debe haber al menos una firma');return;} FIRMAS.splice(i,1); saveFirmas(); renderFirmas(); }
 function updateFirma(i,k,v){ FIRMAS[i][k]=v; saveFirmas(); }
@@ -2044,6 +2389,20 @@ function inicializarFirmasOficiales() {
       FIRMAS = CARGOS_DELEGADO.map(cargo => ({nombre: '', cargo: cargo, esDelegado: true}));
       saveFirmas();
    }
+}
+function migrarFirmas(){
+  const claves = ['vicerrect','secretar','tecnolog','registro','auditor'];
+  let cambio = false;
+  FIRMAS.forEach(f=>{
+    const lista = f.esDelegado ? CARGOS_DELEGADO : CARGOS_TITULAR;
+    if(f.cargo && !lista.includes(f.cargo)){
+      const n = norm(f.cargo);
+      const i = claves.findIndex(k=>n.includes(k));
+      f.cargo = i>=0 ? lista[i] : '';
+      cambio = true;
+    }
+  });
+  if(cambio) saveFirmas();
 }
 
 const CM_PX = 96/2.54;
@@ -2237,7 +2596,7 @@ function genActa(){
  const total = paginarDoc($('actaOut'), {nodes, landscape:false});
  $('actaOutContainer').scrollIntoView({behavior:'smooth'});
  ajustarTamanoLetra($('fontSizeSlider').value);
- toast(`Acta generada: ${total} página${total===1?'':'s'}`);
+ toast(`Acta generada: ${total} página(s)`);
 }
 
 async function exportarDOCX() {
@@ -2254,7 +2613,7 @@ async function exportarDOCX() {
     async function cargarImagenDataURL(src) {
       return new Promise((resolve) => {
         const img = new Image(); img.crossOrigin = 'anonymous';
-        img.onload = () => { try { const canvas = document.createElement('canvas'); canvas.width = img.naturalWidth; canvas.height = img.naturalHeight; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve({ dataURL: canvas.toDataURL('image/png'), width: img.naturalWidth, height: img.naturalHeight }); } catch(e) { resolve(null); } };
+        img.onload = () => { try { const canvas = document.createElement('canvas'); canvas.width = img.naturalWidth; canvas.height = img.naturalHeight; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve({ dataURL: canvas.toDataURL('image/png') }); } catch(e) { resolve(null); } };
         img.onerror = () => resolve(null); img.src = src;
       });
     }
@@ -2334,24 +2693,15 @@ function partesFecha(iso){
 }
 function diasEntre(a,b){ return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00'))/864e5)+1; }
 const TIPO_STYLE = {
-  'Inscripción':['📝','#1f6fd1','#e4f0fd'],
-  'Campaña':['📣','#e8590c','#ffe8d9'],
-  'Votación':['🗳️','#0B9B5B','#dcf6e7'],
-  'Escrutinio':['🧮','#7d3c98','#f1e4f7'],
-  'Poselectoral':['🏛️','#c2255c','#fde4ee'],
-  'Otro':['📌','#4a6572','#e6eef2']
+  'Inscripción':['📝','#1f6fd1','#e4f0fd'],'Campaña':['📣','#e8590c','#ffe8d9'],'Votación':['🗳️','#0B9B5B','#dcf6e7'],
+  'Escrutinio':['🧮','#7d3c98','#f1e4f7'],'Poselectoral':['🏛️','#c2255c','#fde4ee'],'Otro':['📌','#4a6572','#e6eef2']
 };
 function estadoGuardado(){
   const el = $('cronGuardado'); if(!el) return;
   let kb = 0; try{ let n=0; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); n += k.length + (localStorage.getItem(k)||'').length; } kb = Math.round(n*2/1024); }catch(e){}
   const hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-  if(!_lsOK){
-    el.className='cr-save warn';
-    el.innerHTML = `⚠️ El navegador no pudo guardar en su almacenamiento principal (usa ${kb} KB). <button onclick="descargarRespaldo()">Descargar respaldo</button>`;
-  } else {
-    el.className='cr-save';
-    el.innerHTML = `💾 Guardado automáticamente · ${CRON.length} actividades · ${hora} · almacenamiento usado ${kb} KB <button onclick="descargarRespaldo()">Respaldo</button>`;
-  }
+  if(!_lsOK){ el.className='cr-save warn'; el.innerHTML = `⚠️ Almacenamiento lleno (${kb} KB). <button onclick="descargarRespaldo()">Descargar respaldo</button>`; }
+  else { el.className='cr-save'; el.innerHTML = `💾 Guardado automáticamente · ${CRON.length} actividades · ${hora} · ${kb} KB <button onclick="descargarRespaldo()">Respaldo</button>`; }
 }
 let _crI=0;
 function cronItemHTML(a, hoy, interno){
@@ -2436,15 +2786,13 @@ function renderCronograma(anim){
   const pendientes = CRON.filter(a=>estadoCron(a,hoy)==='pendientes').length;
   const vencidas = CRON.filter(a=>estadoCron(a,hoy)==='vencidas').length;
   const st = (n,l,acc,soft)=>`<div class="cr-stat" style="--acc:${acc};--soft:${soft}"><b>${n}</b><span>${l}</span></div>`;
-  $('cronStats').innerHTML =
-    st(completadas,'Completadas','#1e8e5a','#e3f4ea') + st(nEn+pendientes,'Por hacer','#1f6fd1','#e4f0fd') +
-    st(vencidas,'Vencidas','#d9730d','#fdebd9') + st(total,'Total','#0B3B2C','#eaf1ed');
+  $('cronStats').innerHTML = st(completadas,'Completadas','#1e8e5a','#e3f4ea') + st(nEn+pendientes,'Por hacer','#1f6fd1','#e4f0fd') + st(vencidas,'Vencidas','#d9730d','#fdebd9') + st(total,'Total','#0B3B2C','#eaf1ed');
   $('cronNextInt').innerHTML = cronProximaHTML(CRON, hoy);
   const filtros = [['todas','Todas'],['en curso','En curso'],['pendientes','Por iniciar'],['vencidas','Vencidas'],['completadas','Completadas']];
   $('cronFiltros').innerHTML = filtros.map(([k,l])=>`<button class="${CRON_FILTRO===k?'on':''}" onclick="setCronFiltro('${k}')">${l}</button>`).join('');
   const vista = CRON_FILTRO==='todas' ? CRON : CRON.filter(a=>estadoCron(a,hoy)===CRON_FILTRO);
   estadoGuardado();
-  $('cronList').innerHTML = cronListaHTML(vista, hoy, true) || `<p class="empty">${CRON.length ? 'No hay actividades en este filtro.' : 'No hay actividades. Agrega una nueva o carga un Excel.'}</p>`;
+  $('cronList').innerHTML = cronListaHTML(vista, hoy, true) || `<p class="empty">${CRON.length ? 'No hay actividades en este filtro.' : 'No hay actividades.'}</p>`;
   deshabilitarBotonesEdicion();
 }
 function addActividad(){
@@ -2487,7 +2835,7 @@ function toggleAct(id){
   if(SESSION && !puedeEditar('vCron')){ toast('⛔ Sin permiso'); return; }
   if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
   const a = CRON.find(x=>x.id===id);
-  if(a){ a.completado = !a.completado; saveCron(); renderCronograma(false); if(a.completado){ playSound(); toast('✅ Actividad completada'); } }
+  if(a){ a.completado = !a.completado; saveCron(); renderCronograma(false); if(a.completado){ playSound(); toast('✅ Completada'); } }
 }
 function delAct(id){
   if(SESSION && !puedeEditar('vCron')){ toast('⛔ Sin permiso'); return; }
@@ -2564,7 +2912,6 @@ function parseFechaExcel(raw){
   }
   return '';
 }
-const fmtRango = a => a.fechaFin && a.fechaFin !== a.fecha ? `${a.fecha} → ${a.fechaFin}` : a.fecha;
 function migrarCron(){
   let cambio = false;
   CRON.forEach(a=>{
@@ -2623,7 +2970,7 @@ function importarCronograma(input) {
       const manuales = CRON.filter(a=>a.manual);
       CRON = nuevoCron.concat(manuales);
       saveCron(); renderCronograma();
-      toast(`✅ Cronograma cargado: ${nuevoCron.length} actividades`);
+      toast(`✅ ${nuevoCron.length} actividades cargadas`);
       input.value = '';
     } catch (error) { console.error(error); toast('Error al procesar el archivo'); }
   };
@@ -2717,18 +3064,16 @@ function renderCensoData() {
   $('inpTotalHabilitados').value = hab || '';
   $('barVotantes').style.width = pct + '%';
   $('barVotantes').textContent = pct + '%';
-  $('lblFechaCorte').textContent = VOTANTES.fechaCorte
-    ? new Date(VOTANTES.fechaCorte).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' })
-    : 'No definida';
+  $('lblFechaCorte').textContent = VOTANTES.fechaCorte ? new Date(VOTANTES.fechaCorte).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }) : 'No definida';
   const filas = CENSO_DATA.map(d => ({...d, t:(d.est||0)+(d.doc||0)+(d.egr||0)+(d.inc||0)})).sort((a,b)=>b.t-a.t);
   const mayor = filas[0];
   $('censoKpisTop').innerHTML =
     kpiCard('Censo base', fmt(total), null, pct, 'está habilitado', 'd', 'users') +
     kpiCard('Habilitados', fmt(hab), total?fmt(total):null, pct, 'del censo base', 'g', 'ok') +
     kpiCard('Presenso / Inclusiones', fmt(tInc), null, hab ? Math.round(tInc/hab*100) : 0, 'de los habilitados', 'o', 'pct') +
-    kpiCard('Facultades', fmt(CENSO_DATA.length), null, mayor ? sh(mayor.t) : 0, mayor ? 'del total en ' + esc(cleanFac(mayor.fac)) : 'sin datos cargados', 'b', 'build');
+    kpiCard('Facultades', fmt(CENSO_DATA.length), null, mayor ? sh(mayor.t) : 0, mayor ? 'del total en ' + esc(cleanFac(mayor.fac)) : 'sin datos', 'b', 'build');
   if (CENSO_DATA.length === 0) {
-    $('kpisCensoFac').innerHTML = '<p class="empty" style="grid-column:1/-1">No hay datos de censo cargados. Usa el Excel.</p>';
+    $('kpisCensoFac').innerHTML = '<p class="empty" style="grid-column:1/-1">No hay datos de censo cargados.</p>';
     $('tablaCensoDetalle').innerHTML = '<tr><td colspan="8" class="empty">Sin datos.</td></tr>';
     $('tfootCensoDetalle').innerHTML = '';
     if(chartCensoFacInstance){ chartCensoFacInstance.destroy(); chartCensoFacInstance=null; }
@@ -2805,11 +3150,11 @@ function procesarExcelCenso(input) {
       VOTANTES.fechaCorte = new Date().toISOString();
       saveVotantes();
       renderCensoData();
-      $('statusCenso').textContent = `✅ Procesados ${CENSO_DATA.length} registros.`;
+      $('statusCenso').textContent = `✅ ${CENSO_DATA.length} registros procesados.`;
       $('statusCenso').style.color = 'var(--ok)';
-      lanzarNotificacion('Censo cargado', `${totalHab} habilitados totales (${incCount} inclusiones).`);
+      lanzarNotificacion('Censo cargado', `${totalHab} habilitados (${incCount} inclusiones).`);
       input.value = '';
-    } catch (error) { console.error(error); toast('Error al procesar el archivo del censo.'); }
+    } catch (error) { console.error(error); toast('Error al procesar el archivo.'); }
   };
   reader.readAsArrayBuffer(file);
 }
@@ -2829,8 +3174,8 @@ function guardarVotantes(){
   if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
   const total = Number($('inpTotalCenso').value);
   const hab = Number($('inpTotalHabilitados').value);
-  if(total < 0 || hab < 0){ toast('Los valores no pueden ser negativos'); return; }
-  if(hab > total){ toast('Los habilitados no pueden superar el total del censo'); return; }
+  if(total < 0 || hab < 0){ toast('No pueden ser negativos'); return; }
+  if(hab > total){ toast('Los habilitados no pueden superar el total'); return; }
   const now = new Date();
   VOTANTES.totalCenso = total;
   VOTANTES.totalHabilitados = hab;
@@ -2839,7 +3184,7 @@ function guardarVotantes(){
   VOTANTES.historial.push({fechaCorte: now.toISOString(), totalCenso: total, totalHabilitados: hab});
   saveVotantes();
   renderCensoData();
-  lanzarNotificacion('Censo actualizado', `Se registraron ${hab} habilitados de ${total} personas.`);
+  lanzarNotificacion('Censo actualizado', `${hab} habilitados de ${total}.`);
 }
 
 /* ========== ANALÍTICA ========== */
@@ -2860,14 +3205,14 @@ function renderAnalitica(){
   const ganadores = ACT.filter(c => c.gan && !esBl(c)).length;
   const pc = (a,b) => b ? Math.round(a/b*100) : 0;
   $('analKpis').innerHTML =
-    kpiCard('Votantes habilitados', hayCenso ? fmt(votantes) : 'Sin censo', null, null, hayCenso ? 'según el censo cargado' : 'carga el censo', 'd', 'users') +
+    kpiCard('Votantes habilitados', hayCenso ? fmt(votantes) : 'Sin censo', null, null, hayCenso ? 'según el censo' : 'carga el censo', 'd', 'users') +
     kpiCard('Votos emitidos', fmt(emitidos), hayCenso ? fmt(votantes) : null, participacion, 'de participación', 'g', 'vote') +
     kpiCard('Votos válidos', fmt(validos), fmt(emitidos), pc(validos,emitidos), 'del total emitido', 'b', 'ok') +
     kpiCard('Votos en blanco', fmt(blancos), fmt(emitidos), pc(blancos,emitidos), 'del total emitido', 'p', 'file') +
     kpiCard('Abstención', hayCenso ? fmt(abstencion) : '—', null, hayCenso ? 100-participacion : null, 'sin votar', 'o', 'alert') +
     kpiCard('Fórmulas', fmt(totalCand), null, pc(aprobadas,totalCand), `aprobadas (${aprobadas})`, 't', 'chart') +
     kpiCard('Candidatos', fmt(totalPersonas), null, null, 'principales y suplentes', 'b', 'users') +
-    kpiCard('Ganadores', fmt(ganadores), null, null, 'cargos con ganador declarado', 'g', 'trophy');
+    kpiCard('Ganadores', fmt(ganadores), null, null, 'cargos con ganador', 'g', 'trophy');
   const roles = ['Estudiante','Docente','Egresado'];
   chartRolesInstance = nuevoChart('chartRoles', chartRolesInstance, {
     type:'doughnut',
@@ -2961,7 +3306,7 @@ function renderVacantes(){
              <span style="font-size:11px;color:${r.ok?'var(--ok)':'var(--alert-line)'}">${r.ok?'✓ OK':'⚠ Falta'}</span>
           </div>`;
         if (r.candidatos.length > 0) {
-          htmlRoles += `<div class="vac-cand-list" style="margin:4px 0 0 0; padding:0; list-style:none;">`;
+          htmlRoles += `<div style="margin:4px 0 0 0; padding:0;">`;
           r.candidatos.forEach(c => { htmlRoles += `<div style="margin-bottom:4px; line-height:1.3;"><b>P:</b> ${esc(c.pri.nombre)}<br><b>S:</b> ${esc(c.sup ? c.sup.nombre : 'Sin suplente')}</div>`; });
           htmlRoles += `</div>`;
         } else {
@@ -2983,7 +3328,7 @@ function renderVacantes(){
       </div>`;
     }
   });
-  $('vacList').innerHTML = html || '<p class="empty" style="grid-column:1/-1">No hay órganos que requieran facultad activos.</p>';
+  $('vacList').innerHTML = html || '<p class="empty" style="grid-column:1/-1">No hay órganos activos.</p>';
   $('vacKpis').innerHTML = [
     ['Facultades / Deptos', facs.length, 'var(--oscuro)'],
     ['Coberturas OK', totalCubiertas, 'var(--ok)'],
@@ -3016,7 +3361,7 @@ function expVacantesXL() {
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Vacantes');
   XLSX.writeFile(wb, 'reporte-cargos-vacantes.xlsx');
-  toast('Reporte de vacantes descargado');
+  toast('Reporte descargado');
 }
 
 /* ========== CARGA DE VOTOS ========== */
@@ -3150,7 +3495,7 @@ function procesarArchivosVotos(input) {
       <span class="tag p">＋ ${resumen.nuevos} nuevos</span>
       <span class="tag o">⚠ ${resumen.omitidos} omitidos</span>
       <span class="tag t">🗳 ${fmt(resumen.votos)} votos</span>
-      <span class="tag g">🏆 ${gan.marcados} ganadores en ${gan.grupos} cargos</span>`;
+      <span class="tag g">🏆 ${gan.marcados} ganadores</span>`;
     const detalle = resumen.archivos.map(a => `<div style="font-weight:500;font-size:13px;margin-top:4px;color:${a.error?'#b0332b':'var(--mut)'}">📄 ${esc(a.nombre)} — ${a.error ? esc(a.error) : `${a.filas} filas · ${a.actualizados} actualizados · ${a.nuevos} nuevos · ${a.omitidos} omitidos`}</div>`).join('');
     status(`<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">${chips}</div>${detalle}`, 'var(--oscuro)');
     $('previewContainer').classList.remove('hide');
@@ -3164,7 +3509,7 @@ function procesarArchivosVotos(input) {
       </tr>`).join('') + (filasPreview.length > MAX ? `<tr><td colspan="6" class="empty">… y ${filasPreview.length - MAX} filas más</td></tr>` : '');
     lanzarNotificacion('Votos cargados', `${procesados} registros (${resumen.actualizados} actualizados, ${resumen.nuevos} nuevos).`);
     input.value = '';
-  })().catch(err => { console.error(err); status('❌ Ocurrió un error: ' + esc(err.message || err), '#b0332b'); input.value = ''; });
+  })().catch(err => { console.error(err); status('❌ Error: ' + esc(err.message || err), '#b0332b'); input.value = ''; });
 }
 const dropZone = $('dropZone');
 dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -3183,7 +3528,7 @@ function guardarSoporte() {
    const doc = $('sop_doc').value.trim();
    const motivo = $('sop_motivo').value.trim();
    const gestor = $('sop_gestor').value.trim();
-   if(!nombre || !doc || !motivo) { toast('Por favor completa los campos principales'); return; }
+   if(!nombre || !doc || !motivo) { toast('Completa los campos principales'); return; }
    const canales = [];
    if($('sop_tel').checked) canales.push('Teléfono');
    if($('sop_teams').checked) canales.push('Teams');
@@ -3199,7 +3544,7 @@ function guardarSoporte() {
    $('sop_tel').checked=false; $('sop_teams').checked=false; $('sop_presencial').checked=false; $('sop_correo').checked=false;
    $('sop_whatsapp').checked=false; $('sop_forms').checked=false; $('sop_solucionado').value = 'no';
    renderSoportes();
-   toast('✅ Caso de soporte registrado');
+   toast('✅ Caso registrado');
 }
 function toggleSoporteSolucionado(id) {
   if(SESSION && !puedeEditar('vSoporte')){ toast('⛔ Sin permiso'); return; }
@@ -3336,7 +3681,7 @@ function procesarExcelForms(input) {
       });
       if (count > 0) {
         saveSoportes(); renderSoportes();
-        $('statusForms').textContent = `✅ ${count} casos importados de Forms.`;
+        $('statusForms').textContent = `✅ ${count} casos importados.`;
         lanzarNotificacion('Soporte Forms', `Se importaron ${count} registros.`);
       } else { toast('No se encontraron registros válidos.'); }
       input.value = '';
@@ -3395,7 +3740,7 @@ function demo(){
 }
 
 function descargarRespaldo() {
-  const data = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, USERS, LOG, ELECCIONES_CERRADAS, fecha: new Date().toISOString() };
+  const data = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, fecha: new Date().toISOString() };
   const a = document.createElement('a');
   a.setAttribute('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data)));
   a.setAttribute('download', 'respaldo_elecciones.json');
@@ -3404,7 +3749,7 @@ function descargarRespaldo() {
 }
 function guardarYLimpiar() {
   if(SESSION?.rol !== 'administrador'){ toast('Solo el administrador'); return; }
-  if(!confirm('Esto descarga un respaldo y BORRA todos los datos de este navegador. ¿Continuar?')) return;
+  if(!confirm('Esto descarga un respaldo y BORRA todos los datos. ¿Continuar?')) return;
   if(!confirm('¿Estás seguro?')) return;
   const backup = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, ORG_ACTIVOS };
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
@@ -3445,292 +3790,6 @@ function importarRespaldo(input) {
   reader.readAsText(file);
 }
 
-/* ============================================================
-   SISTEMA DE USUARIOS, ROLES, PERMISOS, LOG Y CIERRE DE ELECCIONES
-   ============================================================ */
-const K_USERS   = 'usuarios_v1';
-const K_SESSION = 'session_v1';
-const K_LOG     = 'log_auditoria_v1';
-const K_CERRADA = 'elecciones_cerradas_v1';
-
-const MODULOS = [
-  {key:'vCron',         label:'Cronograma'},
-  {key:'vSeg',          label:'Seguimiento candidatos'},
-  {key:'vVotantes',     label:'Censo Votantes'},
-  {key:'vAnal',         label:'Analítica'},
-  {key:'vVac',          label:'Cargos / Vacantes'},
-  {key:'vCargaVotos',   label:'Cargar Votos'},
-  {key:'vAct',          label:'Actas'},
-  {key:'vGanadores',    label:'Directorio Ganadores'},
-  {key:'vSoporte',      label:'Registro Soporte'}
-];
-
-const ROLES = {
-  administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
-  editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
-  lectura:       {label:'Lectura',       mods:[],  puedeEditar:[],       color:'t'},
-  agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
-  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
-  auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'}
-};
-
-let USERS = JSON.parse(localStorage.getItem(K_USERS) || '[]');
-let SESSION = JSON.parse(localStorage.getItem(K_SESSION) || 'null');
-let LOG = JSON.parse(localStorage.getItem(K_LOG) || '[]');
-let ELECCIONES_CERRADAS = localStorage.getItem(K_CERRADA) === '1';
-
-if(USERS.length === 0){
-  USERS.push({
-    id: uid(),
-    username: 'admin',
-    nombre: 'Administrador del sistema',
-    pass: 'admin123',
-    rol: 'administrador',
-    modulos: [],
-    activo: true,
-    creado: new Date().toISOString()
-  });
-  localStorage.setItem(K_USERS, JSON.stringify(USERS));
-}
-
-const saveUsers  = () => localStorage.setItem(K_USERS, JSON.stringify(USERS));
-const saveLog    = () => { if(LOG.length > 3000) LOG = LOG.slice(-3000); localStorage.setItem(K_LOG, JSON.stringify(LOG)); };
-const saveSession= () => localStorage.setItem(K_SESSION, JSON.stringify(SESSION));
-
-function registrarLog(accion, modulo, detalle){
-  LOG.push({
-    fecha: new Date().toISOString(),
-    usuario: SESSION ? SESSION.username : 'sistema',
-    rol: SESSION ? SESSION.rol : '-',
-    modulo: modulo || '-',
-    accion: accion || '-',
-    detalle: String(detalle ?? '').slice(0, 400)
-  });
-  saveLog();
-}
-
-function doLogin(){
-  const u = $('loginUser').value.trim();
-  const p = $('loginPass').value;
-  $('loginErr').textContent = '';
-  const user = USERS.find(x => x.username.toLowerCase() === u.toLowerCase() && x.pass === p);
-  if(!user || !user.activo){
-    $('loginErr').textContent = 'Usuario o contraseña incorrectos, o usuario inactivo.';
-    return;
-  }
-  SESSION = {id:user.id, username:user.username, nombre:user.nombre, rol:user.rol, modulos:user.modulos||[]};
-  saveSession();
-  registrarLog('Inicio de sesión', '-', user.username);
-  aplicarSesion();
-}
-function doLogout(){
-  if(!confirm('¿Cerrar sesión?')) return;
-  registrarLog('Cierre de sesión', '-', SESSION?.username || '');
-  SESSION = null;
-  localStorage.removeItem(K_SESSION);
-  location.reload();
-}
-function aplicarSesion(){
-  document.body.classList.remove('logged-out');
-  document.body.classList.add('logged-in');
-  $('loginScreen').classList.add('hide');
-  $('topbar').classList.remove('hide');
-  $('userInfo').textContent = (SESSION.nombre || SESSION.username) + ' · ' + (ROLES[SESSION.rol]?.label || SESSION.rol);
-  const badge = $('badgeRol');
-  badge.textContent = (ROLES[SESSION.rol]?.label || SESSION.rol);
-  badge.className = 'tag ' + (ROLES[SESSION.rol]?.color || 'b');
-  aplicarPermisosUI();
-  actualizarBannerCierre();
-  const mods = getModulosPermitidos();
-  if(mods.length){
-    const idx = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].indexOf(mods[0]) + 1;
-    if(idx > 0) tab(idx);
-  }
-}
-function getModulosPermitidos(){
-  if(!SESSION) return [];
-  const rol = ROLES[SESSION.rol];
-  if(!rol) return [];
-  if(rol.mods === '*') return MODULOS.map(m=>m.key);
-  if(SESSION.rol === 'editor' || SESSION.rol === 'lectura'){
-    return SESSION.modulos && SESSION.modulos.length ? SESSION.modulos : [];
-  }
-  return rol.mods;
-}
-function puedeVer(modulo){
-  if(!SESSION) return false;
-  return getModulosPermitidos().includes(modulo);
-}
-function puedeEditar(modulo){
-  if(!SESSION) return false;
-  if(SESSION.rol === 'administrador') return true;
-  if(ELECCIONES_CERRADAS) return false;
-  const rol = ROLES[SESSION.rol];
-  if(!rol) return false;
-  if(rol.puedeEditar === '*') return true;
-  if(Array.isArray(rol.puedeEditar)){
-    if(SESSION.rol === 'editor'){
-      return (SESSION.modulos||[]).includes(modulo);
-    }
-    return rol.puedeEditar.includes(modulo);
-  }
-  return false;
-}
-function aplicarPermisosUI(){
-  const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9'};
-  const permitidos = getModulosPermitidos();
-  MODULOS.forEach(m => {
-    const btn = $(mapa[m.key]);
-    if(btn) btn.style.display = permitidos.includes(m.key) ? '' : 'none';
-  });
-  if($('btnCerrarElec')) $('btnCerrarElec').style.display = (SESSION?.rol === 'administrador') ? '' : 'none';
-  if($('btnVerUsuarios')) $('btnVerUsuarios').style.display = (SESSION?.rol === 'administrador') ? '' : 'none';
-  if($('btnVerLog')) $('btnVerLog').style.display = (SESSION?.rol === 'administrador' || SESSION?.rol === 'auditor') ? '' : 'none';
-  deshabilitarBotonesEdicion();
-}
-function deshabilitarBotonesEdicion(){
-  if(SESSION?.rol === 'administrador') return;
-  const noEditable = ELECCIONES_CERRADAS || SESSION?.rol === 'lectura' || SESSION?.rol === 'auditor';
-  if(!noEditable) return;
-  const selectores = [
-    'button[onclick="openForm()"]','button[onclick="saveForm()"]','button[onclick="aprobarTodos()"]',
-    'button[onclick="addActividad()"]','button[onclick="saveActividad()"]',
-    'button[onclick="guardarVotantes()"]','button[onclick="guardarSoporte()"]',
-    'button[onclick="genActa()"]','button[onclick="crearUsuario()"]',
-    'button[onclick="guardarTextoActa()"]'
-  ];
-  selectores.forEach(s => {
-    document.querySelectorAll(s).forEach(b => { b.disabled = true; b.style.opacity = 0.5; b.style.cursor = 'not-allowed'; });
-  });
-  document.querySelectorAll('#gb input, .nv, .ck').forEach(el => { el.disabled = true; });
-}
-function limpiarPantalla(){
-  if(!confirm('¿Limpiar la pantalla? Se borrarán búsquedas y filtros. Los datos NO se borran.')) return;
-  ['q','fo','fr','fe','fnov','sopBuscar','sopFiltroEstado','sopFiltroCanal','logBuscar','gOrgFilter','gFacFilter'].forEach(id => {
-    const el = $(id); if(el) el.value = '';
-  });
-  const mods = getModulosPermitidos();
-  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9};
-  if(mods.length) tab(mapa[mods[0]] || 1);
-  try{ draw(); }catch(e){}
-  try{ renderSoportes(); }catch(e){}
-  try{ renderCronograma(false); }catch(e){}
-  registrarLog('Limpiar pantalla', '-', 'Filtros y vistas reseteadas');
-  toast('🧹 Pantalla limpia');
-}
-function toggleCerrarElecciones(){
-  if(SESSION?.rol !== 'administrador'){ toast('Solo el administrador puede cerrar o reabrir elecciones'); return; }
-  const nuevo = !ELECCIONES_CERRADAS;
-  const msg = nuevo
-    ? '⚠️ ¿CERRAR LAS ELECCIONES? A partir de ahora NADIE podrá editar información (excepto el administrador).'
-    : '¿Reabrir las elecciones para permitir ediciones?';
-  if(!confirm(msg)) return;
-  ELECCIONES_CERRADAS = nuevo;
-  localStorage.setItem(K_CERRADA, nuevo ? '1' : '0');
-  registrarLog(nuevo ? 'Cerrar elecciones' : 'Reabrir elecciones', '-', 'Estado cambiado');
-  actualizarBannerCierre();
-  deshabilitarBotonesEdicion();
-  toast(nuevo ? '🔒 Elecciones cerradas. Solo lectura.' : '🔓 Elecciones reabiertas.');
-}
-function actualizarBannerCierre(){
-  const b = $('bannerEleccion');
-  if(b) b.classList.toggle('hide', !ELECCIONES_CERRADAS);
-  const btn = $('btnCerrarElec');
-  if(btn){
-    btn.textContent = ELECCIONES_CERRADAS ? '🔓 Reabrir elecciones' : '🔒 Cerrar elecciones';
-    btn.style.background = ELECCIONES_CERRADAS ? '#1d6f42' : '#b03a2e';
-    btn.style.borderColor = ELECCIONES_CERRADAS ? '#1d6f42' : '#b03a2e';
-  }
-}
-function abrirUsuarios(){
-  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
-  $('u_new_mods').innerHTML = MODULOS.map(m => 
-    `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`
-  ).join('');
-  renderTablaUsuarios();
-  dlgUsuarios.showModal();
-}
-function renderTablaUsuarios(){
-  $('tablaUsuarios').innerHTML = USERS.map(u => `
-    <tr>
-      <td><b>${esc(u.username)}</b></td>
-      <td>${esc(u.nombre||'')}</td>
-      <td><span class="tag ${ROLES[u.rol]?.color||'b'}">${ROLES[u.rol]?.label||u.rol}</span></td>
-      <td style="font-size:11.5px">${(u.rol==='editor'||u.rol==='lectura') ? (u.modulos||[]).map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ')||'—' : '—'}</td>
-      <td>${u.activo ? '<span class="pill ok">Activo</span>' : '<span class="pill no">Inactivo</span>'}</td>
-      <td class="c">
-        <button class="ic" title="Activar/Desactivar" onclick="toggleActivoUsuario('${u.id}')">${u.activo?'⏸':'▶'}</button>
-        <button class="ic" title="Eliminar" onclick="eliminarUsuario('${u.id}')">🗑</button>
-      </td>
-    </tr>
-  `).join('');
-}
-function crearUsuario(){
-  const username = $('u_new_user').value.trim();
-  const nombre   = $('u_new_nombre').value.trim();
-  const pass     = $('u_new_pass').value;
-  const rol      = $('u_new_rol').value;
-  if(!username || !pass){ toast('Usuario y contraseña obligatorios'); return; }
-  if(USERS.some(u => u.username.toLowerCase() === username.toLowerCase())){ toast('Ese usuario ya existe'); return; }
-  const mods = [...document.querySelectorAll('.u_mod:checked')].map(i=>i.value);
-  USERS.push({id:uid(), username, nombre, pass, rol, modulos: mods, activo:true, creado:new Date().toISOString()});
-  saveUsers();
-  registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
-  renderTablaUsuarios();
-  $('u_new_user').value=''; $('u_new_nombre').value=''; $('u_new_pass').value='';
-  toast('✅ Usuario creado');
-}
-function toggleActivoUsuario(id){
-  const u = USERS.find(x=>x.id===id); if(!u) return;
-  if(u.username === 'admin' && u.activo){ toast('No puedes desactivar al administrador principal'); return; }
-  u.activo = !u.activo;
-  saveUsers(); renderTablaUsuarios();
-  registrarLog(u.activo?'Activar usuario':'Desactivar usuario', 'Usuarios', u.username);
-}
-function eliminarUsuario(id){
-  const u = USERS.find(x=>x.id===id); if(!u) return;
-  if(u.username === 'admin'){ toast('No puedes eliminar al administrador principal'); return; }
-  if(!confirm(`¿Eliminar al usuario "${u.username}"?`)) return;
-  USERS = USERS.filter(x=>x.id!==id);
-  saveUsers(); renderTablaUsuarios();
-  registrarLog('Eliminar usuario', 'Usuarios', u.username);
-}
-function abrirLog(){
-  if(!(SESSION?.rol === 'administrador' || SESSION?.rol === 'auditor')){ toast('Sin permiso'); return; }
-  renderLog();
-  dlgLog.showModal();
-}
-function renderLog(){
-  const q = norm(($('logBuscar')?.value) || '');
-  const lista = [...LOG].reverse().filter(l => !q || norm([l.usuario,l.accion,l.modulo,l.detalle].join(' ')).includes(q)).slice(0, 500);
-  $('tablaLog').innerHTML = lista.length ? lista.map(l=>`
-    <tr>
-      <td style="white-space:nowrap;font-size:12px">${new Date(l.fecha).toLocaleString('es-CO')}</td>
-      <td><b>${esc(l.usuario)}</b></td>
-      <td><span class="tag ${ROLES[l.rol]?.color||'b'}">${ROLES[l.rol]?.label||l.rol}</span></td>
-      <td>${esc(l.modulo)}</td>
-      <td>${esc(l.accion)}</td>
-      <td style="max-width:340px;font-size:12.5px">${esc(l.detalle)}</td>
-    </tr>`).join('') : '<tr><td colspan="6" class="empty">Sin registros.</td></tr>';
-}
-function limpiarLog(){
-  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
-  if(!confirm('¿Borrar TODO el log de auditoría?')) return;
-  LOG = [];
-  saveLog();
-  renderLog();
-  toast('Log borrado');
-}
-function expLogXL(){
-  const ws = XLSX.utils.json_to_sheet(LOG.map(l=>({
-    Fecha: new Date(l.fecha).toLocaleString('es-CO'),
-    Usuario: l.usuario, Rol: l.rol, Módulo: l.modulo, Acción: l.accion, Detalle: l.detalle
-  })));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Log');
-  XLSX.writeFile(wb, 'log-auditoria.xlsx');
-}
-
 /* ========== INIT ========== */
 normalizarFacultadesGlobal();
 normalizarNombresGlobal();
@@ -3749,7 +3808,14 @@ renderVacantes();
 renderSoportes();
 
 /* Init auth */
-(function initAuth(){
+(async function initAuth(){
+  if(SESSION && supabaseClient){
+    try {
+      const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', SESSION.id).eq(CONFIG.col_activo, true).maybeSingle();
+      if(!data){ SESSION = null; localStorage.removeItem(K_SESSION); }
+      else { await cargarEstadoElecciones(); }
+    } catch(e) { SESSION = null; localStorage.removeItem(K_SESSION); }
+  }
   if(SESSION){
     document.body.classList.add('logged-in');
     document.body.classList.remove('logged-out');
@@ -3765,6 +3831,13 @@ renderSoportes();
     }
   });
 })();
+
+setInterval(async () => {
+  if(SESSION && supabaseClient){
+    await cargarEstadoElecciones();
+    actualizarBannerCierre();
+  }
+}, 60000);
 </script>
 </body>
 </html>
