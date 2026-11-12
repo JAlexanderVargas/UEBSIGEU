@@ -795,7 +795,19 @@ body.logged-in #topbar { display: flex; }
   <textarea class="in" id="at" oninput="guardarTextoActa()" style="min-height: 600px; font-family: monospace; font-size: 13px; line-height: 1.5; background: #fff; padding: 20px;"></textarea>
   <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()">↺ Restaurar texto predefinido</button></div>
  </div>
- 
+
+ <!-- FIRMAS DE RESPALDO (Manuales) -->
+ <div class="card noprint">
+  <h3>Firmas de los asistentes al escrutinio (Texto de respaldo)</h3>
+  <p class="help" style="margin-top:0">Agrega los firmantes que irán al final del acta. Si marcas la casilla de "Delegado", podrás seleccionar su cargo oficial. (Si un firmante usa el QR para firmar digitalmente, el sistema reemplazará automáticamente este texto por su firma dibujada).</p>
+  <div class="bar">
+    <button class="btn sm" onclick="addFirma()">+ Agregar firma personalizada</button>
+    <span class="sp"></span>
+    <span id="firmaCount" style="font-size:12.5px;color:var(--mut)"></span>
+  </div>
+  <div class="firmas-grid" id="firmasGrid"></div>
+ </div>
+
  <div class="card noprint">
    <h3>📄 Generar Informes de Votaciones (Anexos)</h3>
    <div class="bar">
@@ -2130,13 +2142,43 @@ function listaGan(){
 }
 function toggleGanador(id, isChecked) { if(SESSION && !puedeEditar('vAct')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } const candidato = D.find(c => c.id === id); if (!candidato) return; if (isChecked) { const ganadorExistente = D.find(c => c.id !== id && c.gan && c.org === candidato.org && c.rol === candidato.rol && (esGlobal(c.org) || norm(c.fac) === norm(candidato.fac))); if (ganadorExistente) { toast(`⚠️ Ya hay un ganador para este cargo: ${ganadorExistente.pri.nombre}.`, 5000); listaGan(); return; } } candidato.gan = isChecked; save(); listaGan(); }
 function setV(id,k,v){ if(SESSION && !puedeEditar('vAct')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } D.find(x=>x.id===id)[k]=v;save() }
-function renderFirmas(){ $('firmasGrid').innerHTML = FIRMAS.map((f,i)=>`<div class="firma-item" style="border-left: 4px solid ${f.esDelegado ? 'var(--oscuro)' : 'var(--naranja)'};"><button class="del-firma" onclick="delFirma(${i})" title="Eliminar firma">✕</button><label style="display:flex; align-items:center; gap:6px; margin-bottom:12px; cursor:pointer; background:#f0f7f2; padding:6px; border-radius:6px;"><input type="checkbox" ${f.esDelegado?'checked':''} onchange="toggleDelegado(${i}, this.checked)" style="width:16px; height:16px; accent-color:var(--oscuro);"><span style="font-weight:700; font-size:12px; color:var(--oscuro)">Delegado / a</span></label><label>Nombre del firmante ${i+1}</label><input class="in" value="${esc(f.nombre||'')}" oninput="updateFirma(${i},'nombre',this.value)" placeholder="Nombre completo"><label>Cargo / Rol</label>${f.esDelegado ? `<select class="in" onchange="updateFirma(${i},'cargo',this.value)"><option value="">Seleccione el cargo...</option>${CARGOS_DELEGADO.map(c => `<option value="${c}" ${f.cargo === c ? 'selected':''}>${c}</option>`).join('')}</select>` : `<select class="in" onchange="updateFirma(${i},'cargo',this.value)"><option value="">Seleccione de la lista...</option>${CARGOS_TITULAR.map(c => `<option value="${c}" ${f.cargo === c ? 'selected':''}>${c}</option>`).join('')}</select>`}</div>`).join(''); $('firmaCount').textContent = FIRMAS.length + ' firma(s) configurada(s)'; }
+
+/* FUNCIONES DE FIRMAS (TEXTO) */
+function renderFirmas(){
+  $('firmasGrid').innerHTML = FIRMAS.map((f,i)=>`
+    <div class="firma-item" style="border-left: 4px solid ${f.esDelegado ? 'var(--oscuro)' : 'var(--naranja)'};">
+      <button class="del-firma" onclick="delFirma(${i})" title="Eliminar firma">✕</button>
+      
+      <label style="display:flex; align-items:center; gap:6px; margin-bottom:12px; cursor:pointer; background:#f0f7f2; padding:6px; border-radius:6px;">
+        <input type="checkbox" ${f.esDelegado?'checked':''} onchange="toggleDelegado(${i}, this.checked)" style="width:16px; height:16px; accent-color:var(--oscuro);">
+        <span style="font-weight:700; font-size:12px; color:var(--oscuro)">Delegado / a</span>
+      </label>
+
+      <label>Nombre del firmante ${i+1}</label>
+      <input class="in" value="${esc(f.nombre||'')}" oninput="updateFirma(${i},'nombre',this.value)" placeholder="Nombre completo">
+      
+      <label>Cargo / Rol</label>
+      ${f.esDelegado ? `
+        <select class="in" onchange="updateFirma(${i},'cargo',this.value)">
+          <option value="">Seleccione el cargo...</option>
+          ${CARGOS_DELEGADO.map(c => `<option value="${c}" ${f.cargo === c ? 'selected':''}>${c}</option>`).join('')}
+        </select>
+      ` : `
+        <select class="in" onchange="updateFirma(${i},'cargo',this.value)">
+          <option value="">Seleccione de la lista...</option>
+          ${CARGOS_TITULAR.map(c => `<option value="${c}" ${f.cargo === c ? 'selected':''}>${c}</option>`).join('')}
+        </select>
+      `}
+    </div>
+  `).join('');
+  $('firmaCount').textContent = FIRMAS.length + ' firma(s) configurada(s)';
+}
+
 function toggleDelegado(i, isChecked) { FIRMAS[i].esDelegado = isChecked; FIRMAS[i].cargo = ''; saveFirmas(); renderFirmas(); }
 function addFirma(){ FIRMAS.push({nombre:'',cargo:'',esDelegado:false}); saveFirmas(); renderFirmas(); }
 function delFirma(i){ if(FIRMAS.length<=1){toast('Debe haber al menos una firma');return;} FIRMAS.splice(i,1); saveFirmas(); renderFirmas(); }
 function updateFirma(i,k,v){ FIRMAS[i][k]=v; saveFirmas(); }
 function inicializarFirmasOficiales() { if (!FIRMAS.some(f => f.esDelegado)) { FIRMAS = CARGOS_DELEGADO.map(cargo => ({nombre: '', cargo: cargo, esDelegado: true})); saveFirmas(); } }
-function migrarFirmas(){ const claves = ['vicerrect','secretar','tecnolog','registro','auditor']; let cambio = false; FIRMAS.forEach(f=>{ const lista = f.esDelegado ? CARGOS_DELEGADO : CARGOS_TITULAR; if(f.cargo && !lista.includes(f.cargo)){ const n = norm(f.cargo); const i = claves.findIndex(k=>n.includes(k)); f.cargo = i>=0 ? lista[i] : ''; cambio = true; } }); if(cambio) saveFirmas(); }
 
 /* ==========================================
    FIRMAS DIGITALES, QR Y GESTIÓN (POST-ACTA)
@@ -2153,8 +2195,52 @@ async function genActa(){
     const alineacion = /^\s*•/.test(b.txt) ? 'left' : 'justify';
     return `<div style="white-space:pre-wrap;text-align:${alineacion};">${inlineHTML(b.txt)}</div>`;
   });
+
+  const actaId = getActaId();
+  let firmasDB = [];
+  if (supabaseClient) {
+    const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
+    if (data) firmasDB = data;
+  }
+
+  let firmasHTML = '';
   
-  const firmasHTML = `<div class="acta-firmas" id="actaFirmasPreview"></div>`;
+  if (firmasDB.length > 0 || FIRMAS.filter(f=>f.nombre.trim()).length > 0) {
+    firmasHTML = `<div class="acta-firmas">`;
+    
+    // Digitales
+    firmasDB.forEach(f => {
+      firmasHTML += `
+        <div class="acta-firma-item">
+          <img src="${f.firma_base64}" alt="Firma">
+          <b>${esc(f.firmante)}</b><br>
+          <small style="font-size:11px;font-weight:bold;color:#000">${esc(f.cargo)}</small>
+        </div>
+      `;
+    });
+
+    // Manuales (que no tengan digital)
+    FIRMAS.filter(f=>f.nombre.trim()).forEach(f => {
+      const yaFirmoDigital = firmasDB.some(d => d.firmante.toLowerCase().trim() === f.nombre.toLowerCase().trim());
+      if (!yaFirmoDigital) {
+        firmasHTML += `
+          <div class="acta-firma-item">
+            <div style="height:50px;"></div>
+            <b>${esc(f.nombre)}</b><br>
+            <small style="font-size:11px;font-weight:bold;color:#000">${esc(f.cargo || '')}</small>
+          </div>
+        `;
+      }
+    });
+
+    firmasHTML += `</div>`;
+  } else {
+    firmasHTML = `<div class="acta-firmas">
+      <div class="acta-firma-item"><div style="height:50px;"></div><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div>
+      <div class="acta-firma-item"><div style="height:50px;"></div><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div>
+    </div>`;
+  }
+
   const chkFirmada = $('chkFirmada').checked ? '<div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div>' : '';
   const nodes = [];
   partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
@@ -2167,7 +2253,7 @@ async function genActa(){
   ajustarTamanoLetra($('fontSizeSlider').value);
   
   await cargarFirmasSupabase();
-  toast(`Acta generada: ${total} página(s). Ya puedes recolectar firmas.`);
+  toast(`Acta generada: ${total} página(s).`);
 }
 
 function getActaId() {
@@ -2408,6 +2494,9 @@ async function enviarFirmaPublica() {
   }
 }
 
+/* ==========================================
+   EXPORTACIÓN Y PAGINACIÓN
+   ========================================== */
 const CM_PX = 96/2.54;
 const HEAD_HTML = `<div class="acta-header" style="background-color:#007a3d; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-radius: 0; box-sizing: border-box; width: 100%;"><div style="display: flex; align-items: center; gap: 12px; color: #ffffff;"><img src="Logo_de_la_Universidad_El_Bosque.png" alt="Logo U. El Bosque" style="height: 48px; width: auto; filter: brightness(0) invert(1);"></div><div style="background-color: #7ab800; color: #ffffff; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 2px; letter-spacing: 0.5px; white-space: nowrap; font-family: Arial, sans-serif;">Dirección Registro y Control Académico</div></div>`;
 const FOOT_HTML = `<div class="acta-footer" style="background-color:#00201A !important;"><div class="acta-footer-logo"><img src="Logo_RyC.png" alt="Logo RyC"></div><div class="acta-page-num" data-pg="n"></div><div class="acta-footer-info">Av. Cra 9 No. 131 A - 02<br><span style="color:#C6ED6E; font-weight:bold;">PBX (601) 648 9000 EXT 1500 - 1506</span><br><span style="color:#C6ED6E; font-weight:bold;">registroacademico@unbosque.edu.co</span></div></div>`;
@@ -2507,41 +2596,47 @@ async function exportarDOCX() {
       if (data) firmasDB = data;
     }
 
-    if (firmasDB.length > 0) {
+    let todasLasFirmas = [];
+    firmasDB.forEach(f => {
+      todasLasFirmas.push({ nombre: f.firmante, cargo: f.cargo, imgBase64: f.firma_base64 });
+    });
+
+    FIRMAS.filter(f=>f.nombre.trim()).forEach(f => {
+      const yaFirmoDigital = firmasDB.some(d => d.firmante.toLowerCase().trim() === f.nombre.toLowerCase().trim());
+      if (!yaFirmoDigital) {
+        todasLasFirmas.push({ nombre: f.nombre, cargo: f.cargo, imgBase64: null });
+      }
+    });
+
+    if (todasLasFirmas.length > 0) {
       cuerpo.push(new Paragraph({ children: [new TextRun({ text: '', size: 20 })], spacing: { after: 800 } }));
       const filasFirmas = [];
-      for (let i = 0; i < firmasDB.length; i += 2) {
-        const f1 = firmasDB[i]; 
-        const f2 = firmasDB[i+1];
+      
+      for (let i = 0; i < todasLasFirmas.length; i += 2) {
+        const f1 = todasLasFirmas[i]; 
+        const f2 = todasLasFirmas[i+1];
         
-        const celdaImg = async (f) => {
+        const celdaFirma = async (f) => {
            if(!f) return new TableCell({ children: [new Paragraph("")] });
-           const imgData = await cargarImagenDataURL(f.firma_base64);
+           
+           let imgData = null;
+           if (f.imgBase64) {
+               imgData = await cargarImagenDataURL(f.imgBase64);
+           }
+
            return new TableCell({ 
              width: { size: 50, type: WidthType.PERCENTAGE }, 
              borders: { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, 
              children: [
-               new Paragraph({ alignment: AlignmentType.CENTER, children: imgData ? [new ImageRun({ data: imgData.dataURL, transformation: { width: 100, height: 50 } })] : [] }),
-               new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f.firmante, size: 20, font: 'Arial', bold: true })] }),
+               new Paragraph({ alignment: AlignmentType.CENTER, children: imgData ? [new ImageRun({ data: imgData.dataURL, transformation: { width: 100, height: 50 } })] : [new TextRun({ text: '\n\n' })] }),
+               new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f.nombre, size: 20, font: 'Arial', bold: true })] }),
                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f.cargo || '', size: 18, font: 'Arial', color: '000000' })] })
              ] 
            });
         };
-        filasFirmas.push(new TableRow({ children: [ await celdaImg(f1), await celdaImg(f2) ] }));
+        filasFirmas.push(new TableRow({ children: [ await celdaFirma(f1), await celdaFirma(f2) ] }));
       }
       cuerpo.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: filasFirmas }));
-    } else {
-      const firmasValidas = FIRMAS.filter(f => f.nombre.trim());
-      if (firmasValidas.length > 0) {
-        cuerpo.push(new Paragraph({ children: [new TextRun({ text: '', size: 20 })], spacing: { after: 800 } }));
-        const filasFirmas = [];
-        for (let i = 0; i < firmasValidas.length; i += 2) {
-          const f1 = firmasValidas[i]; const f2s = firmasValidas[i+1];
-          let cargo1 = f1.cargo || ''; let cargo2 = f2s ? (f2s.cargo || '') : '';
-          filasFirmas.push(new TableRow({ children: [new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f1.nombre, size: 20, font: 'Arial', bold: true })] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: cargo1, size: 18, font: 'Arial', bold: true, color: '000000' })] })] }),new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, borders: f2s ? { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } } : { top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, children: f2s ? [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f2s.nombre, size: 20, font: 'Arial', bold: true })] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: cargo2, size: 18, font: 'Arial', bold: true, color: '000000' })] })] : [new Paragraph({ children: [new TextRun({ text: '', size: 16 })] })] })] }));
-        }
-        cuerpo.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, insideHorizontal: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, insideVertical: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, rows: filasFirmas }));
-      }
     }
 
     if ($('chkFirmada').checked) { cuerpo.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 300 }, children: [new TextRun({ text: '✔ FIRMADA', bold: true, size: 22, font: 'Arial', color: '006400' })] })); }
