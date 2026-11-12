@@ -16,7 +16,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
 <style>
 :root{
@@ -196,7 +195,7 @@ tr.posible-ganador td:first-child { border-left: 4px solid #FFC107 !important; }
 .firmas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
 .firma-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcfb;position:relative}
 .firma-item label{font-size:11.5px;margin:6px 0 2px}
-.firma-item .del-firma{position:absolute;top:6px;right:6px;background:none;border:0;color:var(--alert-line);cursor:pointer;font-size:14px;font-weight:700}
+.firma-item .del-firma{position:absolute;top:6px;right:6px;background:none;border:0;color:var(--alert-line);cursor:pointer;font-size:14px;font-weight:700; z-index:10;}
 .firma-item .del-firma:hover{transform:scale(1.2)}
 
 dialog{border:0;border-radius:18px;padding:0;width:min(820px,95vw);max-height:92vh;box-shadow:0 30px 80px #0B3B2C66}
@@ -797,29 +796,6 @@ body.logged-in #topbar { display: flex; }
   <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()">↺ Restaurar texto predefinido</button></div>
  </div>
  
- <!-- Firma -->
- <div class="card noprint">
-  <h3>✍️ Firmas y participación</h3>
-  <p class="help" style="margin-top:0">Puedes firmar directamente aquí, o generar un enlace/QR para que otros firmen desde su celular. También puedes generar un QR grupal para que varios firmen desde un solo dispositivo.</p>
-  
-  <div class="bar" style="margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 16px;">
-     <button class="btn" onclick="generarEnlaceFirma()">🔗 Generar enlace / QR individual</button>
-     <button class="btn" onclick="generarQRGrupal()">👥 Generar QR grupal (mesa)</button>
-     <button class="btn" style="background:#0B7A4B;color:white;border-color:#0B7A4B" onclick="enviarEnlacePorCorreo()">📧 Enviar link por correo</button>
-  </div>
-
-  <div id="qrContainer" class="hide" style="text-align: center; margin-bottom: 20px;"></div>
-
-  <div class="signature-pad-container" style="max-width: 600px; margin: 0 auto;">
-    <canvas id="signatureCanvas"></canvas>
-  </div>
-  <div class="bar" style="justify-content: center; margin-top: 12px;">
-    <button class="btn sm" onclick="limpiarFirma()">🗑 Borrar firma</button>
-    <button class="btn sm p" onclick="guardarFirma()">💾 Guardar mi firma (admin)</button>
-  </div>
-
-  <div class="firmas-grid" id="firmasGrid" style="margin-top: 24px;"></div>
- </div>
  <div class="card noprint">
    <h3>📄 Generar Informes de Votaciones (Anexos)</h3>
    <div class="bar">
@@ -841,7 +817,29 @@ body.logged-in #topbar { display: flex; }
     <button class="btn" style="background:#2b579a;color:white;border-color:#2b579a" onclick="exportarDOCX()">Descargar Word (.docx)</button>
   </div>
  </div>
- <div id="actaOutContainer" class="hide"><div class="acta-page" id="actaOut"></div></div>
+
+ <div id="actaOutContainer" class="hide">
+   <div class="acta-page" id="actaOut"></div>
+   
+   <!-- PANEL DE FIRMAS POST-ACTA -->
+   <div class="card noprint" style="margin-top: 20px; background: #fff;">
+     <h3>✍️ Panel de Firmas (Acta Generada)</h3>
+     <p class="help" style="margin-top:0">El acta ya está generada. Ahora puedes recolectar las firmas mediante los códigos QR.</p>
+     
+     <div class="bar" style="margin-bottom: 20px;">
+       <button class="btn" onclick="generarEnlaceFirma()">🔗 QR Individual</button>
+       <button class="btn" onclick="generarQRGrupal()">👥 QR Grupal (Mesa)</button>
+       <button class="btn" style="background:#0B7A4B;color:white;border-color:#0B7A4B" onclick="enviarEnlacePorCorreo()">📧 Enviar link por correo</button>
+       <span class="sp"></span>
+       <button class="btn p" onclick="cargarFirmasSupabase()">🔄 Actualizar Firmas</button>
+     </div>
+
+     <div id="qrContainer" class="hide" style="text-align: center; margin-bottom: 20px;"></div>
+     
+     <div class="firmas-grid" id="firmasGrid"></div>
+   </div>
+ </div>
+
  <div id="informeOutContainer" class="hide"><div class="acta-page" id="informeOut"></div></div>
 </section>
 
@@ -1192,7 +1190,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const EMAILJS_CONFIG = {
   publicKey: 'bKplucMMXJM3iUbfk',
   serviceId: 'service_2uume1n',
-  templateId: 'template_sy5xcrg'  // <-- ASEGÚRATE QUE SEA EL ID DE TU PLANTILLA DE RESET PASSWORD
+  templateId: 'template_sy5xcrg'
 };
 
 const CONFIG = {
@@ -1259,8 +1257,6 @@ let ORG_ACTIVOS = JSON.parse(localStorage.getItem(K_ORG_ACTIVOS) || '["Consejo d
 let chartRolesInstance, chartOrganosInstance, chartFacInstance, chartHistInstance, chartCensoFacInstance, chartCensoRolInstance;
 let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDiaInstance;
 
-// Firma Pad variables
-let signaturePad = null;
 let publicSignaturePad = null;
 
 const MODULOS = [{key:'vCron',label:'Cronograma'},{key:'vSeg',label:'Seguimiento candidatos'},{key:'vVotantes',label:'Censo Votantes'},{key:'vAnal',label:'Analítica'},{key:'vVac',label:'Cargos / Vacantes'},{key:'vCargaVotos',label:'Cargar Votos'},{key:'vAct',label:'Actas'},{key:'vGanadores',label:'Directorio Ganadores'},{key:'vSoporte',label:'Registro Soporte'}];
@@ -1294,7 +1290,6 @@ async function registrarLog(accion, modulo, detalle){
   }
 }
 
-// AUTH
 async function doLogin(){
   const u = $('loginUser').value.trim();
   const p = $('loginPass').value;
@@ -1492,7 +1487,6 @@ function actualizarBannerCierre(){
   if(txt) txt.textContent = ELECCIONES_CERRADAS ? 'Reabrir elecciones' : 'Cerrar elecciones';
 }
 
-/* USUARIOS */
 async function abrirUsuarios(){
   if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
   $('u_new_mods').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`).join('');
@@ -1578,7 +1572,6 @@ async function eliminarUsuario(id){
   } catch(e) { toast('Error: ' + e.message); }
 }
 
-/* LOG */
 async function abrirLog(){
   if(!(SESSION?.rol === 'administrador' || SESSION?.rol === 'auditor')){ toast('Sin permiso'); return; }
   await cargarLogDeSupabase();
@@ -1627,7 +1620,6 @@ function expLogXL(){
   XLSX.writeFile(wb, 'log-auditoria.xlsx');
 }
 
-/* RESET PASSWORD */
 let _resetOrigenLogin = false;
 
 function abrirResetDesdeLogin(){
@@ -2147,57 +2139,45 @@ function inicializarFirmasOficiales() { if (!FIRMAS.some(f => f.esDelegado)) { F
 function migrarFirmas(){ const claves = ['vicerrect','secretar','tecnolog','registro','auditor']; let cambio = false; FIRMAS.forEach(f=>{ const lista = f.esDelegado ? CARGOS_DELEGADO : CARGOS_TITULAR; if(f.cargo && !lista.includes(f.cargo)){ const n = norm(f.cargo); const i = claves.findIndex(k=>n.includes(k)); f.cargo = i>=0 ? lista[i] : ''; cambio = true; } }); if(cambio) saveFirmas(); }
 
 /* ==========================================
-   FIRMAS DIGITALES Y QR
+   FIRMAS DIGITALES, QR Y GESTIÓN (POST-ACTA)
    ========================================== */
-// Inicializar firma del admin
-if ($('signatureCanvas')) {
-  const ratio = Math.max(window.devicePixelRatio || 1, 1);
-  const canvas = $('signatureCanvas');
-  canvas.width = canvas.offsetWidth * ratio;
-  canvas.height = canvas.offsetHeight * ratio;
-  canvas.getContext("2d").scale(ratio, ratio);
-  signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgba(255, 255, 255, 0)', penColor: 'rgb(11, 59, 44)' });
+
+async function genActa(){
+  const d=datosActa();
+  const bloques=bloquesActa($('at').value,d);
+  const partes=bloques.map(b=>{
+    if(b.t==='blank') return '<div style="height:0.9em"></div>';
+    if(b.t==='tabla') return tablaActaHTML(d);
+    if(b.t==='h'){ const isConsiderandos = norm(b.txt).includes('considerandos'); const styleExtra = isConsiderandos ? 'text-align:center; font-weight:bold; font-size:14px; margin:10px 0;' : 'text-align:center; font-weight:bold; font-size:13px; margin:2px 0;'; return `<div data-keep="1" style="${styleExtra}">${inlineHTML(b.txt)}</div>`; }
+    if(b.txt.includes('<table')) return `<div style="text-align:justify;">${b.txt}</div>`;
+    const alineacion = /^\s*•/.test(b.txt) ? 'left' : 'justify';
+    return `<div style="white-space:pre-wrap;text-align:${alineacion};">${inlineHTML(b.txt)}</div>`;
+  });
+  
+  const firmasHTML = `<div class="acta-firmas" id="actaFirmasPreview"></div>`;
+  const chkFirmada = $('chkFirmada').checked ? '<div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div>' : '';
+  const nodes = [];
+  partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
+  nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${firmasHTML}${chkFirmada?`<div style="text-align:center;">${chkFirmada}</div>`:''}</div>`));
+  
+  $('actaOutContainer').classList.remove('hide');
+  $('informeOutContainer').classList.add('hide');
+  const total = paginarDoc($('actaOut'), {nodes, landscape:false});
+  $('actaOutContainer').scrollIntoView({behavior:'smooth'});
+  ajustarTamanoLetra($('fontSizeSlider').value);
+  
+  await cargarFirmasSupabase();
+  toast(`Acta generada: ${total} página(s). Ya puedes recolectar firmas.`);
 }
 
-function limpiarFirma() { if (signaturePad) { signaturePad.clear(); } }
-async function guardarFirma() {
-  if (!signaturePad || signaturePad.isEmpty()) { toast('⚠️ Dibuja tu firma primero'); return; }
-  if (!supabaseClient) { toast('Sin conexión'); return; }
-  const dataURL = signaturePad.toDataURL('image/png');
-  try {
-    const { error } = await supabaseClient.from(CONFIG.tabla_firmas).insert([{
-      acta_id: `${$('an').value}_${$('aJornada').value}`,
-      firmante: SESSION ? SESSION.nombre : 'Admin',
-      cargo: 'Administrador',
-      firma_base64: dataURL,
-      fecha: new Date().toISOString()
-    }]);
-    if(error) throw error;
-    toast('✅ Firma guardada en Supabase');
-    limpiarFirma();
-    cargarFirmasSupabase();
-  } catch(e) { toast('❌ Error: ' + e.message); }
+function getActaId() {
+  return `ACTA-${$('an').value || 'SN'}-${$('aJornada').value}`;
 }
 
-async function cargarFirmasSupabase() {
-  if (!supabaseClient) return;
-  const actaId = `${$('an').value}_${$('aJornada').value}`;
-  const { data, error } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
-  if(error) { console.warn(error); return; }
-  const grid = $('firmasGrid');
-  grid.innerHTML = data.map(f => `
-    <div class="firma-item" style="border-left: 4px solid var(--ok);">
-      <label>${esc(f.firmante)} (${esc(f.cargo)})</label>
-      <img src="${f.firma_base64}" style="width:100%; max-height:80px; object-fit:contain; margin-top:8px;">
-    </div>
-  `).join('');
-}
-
-// QR y Enlaces
 function generarEnlaceFirma() {
-  const actaId = `${$('an').value}_${$('aJornada').value}`;
+  const actaId = getActaId();
   const token = Math.random().toString(36).substring(2, 10);
-  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&token=${token}`;
+  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&tipo=individual&token=${token}`;
   
   $('qrContainer').classList.remove('hide');
   $('qrContainer').innerHTML = `
@@ -2205,14 +2185,14 @@ function generarEnlaceFirma() {
       <div id="qrcode"></div>
       <small>${url}</small>
     </div>
-    <p class="help" style="margin-top:12px;">Muestra este QR a los asistentes o envíalo por correo. Cada firma se guardará automáticamente en Supabase.</p>
+    <p class="help" style="margin-top:12px;">Comparte este QR. Cada persona que lo escanee firmará una vez y el sistema registrará su nombre y cargo.</p>
   `;
   new QRCode($('qrcode'), { text: url, width: 180, height: 180 });
 }
 
 function generarQRGrupal() {
-  const actaId = `${$('an').value}_${$('aJornada').value}`;
-  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&grupal=1`;
+  const actaId = getActaId();
+  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&tipo=grupal`;
   
   $('qrContainer').classList.remove('hide');
   $('qrContainer').innerHTML = `
@@ -2220,7 +2200,7 @@ function generarQRGrupal() {
       <div id="qrcode"></div>
       <small>${url}</small>
     </div>
-    <p class="help" style="margin-top:12px;"><b>Modo Mesa:</b> Cualquier persona puede acercarse y firmar desde este mismo dispositivo.</p>
+    <p class="help" style="margin-top:12px;"><b>Modo Mesa:</b> Todos los asistentes pueden usar este mismo código. El sistema pedirá seleccionar su nombre de la lista y luego firmar.</p>
   `;
   new QRCode($('qrcode'), { text: url, width: 200, height: 200 });
 }
@@ -2230,17 +2210,16 @@ function enviarEnlacePorCorreo() {
   const correo = prompt("Ingresa el correo al que deseas enviar el enlace de firma:");
   if (!correo) return;
   
-  const actaId = `${$('an').value}_${$('aJornada').value}`;
-  const token = Math.random().toString(36).substring(2, 10);
-  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&token=${token}`;
+  const actaId = getActaId();
+  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&tipo=individual`;
 
   const btn = event?.target || document.querySelector('button[onclick="enviarEnlacePorCorreo()"]');
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
 
   emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
     to_email: correo,
-    to_name: 'Delegado / Candidato',
-    user_name: 'Firmante',
+    to_name: 'Firmante',
+    user_name: 'Invitado',
     reset_link: url, 
     expires_in: '24 horas',
     app_name: 'Sistema de Elecciones · Firma de Acta',
@@ -2254,23 +2233,85 @@ function enviarEnlacePorCorreo() {
   });
 }
 
-// Lógica de la vista pública para firmar
-window.addEventListener('DOMContentLoaded', () => {
+async function cargarFirmasSupabase() {
+  if (!supabaseClient) return;
+  const actaId = getActaId();
+  const { data, error } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId).order('fecha', {ascending: true});
+  
+  if(error) { console.warn(error); return; }
+  
+  const grid = $('firmasGrid');
+  if (data.length === 0) {
+    grid.innerHTML = '<p class="empty" style="grid-column:1/-1">Aún no hay firmas registradas.</p>';
+    return;
+  }
+
+  grid.innerHTML = data.map(f => `
+    <div class="firma-item" style="border-left: 4px solid var(--ok); position: relative;">
+      <button class="del-firma" onclick="eliminarFirma('${f.id}')" title="Eliminar firma">✕</button>
+      <img src="${f.firma_base64}" style="width:100%; height:80px; object-fit:contain; margin-bottom:8px;">
+      <b style="display:block; font-size:14px; color:var(--oscuro);">${esc(f.firmante)}</b>
+      <small style="color:var(--mut); font-weight:600;">${esc(f.cargo)}</small>
+    </div>
+  `).join('');
+}
+
+async function eliminarFirma(id) {
+  if (!confirm('¿Estás seguro de eliminar esta firma? La persona tendrá que volver a firmar.')) return;
+  if (!supabaseClient) return;
+  try {
+    const { error } = await supabaseClient.from(CONFIG.tabla_firmas).delete().eq('id', id);
+    if(error) throw error;
+    toast('Firma eliminada');
+    cargarFirmasSupabase();
+  } catch(e) {
+    toast('Error al eliminar: ' + e.message);
+  }
+}
+
+/* ==========================================
+   VISTA PÚBLICA PARA FIRMAR
+   ========================================== */
+window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('firmar') === '1') {
     document.getElementById('loginScreen').classList.add('hide');
     document.getElementById('publicSignView').classList.remove('hide');
     document.body.style.display = 'block';
 
-    const actaId = params.get('acta') || 'Acta-SN';
-    const grupal = params.get('grupal') === '1';
+    const actaId = params.get('acta') || 'ACTA-SN';
+    const tipo = params.get('tipo') || 'individual';
     
     document.getElementById('publicSignInfo').innerHTML = `
-      Acta N.º <b>${actaId.split('_')[0]}</b><br>
-      ${grupal ? '<b>Modo Mesa:</b> Varias personas pueden firmar desde este dispositivo.' : 'Por favor dibuja tu firma y confirma.'}
+      Acta N.º <b>${actaId.split('-')[1]}</b><br>
+      ${tipo === 'grupal' ? '<b>Modo Mesa:</b> Selecciona tu nombre de la lista.' : 'Por favor, ingresa tus datos y firma.'}
     `;
 
-    // Setup Canvas
+    if (tipo === 'grupal') {
+      const select = document.createElement('select');
+      select.id = 'selectFirmanteGrupal';
+      select.className = 'in';
+      select.style.marginBottom = '16px';
+      
+      const listaFirmantes = JSON.parse(localStorage.getItem('firmas_acta_v1') || '[]');
+      const opciones = listaFirmantes.map(f => `<option value="${f.nombre}|${f.cargo || 'Sin cargo'}">${f.nombre} - ${f.cargo || 'Sin cargo'}</option>`).join('');
+      
+      if (opciones) {
+        select.innerHTML = `<option value="">-- Selecciona tu nombre --</option>` + opciones;
+        document.getElementById('publicSignInfo').appendChild(select);
+      } else {
+        select.innerHTML = `<option value="manual">Otro (Ingresar manualmente)</option>`;
+        document.getElementById('publicSignInfo').appendChild(select);
+      }
+    } else {
+       const div = document.createElement('div');
+       div.innerHTML = `
+         <input class="in" id="pubNombre" placeholder="Tu nombre completo" style="width:100%; margin-bottom:8px;">
+         <input class="in" id="pubCargo" placeholder="Tu rol o cargo" style="width:100%; margin-bottom:16px;">
+       `;
+       document.getElementById('publicSignInfo').appendChild(div);
+    }
+
     const canvas = document.getElementById('publicSignatureCanvas');
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     canvas.width = canvas.offsetWidth * ratio;
@@ -2293,15 +2334,33 @@ async function enviarFirmaPublica() {
     toast('⚠️ Por favor dibuja tu firma');
     return;
   }
+  
   const params = new URLSearchParams(window.location.search);
-  const actaId = params.get('acta') || 'Acta-SN';
-  const grupal = params.get('grupal') === '1';
+  const actaId = params.get('acta') || 'ACTA-SN';
+  const tipo = params.get('tipo') || 'individual';
 
-  // Si es grupal, pedimos nombre rápido
-  let nombre = 'Firmante Móvil';
-  let cargo = 'Asistente';
-  if (grupal) {
-    nombre = prompt("Por favor ingresa tu nombre completo:") || nombre;
+  let nombre = '';
+  let cargo = '';
+
+  if (tipo === 'grupal') {
+    const select = document.getElementById('selectFirmanteGrupal');
+    if (!select || !select.value) {
+      toast('⚠️ Selecciona tu nombre de la lista');
+      return;
+    }
+    if (select.value === 'manual') {
+      nombre = prompt("Ingresa tu nombre completo:") || 'Invitado';
+      cargo = prompt("Ingresa tu cargo o rol:") || 'Asistente';
+    } else {
+      [nombre, cargo] = select.value.split('|');
+    }
+  } else {
+    nombre = document.getElementById('pubNombre').value.trim();
+    cargo = document.getElementById('pubCargo').value.trim();
+    if (!nombre || !cargo) {
+      toast('⚠️ Ingresa tu nombre y cargo');
+      return;
+    }
   }
 
   const dataURL = publicSignaturePad.toDataURL('image/png');
@@ -2328,74 +2387,25 @@ async function enviarFirmaPublica() {
     document.getElementById('publicSignMsg').innerHTML = '✅ ¡Firma guardada con éxito!';
     document.getElementById('publicSignMsg').style.color = '#14744a';
     
-    if (grupal) {
-      // Si es grupal, limpiamos para el siguiente
+    if (tipo === 'grupal') {
       setTimeout(() => {
         publicSignaturePad.clear();
         document.getElementById('publicSignMsg').textContent = '';
         btn.disabled = false;
         btn.textContent = '✅ Enviar firma';
+        if(document.getElementById('selectFirmanteGrupal')) document.getElementById('selectFirmanteGrupal').value = '';
       }, 2000);
     } else {
-      // Si es individual, bloqueamos
       publicSignaturePad.off();
       btn.style.display = 'none';
+      if(document.getElementById('pubNombre')) document.getElementById('pubNombre').disabled = true;
+      if(document.getElementById('pubCargo')) document.getElementById('pubCargo').disabled = true;
     }
   } catch(e) {
     document.getElementById('publicSignMsg').textContent = '❌ Error: ' + e.message;
     document.getElementById('publicSignMsg').style.color = 'red';
     btn.disabled = false; btn.textContent = '✅ Enviar firma';
   }
-}
-
-// Modificar genActa para incluir las firmas de Supabase
-async function genActa(){
-  const actaId = `${$('an').value}_${$('aJornada').value}`;
-  let firmasDB = [];
-  if (supabaseClient) {
-    const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
-    if (data) firmasDB = data;
-  }
-
- const d=datosActa();
- const bloques=bloquesActa($('at').value,d);
- const partes=bloques.map(b=>{
-   if(b.t==='blank') return '<div style="height:0.9em"></div>';
-   if(b.t==='tabla') return tablaActaHTML(d);
-   if(b.t==='h'){ const isConsiderandos = norm(b.txt).includes('considerandos'); const styleExtra = isConsiderandos ? 'text-align:center; font-weight:bold; font-size:14px; margin:10px 0;' : 'text-align:center; font-weight:bold; font-size:13px; margin:2px 0;'; return `<div data-keep="1" style="${styleExtra}">${inlineHTML(b.txt)}</div>`; }
-   if(b.txt.includes('<table')) return `<div style="text-align:justify;">${b.txt}</div>`;
-   const alineacion = /^\s*•/.test(b.txt) ? 'left' : 'justify';
-   return `<div style="white-space:pre-wrap;text-align:${alineacion};">${inlineHTML(b.txt)}</div>`;
- });
- 
- let fir='';
- if(firmasDB.length > 0){
-   fir = `<div class="acta-firmas">`+ firmasDB.map(f=>{
-       return `<div class="acta-firma-item">
-                 <img src="${f.firma_base64}" alt="Firma">
-                 <b>${esc(f.firmante)}</b><br>
-                 <small style="font-size:11px;font-weight:bold;color:#000">${esc(f.cargo)}</small>
-               </div>`;
-     }).join('')+ `</div>`;
- } else if(FIRMAS.filter(f=>f.nombre.trim()).length > 0) {
-   // Fallback a firmas de texto si no hay digitales
-   fir = `<div class="acta-firmas">`+ FIRMAS.filter(f=>f.nombre.trim()).map(f=>{
-       return `<div class="acta-firma-item"><b>${esc(f.nombre)}</b><br><small style="font-size:11px;font-weight:bold;color:#000">${esc(f.cargo)}</small></div>`;
-     }).join('')+ `</div>`;
- } else {
-   fir = `<div class="acta-firmas"><div class="acta-firma-item"><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div><div class="acta-firma-item"><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div></div>`;
- }
- 
- const chkFirmada = $('chkFirmada').checked ? '<div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div>' : '';
- const nodes = [];
- partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
- nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${fir}${chkFirmada?`<div style="text-align:center;">${chkFirmada}</div>`:''}</div>`));
- $('actaOutContainer').classList.remove('hide');
- $('informeOutContainer').classList.add('hide');
- const total = paginarDoc($('actaOut'), {nodes, landscape:false});
- $('actaOutContainer').scrollIntoView({behavior:'smooth'});
- ajustarTamanoLetra($('fontSizeSlider').value);
- toast(`Acta generada: ${total} página(s)`);
 }
 
 const CM_PX = 96/2.54;
@@ -2490,8 +2500,7 @@ async function exportarDOCX() {
       else cuerpo.push(new Paragraph({alignment:AlignmentType.JUSTIFIED,spacing:{after:60},children:runsInline(b.txt.replace(/^ {3}/,'      '))}));
     });
     
-    // Firmas Digitales de Supabase (si las hay)
-    const actaId = `${$('an').value}_${$('aJornada').value}`;
+    const actaId = getActaId();
     let firmasDB = [];
     if (supabaseClient) {
       const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
@@ -2522,7 +2531,6 @@ async function exportarDOCX() {
       }
       cuerpo.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: filasFirmas }));
     } else {
-      // Fallback firmas de texto
       const firmasValidas = FIRMAS.filter(f => f.nombre.trim());
       if (firmasValidas.length > 0) {
         cuerpo.push(new Paragraph({ children: [new TextRun({ text: '', size: 20 })], spacing: { after: 800 } }));
