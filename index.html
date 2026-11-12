@@ -14,6 +14,9 @@
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
 <style>
 :root{
@@ -183,6 +186,7 @@ tr.posible-ganador td { background-color: #FFF3CD !important; font-weight: 600; 
 tr.posible-ganador td:first-child { border-left: 4px solid #FFC107 !important; }
 .acta-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 80px; margin-top: 60px; margin-bottom: 80px; }
 .acta-firma-item { border-top: 1px solid #000; padding-top: 15px; text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 40px; }
+.acta-firma-item img { height: 50px; width: auto; display: block; margin: 0 auto 5px; }
 .acta-footer { background: #00201A !important; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; position: relative; margin-top: auto; }
 .acta-footer-logo { display: flex; align-items: center; gap: 5px; }
 .acta-footer-logo img { height: 50px; width: auto; filter: brightness(0) invert(1); }
@@ -547,10 +551,58 @@ body.logged-in #topbar { display: flex; }
   color: var(--oscuro);
   border-bottom-color: var(--naranja);
 }
+
+/* Firma pad */
+.signature-pad-container {
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+.signature-pad-container canvas {
+  width: 100%;
+  height: 200px;
+  display: block;
+}
+
+/* Página pública de firma */
+#publicSignView {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+#publicSignView .sign-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px;
+  width: min(500px, 100%);
+  box-shadow: 0 30px 80px rgba(0,0,0,.35);
+}
+#publicSignView h2 { margin: 0 0 6px; color: var(--oscuro); font-size: 20px; }
+#publicSignView .sign-sub { color: var(--mut); font-size: 13px; margin-bottom: 20px; }
+
+.qr-box {
+  background: #fff;
+  padding: 16px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  display: inline-block;
+  text-align: center;
+}
+.qr-box small { margin-top: 8px; word-break: break-all; }
 </style>
 </head>
 <body class="logged-out">
 
+<!-- LOGIN -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%);display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:22px;padding:34px 30px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);">
     <div style="text-align:center;margin-bottom:20px;">
@@ -566,6 +618,22 @@ body.logged-in #topbar { display: flex; }
     <button class="btn p" id="loginBtn" style="width:100%;padding:12px;font-weight:800" onclick="doLogin()">Ingresar</button>
     <button class="reset-link" onclick="abrirResetDesdeLogin()">¿Olvidaste tu contraseña?</button>
     <div id="loginLoad" class="hide" style="text-align:center;margin-top:10px;color:var(--mut);font-size:12px;">Conectando con el servidor...</div>
+  </div>
+</div>
+
+<!-- Vista pública de firma (por link) -->
+<div id="publicSignView" class="hide">
+  <div class="sign-card">
+    <h2>✍️ Firma del Acta</h2>
+    <p class="sign-sub" id="publicSignInfo">Cargando información...</p>
+    <div class="signature-pad-container" style="margin: 20px 0;">
+      <canvas id="publicSignatureCanvas"></canvas>
+    </div>
+    <div class="bar" style="margin-bottom: 16px;">
+      <button class="btn sm" onclick="limpiarFirmaPublica()">🗑 Borrar</button>
+    </div>
+    <button class="btn p" id="btnEnviarFirmaPublica" style="width:100%;padding:14px;font-weight:800" onclick="enviarFirmaPublica()">✅ Enviar firma</button>
+    <div id="publicSignMsg" style="text-align:center;margin-top:14px;font-size:13px;"></div>
   </div>
 </div>
 
@@ -728,14 +796,29 @@ body.logged-in #topbar { display: flex; }
   <textarea class="in" id="at" oninput="guardarTextoActa()" style="min-height: 600px; font-family: monospace; font-size: 13px; line-height: 1.5; background: #fff; padding: 20px;"></textarea>
   <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()">↺ Restaurar texto predefinido</button></div>
  </div>
+ 
+ <!-- Firma -->
  <div class="card noprint">
-  <h3>Firmas de los asistentes al escrutinio</h3>
-  <div class="bar">
-    <button class="btn sm" onclick="addFirma()">+ Agregar firma personalizada</button>
-    <span class="sp"></span>
-    <span id="firmaCount" style="font-size:12.5px;color:var(--mut)"></span>
+  <h3>✍️ Firmas y participación</h3>
+  <p class="help" style="margin-top:0">Puedes firmar directamente aquí, o generar un enlace/QR para que otros firmen desde su celular. También puedes generar un QR grupal para que varios firmen desde un solo dispositivo.</p>
+  
+  <div class="bar" style="margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 16px;">
+     <button class="btn" onclick="generarEnlaceFirma()">🔗 Generar enlace / QR individual</button>
+     <button class="btn" onclick="generarQRGrupal()">👥 Generar QR grupal (mesa)</button>
+     <button class="btn" style="background:#0B7A4B;color:white;border-color:#0B7A4B" onclick="enviarEnlacePorCorreo()">📧 Enviar link por correo</button>
   </div>
-  <div class="firmas-grid" id="firmasGrid"></div>
+
+  <div id="qrContainer" class="hide" style="text-align: center; margin-bottom: 20px;"></div>
+
+  <div class="signature-pad-container" style="max-width: 600px; margin: 0 auto;">
+    <canvas id="signatureCanvas"></canvas>
+  </div>
+  <div class="bar" style="justify-content: center; margin-top: 12px;">
+    <button class="btn sm" onclick="limpiarFirma()">🗑 Borrar firma</button>
+    <button class="btn sm p" onclick="guardarFirma()">💾 Guardar mi firma (admin)</button>
+  </div>
+
+  <div class="firmas-grid" id="firmasGrid" style="margin-top: 24px;"></div>
  </div>
  <div class="card noprint">
    <h3>📄 Generar Informes de Votaciones (Anexos)</h3>
@@ -1078,7 +1161,6 @@ body.logged-in #topbar { display: flex; }
       <button id="tabResetCorreo" class="on" onclick="switchResetTab('correo')">📧 Enviar por correo</button>
       <button id="tabResetManual" onclick="switchResetTab('manual')">🔧 Cambio manual</button>
     </div>
-
     <div id="panelResetCorreo">
       <p class="help" style="margin-top:0">Se enviará un enlace de restablecimiento al correo registrado del usuario.</p>
       <label>Correo electrónico del usuario</label>
@@ -1086,7 +1168,6 @@ body.logged-in #topbar { display: flex; }
       <div id="resetEmailMsg" style="font-size:12.5px;margin-top:10px;min-height:18px;"></div>
       <div style="margin-top:16px"><button class="btn p" onclick="enviarResetCorreo()">📧 Enviar enlace</button></div>
     </div>
-
     <div id="panelResetManual" class="hide">
       <p class="help" style="margin-top:0">Si eres administrador, puedes cambiar la contraseña de cualquier usuario directamente.</p>
       <label>Usuario</label>
@@ -1111,7 +1192,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const EMAILJS_CONFIG = {
   publicKey: 'bKplucMMXJM3iUbfk',
   serviceId: 'service_2uume1n',
-  templateId: 'template_x4yewx3'
+  templateId: 'template_sy5xcrg'  // <-- ASEGÚRATE QUE SEA EL ID DE TU PLANTILLA DE RESET PASSWORD
 };
 
 const CONFIG = {
@@ -1133,7 +1214,8 @@ const CONFIG = {
   col_log_modulo: 'modulo',
   col_log_accion: 'accion',
   col_log_detalle: 'detalle',
-  col_log_fecha: 'fecha'
+  col_log_fecha: 'fecha',
+  tabla_firmas: 'acta_firmas'
 };
 
 let supabaseClient = null;
@@ -1177,6 +1259,10 @@ let ORG_ACTIVOS = JSON.parse(localStorage.getItem(K_ORG_ACTIVOS) || '["Consejo d
 let chartRolesInstance, chartOrganosInstance, chartFacInstance, chartHistInstance, chartCensoFacInstance, chartCensoRolInstance;
 let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDiaInstance;
 
+// Firma Pad variables
+let signaturePad = null;
+let publicSignaturePad = null;
+
 const MODULOS = [{key:'vCron',label:'Cronograma'},{key:'vSeg',label:'Seguimiento candidatos'},{key:'vVotantes',label:'Censo Votantes'},{key:'vAnal',label:'Analítica'},{key:'vVac',label:'Cargos / Vacantes'},{key:'vCargaVotos',label:'Cargar Votos'},{key:'vAct',label:'Actas'},{key:'vGanadores',label:'Directorio Ganadores'},{key:'vSoporte',label:'Registro Soporte'}];
 const ROLES = {
   administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
@@ -1208,6 +1294,7 @@ async function registrarLog(accion, modulo, detalle){
   }
 }
 
+// AUTH
 async function doLogin(){
   const u = $('loginUser').value.trim();
   const p = $('loginPass').value;
@@ -1405,6 +1492,7 @@ function actualizarBannerCierre(){
   if(txt) txt.textContent = ELECCIONES_CERRADAS ? 'Reabrir elecciones' : 'Cerrar elecciones';
 }
 
+/* USUARIOS */
 async function abrirUsuarios(){
   if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
   $('u_new_mods').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`).join('');
@@ -1490,6 +1578,7 @@ async function eliminarUsuario(id){
   } catch(e) { toast('Error: ' + e.message); }
 }
 
+/* LOG */
 async function abrirLog(){
   if(!(SESSION?.rol === 'administrador' || SESSION?.rol === 'auditor')){ toast('Sin permiso'); return; }
   await cargarLogDeSupabase();
@@ -1538,6 +1627,7 @@ function expLogXL(){
   XLSX.writeFile(wb, 'log-auditoria.xlsx');
 }
 
+/* RESET PASSWORD */
 let _resetOrigenLogin = false;
 
 function abrirResetDesdeLogin(){
@@ -1594,7 +1684,7 @@ async function enviarResetCorreo(){
     const resetLink = `${baseURL}?reset_token=${token}&email=${encodeURIComponent(email)}`;
     const templateParams = {to_email: email,to_name: user[CONFIG.col_nombre] || user[CONFIG.col_user],user_name: user[CONFIG.col_user],reset_link: resetLink,expires_in: '1 hora',app_name: 'Sistema de Elecciones · Universidad El Bosque',current_year: new Date().getFullYear()};
     await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, templateParams);
-    registrarLog('Reset por correo enviado (EmailJS)', 'Usuarios', email);
+    registrarLog('Reset por correo enviado', 'Usuarios', email);
     msg.style.color = '#14744a';
     msg.innerHTML = `✅ Correo enviado a <b>${esc(email)}</b>.<br><small>Revisa tu bandeja de entrada y la carpeta de spam. El enlace expira en 1 hora.</small>`;
     setTimeout(() => { dlgReset.close(); $('resetEmail').value = ''; msg.textContent = ''; }, 3000);
@@ -1765,7 +1855,7 @@ function tab(n){
   if(n===3) { renderCensoData(); }
   if(n===4) { renderAnalitica(); }
   if(n===5) renderVacantes();
-  if(n===7) { updateJornada(); inicializarFirmasOficiales(); renderFirmas(); $('ad').value = new Date().toISOString().slice(0,10); ajustarTamanoLetra($('fontSizeSlider').value); }
+  if(n===7) { updateJornada(); inicializarFirmasOficiales(); renderFirmas(); $('ad').value = new Date().toISOString().slice(0,10); ajustarTamanoLetra($('fontSizeSlider').value); cargarFirmasSupabase(); }
   if(n===8) { renderDirectorio(); }
   if(n===9) { renderSoportes(); }
   deshabilitarBotonesEdicion();
@@ -2056,6 +2146,258 @@ function updateFirma(i,k,v){ FIRMAS[i][k]=v; saveFirmas(); }
 function inicializarFirmasOficiales() { if (!FIRMAS.some(f => f.esDelegado)) { FIRMAS = CARGOS_DELEGADO.map(cargo => ({nombre: '', cargo: cargo, esDelegado: true})); saveFirmas(); } }
 function migrarFirmas(){ const claves = ['vicerrect','secretar','tecnolog','registro','auditor']; let cambio = false; FIRMAS.forEach(f=>{ const lista = f.esDelegado ? CARGOS_DELEGADO : CARGOS_TITULAR; if(f.cargo && !lista.includes(f.cargo)){ const n = norm(f.cargo); const i = claves.findIndex(k=>n.includes(k)); f.cargo = i>=0 ? lista[i] : ''; cambio = true; } }); if(cambio) saveFirmas(); }
 
+/* ==========================================
+   FIRMAS DIGITALES Y QR
+   ========================================== */
+// Inicializar firma del admin
+if ($('signatureCanvas')) {
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  const canvas = $('signatureCanvas');
+  canvas.width = canvas.offsetWidth * ratio;
+  canvas.height = canvas.offsetHeight * ratio;
+  canvas.getContext("2d").scale(ratio, ratio);
+  signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgba(255, 255, 255, 0)', penColor: 'rgb(11, 59, 44)' });
+}
+
+function limpiarFirma() { if (signaturePad) { signaturePad.clear(); } }
+async function guardarFirma() {
+  if (!signaturePad || signaturePad.isEmpty()) { toast('⚠️ Dibuja tu firma primero'); return; }
+  if (!supabaseClient) { toast('Sin conexión'); return; }
+  const dataURL = signaturePad.toDataURL('image/png');
+  try {
+    const { error } = await supabaseClient.from(CONFIG.tabla_firmas).insert([{
+      acta_id: `${$('an').value}_${$('aJornada').value}`,
+      firmante: SESSION ? SESSION.nombre : 'Admin',
+      cargo: 'Administrador',
+      firma_base64: dataURL,
+      fecha: new Date().toISOString()
+    }]);
+    if(error) throw error;
+    toast('✅ Firma guardada en Supabase');
+    limpiarFirma();
+    cargarFirmasSupabase();
+  } catch(e) { toast('❌ Error: ' + e.message); }
+}
+
+async function cargarFirmasSupabase() {
+  if (!supabaseClient) return;
+  const actaId = `${$('an').value}_${$('aJornada').value}`;
+  const { data, error } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
+  if(error) { console.warn(error); return; }
+  const grid = $('firmasGrid');
+  grid.innerHTML = data.map(f => `
+    <div class="firma-item" style="border-left: 4px solid var(--ok);">
+      <label>${esc(f.firmante)} (${esc(f.cargo)})</label>
+      <img src="${f.firma_base64}" style="width:100%; max-height:80px; object-fit:contain; margin-top:8px;">
+    </div>
+  `).join('');
+}
+
+// QR y Enlaces
+function generarEnlaceFirma() {
+  const actaId = `${$('an').value}_${$('aJornada').value}`;
+  const token = Math.random().toString(36).substring(2, 10);
+  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&token=${token}`;
+  
+  $('qrContainer').classList.remove('hide');
+  $('qrContainer').innerHTML = `
+    <div class="qr-box">
+      <div id="qrcode"></div>
+      <small>${url}</small>
+    </div>
+    <p class="help" style="margin-top:12px;">Muestra este QR a los asistentes o envíalo por correo. Cada firma se guardará automáticamente en Supabase.</p>
+  `;
+  new QRCode($('qrcode'), { text: url, width: 180, height: 180 });
+}
+
+function generarQRGrupal() {
+  const actaId = `${$('an').value}_${$('aJornada').value}`;
+  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&grupal=1`;
+  
+  $('qrContainer').classList.remove('hide');
+  $('qrContainer').innerHTML = `
+    <div class="qr-box">
+      <div id="qrcode"></div>
+      <small>${url}</small>
+    </div>
+    <p class="help" style="margin-top:12px;"><b>Modo Mesa:</b> Cualquier persona puede acercarse y firmar desde este mismo dispositivo.</p>
+  `;
+  new QRCode($('qrcode'), { text: url, width: 200, height: 200 });
+}
+
+function enviarEnlacePorCorreo() {
+  if (!emailjsReady) { toast('EmailJS no configurado'); return; }
+  const correo = prompt("Ingresa el correo al que deseas enviar el enlace de firma:");
+  if (!correo) return;
+  
+  const actaId = `${$('an').value}_${$('aJornada').value}`;
+  const token = Math.random().toString(36).substring(2, 10);
+  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&token=${token}`;
+
+  const btn = event?.target || document.querySelector('button[onclick="enviarEnlacePorCorreo()"]');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
+
+  emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+    to_email: correo,
+    to_name: 'Delegado / Candidato',
+    user_name: 'Firmante',
+    reset_link: url, 
+    expires_in: '24 horas',
+    app_name: 'Sistema de Elecciones · Firma de Acta',
+    current_year: new Date().getFullYear()
+  }).then(() => {
+    toast('✅ Enlace de firma enviado a ' + correo);
+    if(btn){ btn.disabled = false; btn.textContent = '📧 Enviar link por correo'; }
+  }).catch(err => {
+    toast('❌ Error: ' + (err.text || err.message));
+    if(btn){ btn.disabled = false; btn.textContent = '📧 Enviar link por correo'; }
+  });
+}
+
+// Lógica de la vista pública para firmar
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('firmar') === '1') {
+    document.getElementById('loginScreen').classList.add('hide');
+    document.getElementById('publicSignView').classList.remove('hide');
+    document.body.style.display = 'block';
+
+    const actaId = params.get('acta') || 'Acta-SN';
+    const grupal = params.get('grupal') === '1';
+    
+    document.getElementById('publicSignInfo').innerHTML = `
+      Acta N.º <b>${actaId.split('_')[0]}</b><br>
+      ${grupal ? '<b>Modo Mesa:</b> Varias personas pueden firmar desde este dispositivo.' : 'Por favor dibuja tu firma y confirma.'}
+    `;
+
+    // Setup Canvas
+    const canvas = document.getElementById('publicSignatureCanvas');
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+    
+    publicSignaturePad = new SignaturePad(canvas, {
+      backgroundColor: 'rgba(255, 255, 255, 0)',
+      penColor: 'rgb(11, 59, 44)'
+    });
+  }
+});
+
+function limpiarFirmaPublica() {
+  if (publicSignaturePad) publicSignaturePad.clear();
+}
+
+async function enviarFirmaPublica() {
+  if (!publicSignaturePad || publicSignaturePad.isEmpty()) {
+    toast('⚠️ Por favor dibuja tu firma');
+    return;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const actaId = params.get('acta') || 'Acta-SN';
+  const grupal = params.get('grupal') === '1';
+
+  // Si es grupal, pedimos nombre rápido
+  let nombre = 'Firmante Móvil';
+  let cargo = 'Asistente';
+  if (grupal) {
+    nombre = prompt("Por favor ingresa tu nombre completo:") || nombre;
+  }
+
+  const dataURL = publicSignaturePad.toDataURL('image/png');
+  const btn = document.getElementById('btnEnviarFirmaPublica');
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando...';
+
+  if (!supabaseClient) {
+    document.getElementById('publicSignMsg').textContent = '❌ Error de conexión.';
+    btn.disabled = false; btn.textContent = '✅ Enviar firma';
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.from(CONFIG.tabla_firmas).insert([{
+      acta_id: actaId,
+      firmante: nombre,
+      cargo: cargo,
+      firma_base64: dataURL,
+      fecha: new Date().toISOString()
+    }]);
+    if(error) throw error;
+    
+    document.getElementById('publicSignMsg').innerHTML = '✅ ¡Firma guardada con éxito!';
+    document.getElementById('publicSignMsg').style.color = '#14744a';
+    
+    if (grupal) {
+      // Si es grupal, limpiamos para el siguiente
+      setTimeout(() => {
+        publicSignaturePad.clear();
+        document.getElementById('publicSignMsg').textContent = '';
+        btn.disabled = false;
+        btn.textContent = '✅ Enviar firma';
+      }, 2000);
+    } else {
+      // Si es individual, bloqueamos
+      publicSignaturePad.off();
+      btn.style.display = 'none';
+    }
+  } catch(e) {
+    document.getElementById('publicSignMsg').textContent = '❌ Error: ' + e.message;
+    document.getElementById('publicSignMsg').style.color = 'red';
+    btn.disabled = false; btn.textContent = '✅ Enviar firma';
+  }
+}
+
+// Modificar genActa para incluir las firmas de Supabase
+async function genActa(){
+  const actaId = `${$('an').value}_${$('aJornada').value}`;
+  let firmasDB = [];
+  if (supabaseClient) {
+    const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
+    if (data) firmasDB = data;
+  }
+
+ const d=datosActa();
+ const bloques=bloquesActa($('at').value,d);
+ const partes=bloques.map(b=>{
+   if(b.t==='blank') return '<div style="height:0.9em"></div>';
+   if(b.t==='tabla') return tablaActaHTML(d);
+   if(b.t==='h'){ const isConsiderandos = norm(b.txt).includes('considerandos'); const styleExtra = isConsiderandos ? 'text-align:center; font-weight:bold; font-size:14px; margin:10px 0;' : 'text-align:center; font-weight:bold; font-size:13px; margin:2px 0;'; return `<div data-keep="1" style="${styleExtra}">${inlineHTML(b.txt)}</div>`; }
+   if(b.txt.includes('<table')) return `<div style="text-align:justify;">${b.txt}</div>`;
+   const alineacion = /^\s*•/.test(b.txt) ? 'left' : 'justify';
+   return `<div style="white-space:pre-wrap;text-align:${alineacion};">${inlineHTML(b.txt)}</div>`;
+ });
+ 
+ let fir='';
+ if(firmasDB.length > 0){
+   fir = `<div class="acta-firmas">`+ firmasDB.map(f=>{
+       return `<div class="acta-firma-item">
+                 <img src="${f.firma_base64}" alt="Firma">
+                 <b>${esc(f.firmante)}</b><br>
+                 <small style="font-size:11px;font-weight:bold;color:#000">${esc(f.cargo)}</small>
+               </div>`;
+     }).join('')+ `</div>`;
+ } else if(FIRMAS.filter(f=>f.nombre.trim()).length > 0) {
+   // Fallback a firmas de texto si no hay digitales
+   fir = `<div class="acta-firmas">`+ FIRMAS.filter(f=>f.nombre.trim()).map(f=>{
+       return `<div class="acta-firma-item"><b>${esc(f.nombre)}</b><br><small style="font-size:11px;font-weight:bold;color:#000">${esc(f.cargo)}</small></div>`;
+     }).join('')+ `</div>`;
+ } else {
+   fir = `<div class="acta-firmas"><div class="acta-firma-item"><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div><div class="acta-firma-item"><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div></div>`;
+ }
+ 
+ const chkFirmada = $('chkFirmada').checked ? '<div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div>' : '';
+ const nodes = [];
+ partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
+ nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${fir}${chkFirmada?`<div style="text-align:center;">${chkFirmada}</div>`:''}</div>`));
+ $('actaOutContainer').classList.remove('hide');
+ $('informeOutContainer').classList.add('hide');
+ const total = paginarDoc($('actaOut'), {nodes, landscape:false});
+ $('actaOutContainer').scrollIntoView({behavior:'smooth'});
+ ajustarTamanoLetra($('fontSizeSlider').value);
+ toast(`Acta generada: ${total} página(s)`);
+}
+
 const CM_PX = 96/2.54;
 const HEAD_HTML = `<div class="acta-header" style="background-color:#007a3d; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-radius: 0; box-sizing: border-box; width: 100%;"><div style="display: flex; align-items: center; gap: 12px; color: #ffffff;"><img src="Logo_de_la_Universidad_El_Bosque.png" alt="Logo U. El Bosque" style="height: 48px; width: auto; filter: brightness(0) invert(1);"></div><div style="background-color: #7ab800; color: #ffffff; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 2px; letter-spacing: 0.5px; white-space: nowrap; font-family: Arial, sans-serif;">Dirección Registro y Control Académico</div></div>`;
 const FOOT_HTML = `<div class="acta-footer" style="background-color:#00201A !important;"><div class="acta-footer-logo"><img src="Logo_RyC.png" alt="Logo RyC"></div><div class="acta-page-num" data-pg="n"></div><div class="acta-footer-info">Av. Cra 9 No. 131 A - 02<br><span style="color:#C6ED6E; font-weight:bold;">PBX (601) 648 9000 EXT 1500 - 1506</span><br><span style="color:#C6ED6E; font-weight:bold;">registroacademico@unbosque.edu.co</span></div></div>`;
@@ -2116,33 +2458,6 @@ function paginarDoc(cont, o){
   return total;
 }
 
-function genActa(){
- const d=datosActa();
- const bloques=bloquesActa($('at').value,d);
- const partes=bloques.map(b=>{
-   if(b.t==='blank') return '<div style="height:0.9em"></div>';
-   if(b.t==='tabla') return tablaActaHTML(d);
-   if(b.t==='h'){ const isConsiderandos = norm(b.txt).includes('considerandos'); const styleExtra = isConsiderandos ? 'text-align:center; font-weight:bold; font-size:14px; margin:10px 0;' : 'text-align:center; font-weight:bold; font-size:13px; margin:2px 0;'; return `<div data-keep="1" style="${styleExtra}">${inlineHTML(b.txt)}</div>`; }
-   if(b.txt.includes('<table')) return `<div style="text-align:justify;">${b.txt}</div>`;
-   const alineacion = /^\s*•/.test(b.txt) ? 'left' : 'justify';
-   return `<div style="white-space:pre-wrap;text-align:${alineacion};">${inlineHTML(b.txt)}</div>`;
- });
- const firmasValidas = FIRMAS.filter(f=>f.nombre.trim());
- let fir='';
- if(firmasValidas.length){ fir = `<div class="acta-firmas">`+ firmasValidas.map(f=>{ const cargoText = f.cargo || ''; return `<div class="acta-firma-item"><b>${esc(f.nombre)}</b><br><small style="font-size:11px;font-weight:bold;color:#000">${esc(cargoText)}</small></div>`; }).join('')+ `</div>`; }
- else { fir = `<div class="acta-firmas"><div class="acta-firma-item"><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div><div class="acta-firma-item"><b>Nombre</b><br><small style="font-size:11px;font-weight:bold;color:#000">Cargo</small></div></div>`; }
- const chkFirmada = $('chkFirmada').checked ? '<div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div>' : '';
- const nodes = [];
- partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
- nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${fir}${chkFirmada?`<div style="text-align:center;">${chkFirmada}</div>`:''}</div>`));
- $('actaOutContainer').classList.remove('hide');
- $('informeOutContainer').classList.add('hide');
- const total = paginarDoc($('actaOut'), {nodes, landscape:false});
- $('actaOutContainer').scrollIntoView({behavior:'smooth'});
- ajustarTamanoLetra($('fontSizeSlider').value);
- toast(`Acta generada: ${total} página(s)`);
-}
-
 async function exportarDOCX() {
   try {
     if(!$('actaOut').innerHTML.trim()) { toast('Primero genera el acta'); return; }
@@ -2174,17 +2489,53 @@ async function exportarDOCX() {
       else if(b.t==='h'){ const isCons = norm(b.txt).includes('considerandos'); cuerpo.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:80},children:[new TextRun({text:b.txt,bold:true,size:isCons?26:24,font:'Arial'})]})); }
       else cuerpo.push(new Paragraph({alignment:AlignmentType.JUSTIFIED,spacing:{after:60},children:runsInline(b.txt.replace(/^ {3}/,'      '))}));
     });
-    const firmasValidas = FIRMAS.filter(f => f.nombre.trim());
-    if (firmasValidas.length > 0) {
+    
+    // Firmas Digitales de Supabase (si las hay)
+    const actaId = `${$('an').value}_${$('aJornada').value}`;
+    let firmasDB = [];
+    if (supabaseClient) {
+      const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
+      if (data) firmasDB = data;
+    }
+
+    if (firmasDB.length > 0) {
       cuerpo.push(new Paragraph({ children: [new TextRun({ text: '', size: 20 })], spacing: { after: 800 } }));
       const filasFirmas = [];
-      for (let i = 0; i < firmasValidas.length; i += 2) {
-        const f1 = firmasValidas[i]; const f2s = firmasValidas[i+1];
-        let cargo1 = f1.cargo || ''; let cargo2 = f2s ? (f2s.cargo || '') : '';
-        filasFirmas.push(new TableRow({ children: [new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f1.nombre, size: 20, font: 'Arial', bold: true })] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: cargo1, size: 18, font: 'Arial', bold: true, color: '000000' })] })] }),new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, borders: f2s ? { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } } : { top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, children: f2s ? [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f2s.nombre, size: 20, font: 'Arial', bold: true })] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: cargo2, size: 18, font: 'Arial', bold: true, color: '000000' })] })] : [new Paragraph({ children: [new TextRun({ text: '', size: 16 })] })] })] }));
+      for (let i = 0; i < firmasDB.length; i += 2) {
+        const f1 = firmasDB[i]; 
+        const f2 = firmasDB[i+1];
+        
+        const celdaImg = async (f) => {
+           if(!f) return new TableCell({ children: [new Paragraph("")] });
+           const imgData = await cargarImagenDataURL(f.firma_base64);
+           return new TableCell({ 
+             width: { size: 50, type: WidthType.PERCENTAGE }, 
+             borders: { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, 
+             children: [
+               new Paragraph({ alignment: AlignmentType.CENTER, children: imgData ? [new ImageRun({ data: imgData.dataURL, transformation: { width: 100, height: 50 } })] : [] }),
+               new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f.firmante, size: 20, font: 'Arial', bold: true })] }),
+               new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f.cargo || '', size: 18, font: 'Arial', color: '000000' })] })
+             ] 
+           });
+        };
+        filasFirmas.push(new TableRow({ children: [ await celdaImg(f1), await celdaImg(f2) ] }));
       }
-      cuerpo.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, insideHorizontal: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, insideVertical: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, rows: filasFirmas }));
+      cuerpo.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: filasFirmas }));
+    } else {
+      // Fallback firmas de texto
+      const firmasValidas = FIRMAS.filter(f => f.nombre.trim());
+      if (firmasValidas.length > 0) {
+        cuerpo.push(new Paragraph({ children: [new TextRun({ text: '', size: 20 })], spacing: { after: 800 } }));
+        const filasFirmas = [];
+        for (let i = 0; i < firmasValidas.length; i += 2) {
+          const f1 = firmasValidas[i]; const f2s = firmasValidas[i+1];
+          let cargo1 = f1.cargo || ''; let cargo2 = f2s ? (f2s.cargo || '') : '';
+          filasFirmas.push(new TableRow({ children: [new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f1.nombre, size: 20, font: 'Arial', bold: true })] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: cargo1, size: 18, font: 'Arial', bold: true, color: '000000' })] })] }),new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, borders: f2s ? { top: { style: BorderStyle.SINGLE, size: 6, color: '000000' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } } : { top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, children: f2s ? [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: f2s.nombre, size: 20, font: 'Arial', bold: true })] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: cargo2, size: 18, font: 'Arial', bold: true, color: '000000' })] })] : [new Paragraph({ children: [new TextRun({ text: '', size: 16 })] })] })] }));
+        }
+        cuerpo.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, insideHorizontal: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, insideVertical: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } }, rows: filasFirmas }));
+      }
     }
+
     if ($('chkFirmada').checked) { cuerpo.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 300 }, children: [new TextRun({ text: '✔ FIRMADA', bold: true, size: 22, font: 'Arial', color: '006400' })] })); }
     const doc = new Document({ styles: { default: { document: { run: { font: 'Arial', size: 22 } } } }, sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440 * 2, right: 1440, bottom: 1440 * 2, left: 1440, header: 720, footer: 720 } } }, headers: { default: new Header({ children: [headerBar] }) }, footers: { default: new Footer({ children: [footerBar] }) }, children: cuerpo }] });
     const blob = await Packer.toBlob(doc);
