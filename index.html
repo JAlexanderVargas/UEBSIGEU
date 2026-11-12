@@ -13,6 +13,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <style>
 :root{
@@ -457,7 +458,6 @@ body.logged-in #topbar { display: flex; }
 
 #loginScreen .in { padding: 12px; }
 
-/* ============ USER CARD EN EL SIDEBAR ============ */
 .user-card {
   margin: 0 0 14px;
   padding: 12px 14px;
@@ -551,7 +551,6 @@ body.logged-in #topbar { display: flex; }
 </head>
 <body class="logged-out">
 
-<!-- LOGIN -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%);display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:22px;padding:34px 30px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);">
     <div style="text-align:center;margin-bottom:20px;">
@@ -1107,8 +1106,15 @@ body.logged-in #topbar { display: flex; }
 
 <script>
 /* CONFIGURACIÓN SUPABASE */
-const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-const SUPABASE_ANON_KEY = 'TU-ANON-KEY-AQUI';
+const SUPABASE_URL = 'https://doqoiporsulytaytuokc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvcW9pcG9yc3VseXRheXR1b2tjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0MTQ0NTMsImV4cCI6MjEwOTk5MDQ1M30.VBgRgNJChmzvfI4k7IXIPCZ9akbqShtP-VG-3jl7Gz4;
+
+/* CONFIGURACIÓN EMAILJS */
+const EMAILJS_CONFIG = {
+  publicKey: 'bKplucMMXJM3iUbfk',
+  serviceId: 'service_2uume1n',
+  templateId: 'template_sy5xcrg'
+};
 
 const CONFIG = {
   tabla_usuarios: 'usuarios',
@@ -1138,6 +1144,14 @@ try {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 } catch(e) { console.error('Supabase init error:', e); }
+
+let emailjsReady = false;
+try {
+  if(window.emailjs && EMAILJS_CONFIG.publicKey && !EMAILJS_CONFIG.publicKey.includes('TU_')) {
+    emailjs.init({ publicKey: EMAILJS_CONFIG.publicKey });
+    emailjsReady = true;
+  }
+} catch(e) { console.warn('EmailJS init:', e); }
 
 /* CONSTANTES */
 const $=id=>document.getElementById(id);
@@ -1682,6 +1696,7 @@ async function enviarResetCorreo(){
   const msg = $('resetEmailMsg');
   msg.style.color = '#b03a2e';
   msg.textContent = '';
+
   if(!email || !/^\S+@\S+\.\S+$/.test(email)){
     msg.textContent = 'Ingresa un correo válido.';
     return;
@@ -1690,43 +1705,77 @@ async function enviarResetCorreo(){
     msg.textContent = 'No hay conexión con el servidor.';
     return;
   }
+  if(!emailjsReady){
+    msg.style.color = '#b35a06';
+    msg.textContent = '⚠️ El servicio de correo no está configurado. Usa el "Cambio manual".';
+    return;
+  }
+
+  const btn = event?.target || document.querySelector('button[onclick="enviarResetCorreo()"]');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
+
   try {
-    const { data } = await supabaseClient
+    const { data: user, error: errUser } = await supabaseClient
       .from(CONFIG.tabla_usuarios)
-      .select(CONFIG.col_user)
+      .select(`${CONFIG.col_user}, ${CONFIG.col_nombre}`)
       .eq('email', email)
+      .eq(CONFIG.col_activo, true)
       .maybeSingle();
 
-    if(data){
-      const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      const expira = new Date(Date.now() + 60*60*1000).toISOString();
-      try {
-        await supabaseClient.from(CONFIG.tabla_usuarios)
-          .update({ reset_token: token, reset_expira: expira })
-          .eq('email', email);
-      } catch(e) {}
+    if(errUser) throw errUser;
 
-      try {
-        const { error: errAuth } = await supabaseClient.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + window.location.pathname
-        });
-        if(errAuth) throw errAuth;
-        msg.style.color = '#14744a';
-        msg.textContent = '✅ Se envió un correo con instrucciones. Revisa tu bandeja.';
-        registrarLog('Solicitud de restablecimiento por correo', 'Usuarios', email);
-      } catch(err) {
-        msg.style.color = '#b35a06';
-        msg.innerHTML = `⚠️ El envío automático falló. Contacta al administrador.<br><small>Token generado: <code>${token}</code></small>`;
-        registrarLog('Reset correo falló (mostrando token)', 'Usuarios', email);
-      }
-    } else {
+    if(!user){
       msg.style.color = '#14744a';
-      msg.textContent = '✅ Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.';
+      msg.textContent = '✅ Si el correo está registrado, recibirás instrucciones en tu bandeja.';
+      return;
     }
+
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(24)))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+    const expira = new Date(Date.now() + 60*60*1000).toISOString();
+
+    const { error: errUpd } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .update({ reset_token: token, reset_expira: expira })
+      .eq('email', email);
+    if(errUpd) throw errUpd;
+
+    const baseURL = window.location.origin + window.location.pathname;
+    const resetLink = `${baseURL}?reset_token=${token}&email=${encodeURIComponent(email)}`;
+
+    const templateParams = {
+      to_email: email,
+      to_name: user[CONFIG.col_nombre] || user[CONFIG.col_user],
+      user_name: user[CONFIG.col_user],
+      reset_link: resetLink,
+      expires_in: '1 hora',
+      app_name: 'Sistema de Elecciones · Universidad El Bosque',
+      current_year: new Date().getFullYear()
+    };
+
+    await emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.templateId,
+      templateParams
+    );
+
+    registrarLog('Reset por correo enviado (EmailJS)', 'Usuarios', email);
+    msg.style.color = '#14744a';
+    msg.innerHTML = `✅ Correo enviado a <b>${esc(email)}</b>.<br><small>Revisa tu bandeja de entrada y la carpeta de spam. El enlace expira en 1 hora.</small>`;
+    setTimeout(() => {
+      dlgReset.close();
+      $('resetEmail').value = '';
+      msg.textContent = '';
+    }, 3000);
+
   } catch(err) {
-    console.error(err);
+    console.error('Error enviando correo:', err);
+    const errText = err?.text || err?.message || 'No se pudo enviar el correo';
     msg.style.color = '#b03a2e';
-    msg.textContent = 'Error: ' + (err.message || 'No se pudo procesar la solicitud.');
+    msg.innerHTML = `❌ Error al enviar: ${esc(errText)}<br><small>Verifica la configuración de EmailJS o contacta al administrador.</small>`;
+    registrarLog('Reset por correo falló', 'Usuarios', `${email} — ${errText}`);
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '📧 Enviar enlace'; }
   }
 }
 
@@ -1911,7 +1960,7 @@ function ajustarTamanoLetra(size) {
   document.documentElement.style.setProperty('--font-size-acta', size + 'px');
   try { localStorage.setItem(K_FONT_SIZE, size); } catch(e) {}
   const outDiv = $('actaOut');
-  if (outDiv) { outDiv.style.fontSize = size + 'px'; const bodyAct = outDiv.querySelector('.acta-body'); if (bodyAct) bodyAct.style.fontSize = size + 'px'; }
+  if (outDiv) { outDiv.style.fontSize = size + 'px'; const bodyAct = outDiv.querySelector('.acta-body'); if(bodyAct) bodyAct.style.fontSize = size + 'px'; }
 }
 let audioCtx;
 function playSound(){
@@ -4036,6 +4085,68 @@ function importarRespaldo(input) {
   };
   reader.readAsText(file);
 }
+
+/* DETECCIÓN DE TOKEN DE RESET EN LA URL */
+(async function verificarTokenReset(){
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('reset_token');
+  const email = params.get('email');
+  if(!token || !email) return;
+  if(!supabaseClient) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .select('id, reset_expira, activo')
+      .eq('email', email)
+      .eq('reset_token', token)
+      .maybeSingle();
+
+    if(error || !data){
+      toast('❌ El enlace de restablecimiento no es válido.');
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
+    if(!data.activo){
+      toast('❌ El usuario está inactivo.');
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
+    if(new Date(data.reset_expira) < new Date()){
+      toast('❌ El enlace expiró. Solicita uno nuevo.');
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
+    const nuevaPass = prompt('Ingresa tu nueva contraseña (mínimo 6 caracteres):');
+    if(!nuevaPass) { window.history.replaceState({}, '', window.location.pathname); return; }
+    if(nuevaPass.length < 6){ alert('La contraseña debe tener al menos 6 caracteres.'); return; }
+
+    const confirma = prompt('Confirma tu nueva contraseña:');
+    if(confirma !== nuevaPass){ alert('Las contraseñas no coinciden.'); return; }
+
+    const { error: errUpd } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .update({
+        [CONFIG.col_pass]: nuevaPass,
+        reset_token: null,
+        reset_expira: null
+      })
+      .eq('id', data.id);
+
+    if(errUpd) throw errUpd;
+
+    toast('✅ Contraseña actualizada. Ya puedes iniciar sesión.');
+    window.history.replaceState({}, '', window.location.pathname);
+
+  } catch(err) {
+    console.error(err);
+    toast('❌ Error al procesar el enlace: ' + (err.message || ''));
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
 
 /* INIT */
 normalizarFacultadesGlobal();
