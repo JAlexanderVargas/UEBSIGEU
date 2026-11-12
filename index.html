@@ -30,7 +30,7 @@ small{display:block;color:var(--mut);font-size:12px;line-height:1.3}
 .hide{display:none!important}
 
 aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
-.brand{display:flex;flex-direction:column;align-items:center;margin:0 6px 26px;color:var(--blanco);text-align:center}
+.brand{display:flex;flex-direction:column;align-items:center;margin:0 6px 14px;color:var(--blanco);text-align:center}
 .brand img{height:70px;width:auto;margin-bottom:12px;filter: brightness(0) invert(1);}
 .brand b{display:block;font-size:16px;font-weight:800;letter-spacing:-.2px;line-height:1.2}
 .brand span{font-size:12px;color:#9ac0b0}
@@ -46,7 +46,7 @@ aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:st
 
 #sideActions .nav { font-size: 13px; padding: 9px 12px; }
 #sideActions .nav svg { flex: none; }
-body.logged-in aside { padding-top: 70px; overflow-y: auto; }
+body.logged-in aside { padding-top: 20px; overflow-y: auto; }
 
 main{padding:28px 32px 60px;min-width:0}
 .top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--oscuro)}
@@ -159,7 +159,6 @@ tr.alert-row td:first-child { border-left: 5px solid var(--alert-line) !importan
 .grid label,.lb{font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:3px}
 .grid .in,textarea.in,.dlg .in{width:100%}
 textarea.in{min-height:110px;resize:vertical}
-textarea.in[readonly]{background:#f5f5f5 !important;cursor:not-allowed;opacity:0.85}
 
 #actaOutContainer, #informeOutContainer { background: #d9d9d9; padding: 20px; border-radius: 14px; margin-top: 20px; }
 .acta-page { background: #fff; width: 21.59cm; min-height: 27.94cm; margin: 0 auto; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; position: relative; font-family: var(--font-acta); color: #000; }
@@ -282,6 +281,14 @@ dialog[open]{animation:pop .18s ease-out}
 .chart-container { position: relative; width: 100%; height: 300px; margin-top: 12px; }
 .chart-container-sm { position: relative; width: 100%; height: 250px; margin-top: 12px; }
 
+.votos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px}
+.voto-item{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--card);border-left:4px solid var(--naranja)}
+.voto-item.ganador{border-left-color:var(--ok);background:var(--okb)}
+.voto-item .cand-info{font-size:12.5px;margin-bottom:8px}
+.voto-item .cand-info b{font-size:14px}
+.voto-item .voto-row{display:flex;gap:8px;align-items:center}
+.voto-item input[type=number]{width:90px}
+
 .vac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 12px; }
 .vac-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 .vac-card-header { border-bottom: 2px solid var(--line); padding-bottom: 8px; font-weight: 800; color: var(--oscuro); font-size: 15px; }
@@ -317,7 +324,7 @@ dialog[open]{animation:pop .18s ease-out}
   @page { size: letter; margin: 0; }
   html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; display: block !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   main { padding: 0 !important; }
-  aside, .top, .noprint, #vSeg, #vCron, #vAnal, #vVac, #vVotantes, #vCargaVotos, #vGanadores, #vSoporte, #vAnexos, #toast, #topbar, #loginScreen { display: none !important; }
+  aside, .top, .noprint, #vSeg, #vCron, #vAnal, #vVac, #vVotantes, #vCargaVotos, #vGanadores, #vSoporte, #toast, #topbar, #loginScreen { display: none !important; }
   #vAct { display: block !important; }
   body.printing-informe #actaOutContainer { display: none !important; }
   #actaOutContainer, #informeOutContainer { background: none !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; }
@@ -445,15 +452,106 @@ td small{font-size:12.5px}
 @media (prefers-reduced-motion:reduce){.cr-item,.cr-stage,.cr-stat,.cr-next,.cr-next .ic2,.progress-bar-fill,.cron-panel::before,.tl-status{animation:none !important}}
 
 body.logged-out aside, body.logged-out main { filter: blur(3px); pointer-events: none; user-select: none; }
-body.logged-in main { padding-top: 60px; }
+body.logged-in main { padding-top: 20px; }
 body.logged-in #topbar { display: flex; }
 
 #loginScreen .in { padding: 12px; }
+
+/* ============ USER CARD EN EL SIDEBAR ============ */
+.user-card {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #14523e 0%, #0B3B2C 100%);
+  border-radius: 14px;
+  border: 1px solid #2a5e4d;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+.user-card .user-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.user-card .user-role {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: #C6ED6E;
+}
+.user-card .btn-logout {
+  margin-top: 4px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all .18s;
+}
+.user-card .btn-logout:hover {
+  background: rgba(231,76,60,.85);
+  border-color: #e74c3c;
+}
+.user-card .session-timer {
+  font-size: 11px;
+  color: #9ac0b0;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+
+.reset-link {
+  background: none;
+  border: none;
+  color: var(--oscuro);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px 0;
+  text-align: center;
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+.reset-link:hover { color: var(--naranja); }
+
+#dlgReset .db .tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+#dlgReset .db .tabs button {
+  border: 0;
+  background: none;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--mut);
+  border-bottom: 3px solid transparent;
+  font-size: 13px;
+}
+#dlgReset .db .tabs button.on {
+  color: var(--oscuro);
+  border-bottom-color: var(--naranja);
+}
 </style>
 </head>
 <body class="logged-out">
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%);display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:22px;padding:34px 30px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);">
     <div style="text-align:center;margin-bottom:20px;">
@@ -464,23 +562,12 @@ body.logged-in #topbar { display: flex; }
     <label style="font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px;">Usuario</label>
     <input class="in" id="loginUser" autocomplete="username" style="width:100%;margin-bottom:12px;">
     <label style="font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px;">Contraseña</label>
-    <input class="in" id="loginPass" type="password" autocomplete="current-password" style="width:100%;margin-bottom:12px;">
+    <input class="in" id="loginPass" type="password" autocomplete="current-password" style="width:100%;margin-bottom:16px;">
     <div id="loginErr" style="color:var(--alert-line);font-size:12.5px;margin-bottom:10px;min-height:16px;"></div>
     <button class="btn p" id="loginBtn" style="width:100%;padding:12px;font-weight:800" onclick="doLogin()">Ingresar</button>
+    <button class="reset-link" onclick="abrirResetDesdeLogin()">¿Olvidaste tu contraseña?</button>
     <div id="loginLoad" class="hide" style="text-align:center;margin-top:10px;color:var(--mut);font-size:12px;">Conectando con el servidor...</div>
-    <div style="text-align:center; margin-top:14px;">
-      <a href="#" onclick="abrirRecuperarPass(); return false;" style="font-size:12.5px;color:var(--oscuro);font-weight:600;text-decoration:none;">¿Olvidaste tu contraseña?</a>
-    </div>
   </div>
-</div>
-
-<!-- ================= TOPBAR ================= -->
-<div id="topbar" class="noprint hide" style="position:fixed;top:0;right:0;left:244px;z-index:100;background:#fff;border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(11,59,44,.06);">
-  <span id="badgeRol" class="tag b" style="font-weight:800;"></span>
-  <span id="bannerEleccion" class="tag r hide" style="font-weight:800;">🔒 ELECCIONES CERRADAS</span>
-  <span style="flex:1"></span>
-  <span id="userInfo" style="font-weight:700;color:var(--oscuro);"></span>
-  <button class="btn sm" onclick="doLogout()">Salir</button>
 </div>
 
 <aside class="noprint">
@@ -489,14 +576,24 @@ body.logged-in #topbar { display: flex; }
    <b>Elecciones</b>
    <span>Consejos y comités</span>
  </div>
+
+ <div id="userCard" class="user-card hide">
+   <div class="user-role" id="userCardRole">Administrador</div>
+   <div class="user-name" id="userCardName">Nombre del usuario</div>
+   <button class="btn-logout" onclick="doLogout()">
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+     Cerrar sesión
+   </button>
+   <div class="session-timer" id="sessionTimer">Sesión: 05:00</div>
+ </div>
+
  <button class="nav on" id="n1" onclick="tab(1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/></svg>Cronograma</button>
  <button class="nav" id="n2" onclick="tab(2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>Seguimiento candidatos</button>
  <button class="nav" id="n3" onclick="tab(3)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Censo Votantes</button>
  <button class="nav" id="n4" onclick="tab(4)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analítica</button>
  <button class="nav" id="n5" onclick="tab(5)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Cargos / Vacantes</button>
  <button class="nav" id="n6" onclick="tab(6)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>Cargar Votos</button>
- <button class="nav" id="n7" onclick="tab(7)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Generar Actas</button>
- <button class="nav" id="n10" onclick="tab(10)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Anexos e Informes</button>
+ <button class="nav" id="n7" onclick="tab(7)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Actas</button>
  <button class="nav" id="n8" onclick="tab(8)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Directorio Ganadores</button>
  <button class="nav" id="n9" onclick="tab(9)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>Registro Soporte</button>
 
@@ -515,35 +612,26 @@ body.logged-in #topbar { display: flex; }
      <button class="btn-backup import" onclick="document.getElementById('fileImport').click()">📂 Importar Respaldo</button>
      <input type="file" id="fileImport" class="hide" accept=".json" onchange="importarRespaldo(this)">
    </div>
-   <p style="margin-top:10px;margin-bottom:0;">Los datos se guardan en este navegador. Usa el botón superior para respaldar.</p>
+   <p style="margin-top:10px;margin-bottom:0;">Los datos se guardan en este navegador.</p>
  </div>
 </aside>
 <main>
-<!-- SECCIÓN CRONOGRAMA -->
 <section id="vCron">
  <div class="top"><h1>Cronograma y Configuración</h1><p>Visualiza el cronograma y define qué órganos están activos para esta jornada.</p></div>
  <div class="card">
    <h3>⚙️ Órganos Activos en esta Jornada</h3>
-   <p class="help" style="margin-top:0">Selecciona los órganos que participarán. Los módulos de Seguimiento, Analítica, Vacantes, Carga de Votos y Actas solo tendrán en cuenta estas opciones.</p>
+   <p class="help" style="margin-top:0">Selecciona los órganos que participarán.</p>
    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:10px">
-     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
-       <input type="checkbox" class="ck-org" value="Consejo de Facultad" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Consejo de Facultad
-     </label>
-     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
-       <input type="checkbox" class="ck-org" value="Consejo Directivo" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Consejo Directivo
-     </label>
-     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
-       <input type="checkbox" class="ck-org" value="Consejo Académico" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Consejo Académico
-     </label>
-     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
-       <input type="checkbox" class="ck-org" value="Comité de Posgrado" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Comité de Posgrado
-     </label>
+     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" class="ck-org" value="Consejo de Facultad" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Consejo de Facultad</label>
+     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" class="ck-org" value="Consejo Directivo" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Consejo Directivo</label>
+     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" class="ck-org" value="Consejo Académico" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Consejo Académico</label>
+     <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" class="ck-org" value="Comité de Posgrado" checked onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Comité de Posgrado</label>
    </div>
  </div>
  <div class="cron-grid">
    <div class="cron-panel" id="panelCronPub">
      <div class="cron-header"><h3>🌐 Cronograma Público</h3><button class="btn sm" onclick="descargarCronImagen('panelCronPub', 'Cronograma_Publico')">📸 Descargar Imagen</button></div>
-     <p class="help" style="margin-top:0">Información de consulta pública. Las fechas pueden estar sujetas a cambios.</p>
+     <p class="help" style="margin-top:0">Información de consulta pública.</p>
      <div class="progress-container"><div class="progress-bar-bg"><div class="progress-bar-fill" id="cronPubProgress" style="width:0%">0%</div></div></div>
      <div id="cronNextPub"></div>
      <div id="cronPubList"></div>
@@ -565,9 +653,8 @@ body.logged-in #topbar { display: flex; }
  </div>
 </section>
 
-<!-- SECCIÓN SEGUIMIENTO -->
 <section id="vSeg" class="hide">
- <div class="top"><h1>Seguimiento candidatos</h1><p>Valida requisitos, registra novedades y controla cada fórmula.</p></div>
+ <div class="top"><h1>Seguimiento candidatos</h1><p>Valida requisitos, registra novedades y controla cada fórmula (principal y suplente).</p></div>
  <div class="kpis" id="kpis"></div>
  <div class="kpis novedad" id="kpisNovedad" style="margin-bottom:16px"></div>
  <div class="prog"><div class="t"><span>Avance de validación</span><span id="pct"></span></div><div class="seg" id="seg"></div>
@@ -590,13 +677,12 @@ body.logged-in #topbar { display: flex; }
   <button class="btn" onclick="expPDF()">Descargar PDF</button>
  </div>
  <div class="wrap"><table id="tbl"><thead><tr><th>Cargo</th><th>Candidato / Contacto</th><th>Rol y órgano</th><th>Facultad y programa</th><th class="c">Sem.</th><th class="c">TH</th><th class="c">Egresados</th><th class="c">Sec. General</th><th class="c">Fac./Prog.</th><th>Novedad</th><th>Estado</th><th></th></tr></thead></table>
- <div id="vacio" class="empty hide">Aún no hay candidatos.</div></div>
+ <div id="vacio" class="empty hide">Aún no hay candidatos.<br>Carga un Excel, agrega uno a mano o <a href="#" onclick="demo();return false">carga datos de ejemplo</a>.</div></div>
  <p class="help">Toca una casilla para cambiarla: vacío (pendiente), ✔ (cumple) o ✕ (tiene llamado de atención).</p>
 </section>
 
-<!-- SECCIÓN ACTAS -->
 <section id="vAct" class="hide">
- <div class="top noprint"><h1>Generar Actas</h1><p>Registra los votos, marca los ganadores y genera el acta oficial lista para firmar.</p></div>
+ <div class="top noprint"><h1>Actas</h1><p>Registra los votos, marca los ganadores y genera el acta lista para firmar.</p></div>
  <div class="card noprint">
   <h3>Datos del acta</h3>
   <div class="grid">
@@ -607,7 +693,7 @@ body.logged-in #topbar { display: flex; }
    <div><label>Fecha (Automática)</label><input class="in" type="date" id="ad" readonly></div>
    <div><label>Hora de Escrutinio</label><input class="in" type="time" id="ah" value="08:00"></div>
    <div><label>Lugar</label><input class="in" id="al" placeholder="Ciudad o sala" value="Bogotá"></div>
-   <div><label>Tamaño de letra del cuerpo</label><input type="range" id="fontSizeSlider" min="10" max="18" value="12" oninput="ajustarTamanoLetra(this.value)"></div>
+   <div><label>Tamaño de letra</label><input type="range" id="fontSizeSlider" min="10" max="18" value="12" oninput="ajustarTamanoLetra(this.value)"></div>
   </div>
   <div style="margin-top:16px; display:flex; align-items:center; gap:10px;">
     <input type="checkbox" id="chkFirmada" style="width:20px;height:20px;accent-color:var(--oscuro);">
@@ -616,14 +702,14 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="card noprint hide" id="cardVacantes1">
    <h3>⚠️ Cargos Vacantes</h3>
-   <p class="help" style="margin-top:0">Cargos que no fueron ocupados en la primera vuelta.</p>
+   <p class="help" style="margin-top:0">Estos son los cargos que no fueron ocupados en la primera vuelta.</p>
    <div class="wrap"><table style="min-width:100%"><thead><tr><th>Órgano</th><th>Facultad</th><th>Rol</th><th>Motivo</th></tr></thead><tbody id="tablaVacantes1"></tbody></table></div>
  </div>
  <div class="card noprint">
   <h3>Votos y ganadores</h3>
   <p class="help" id="helpVotacion"></p>
   <div id="mensajePosibleGanador" class="hide" style="background:#FFF3CD; border:2px solid #FFC107; padding:10px; border-radius:10px; font-weight:bold; color:#856404; margin-bottom:10px;">
-    ⚠️ Posibles ganadores detectados (resaltados en amarillo). Confirma antes de generar el acta.
+    ⚠️ Posibles ganadores detectados (resaltados en amarillo).
   </div>
   <div class="wrap"><table style="min-width:900px">
       <thead><tr>
@@ -639,29 +725,9 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="card noprint" style="background: #f7fbf8; border: 2px solid var(--oscuro);">
   <h3>📝 Texto del acta oficial (Editable)</h3>
-  <p class="help" style="margin-top:0">Este texto ya viene predefinido. Puedes editarlo y se guarda solo. El sistema reemplaza lo que esté entre <code>{{ }}</code>.</p>
+  <p class="help" style="margin-top:0">Puedes editar el texto. Variables entre <code>{{ }}</code>.</p>
   <textarea class="in" id="at" oninput="guardarTextoActa()" style="min-height: 600px; font-family: monospace; font-size: 13px; line-height: 1.5; background: #fff; padding: 20px;"></textarea>
-  <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()" id="btnRestaurarActa">↺ Restaurar texto predefinido</button></div>
-  <details style="margin-top:15px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid var(--line);">
-    <summary style="font-weight: 800; cursor: pointer; color: var(--oscuro);">🔍 Ver variables disponibles</summary>
-    <div style="margin-top:10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 12.5px; color: var(--mut);">
-      <div><code>{{consejo}}</code> Órgano seleccionado</div>
-      <div><code>{{facultad}}</code> Facultad seleccionada</div>
-      <div><code>{{lugar}}</code> Lugar escrito arriba</div>
-      <div><code>{{numero}}</code> Número de Acta</div>
-      <div><code>{{jornada}}</code> Primera o Segunda Vuelta</div>
-      <div><code>{{periodo}}</code> Periodo actual</div>
-      <div><code>{{fecha_letras}}</code> Fecha en letras</div>
-      <div><code>{{fecha_convocatoria}}</code> Fecha de convocatoria</div>
-      <div><code>{{f2_inscripcion}}</code> Fechas Segunda Vuelta</div>
-      <div><code>{{anexos}}</code> Lista de anexos</div>
-      <div><code>{{literal_D_E}}</code> Considerandos vacantes</div>
-      <div><code>{{tabla_ganadores}}</code> Tabla de elegidos</div>
-      <div><code>{{anio}}</code> / <code>{{anio_siguiente}}</code></div>
-      <div><code>{{hora_actual}}</code> / <code>{{hora_actual_letras}}</code></div>
-      <div><code>{{fecha_firma_letras}}</code> Fecha de firma</div>
-    </div>
-  </details>
+  <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()">↺ Restaurar texto predefinido</button></div>
  </div>
  <div class="card noprint">
   <h3>Firmas de los asistentes al escrutinio</h3>
@@ -673,6 +739,20 @@ body.logged-in #topbar { display: flex; }
   <div class="firmas-grid" id="firmasGrid"></div>
  </div>
  <div class="card noprint">
+   <h3>📄 Generar Informes de Votaciones (Anexos)</h3>
+   <div class="bar">
+     <select class="in" id="inf_jornada"><option value="1">Primera Jornada</option><option value="2">Segunda Jornada</option></select>
+     <select class="in" id="inf_rol">
+       <option value="Todos">Todos los roles</option>
+       <option value="Docente">Docentes</option>
+       <option value="Estudiante">Estudiantes</option>
+       <option value="Egresado">Egresados</option>
+     </select>
+     <button class="btn p" onclick="generarInformeVotacion()">Generar Informe</button>
+     <button class="btn" onclick="imprimirInforme()">Imprimir / PDF (horizontal)</button>
+   </div>
+ </div>
+ <div class="card noprint">
   <div class="bar" style="margin:0">
     <button class="btn p" onclick="genActa()">Generar acta oficial</button>
     <button class="btn" onclick="window.print()">Imprimir o guardar PDF (Acta)</button>
@@ -680,64 +760,16 @@ body.logged-in #topbar { display: flex; }
   </div>
  </div>
  <div id="actaOutContainer" class="hide"><div class="acta-page" id="actaOut"></div></div>
-</section>
-
-<!-- SECCIÓN ANEXOS -->
-<section id="vAnexos" class="hide">
- <div class="top"><h1>Anexos e Informes</h1><p>Genera los informes consolidados de votaciones por rol, jornada y facultad.</p></div>
- 
- <div class="card">
-   <h3>⚙️ Configuración del Anexo</h3>
-   <p class="help" style="margin-top:0">Ajusta los filtros antes de generar el informe. El resultado es un documento oficial horizontal.</p>
-   <div class="grid">
-     <div>
-       <label>Jornada</label>
-       <select class="in" id="inf_jornada">
-         <option value="1">Primera Vuelta</option>
-         <option value="2">Segunda Vuelta</option>
-       </select>
-     </div>
-     <div>
-       <label>Rol</label>
-       <select class="in" id="inf_rol">
-         <option value="Todos">Todos los roles</option>
-         <option value="Docente">Docentes</option>
-         <option value="Estudiante">Estudiantes</option>
-         <option value="Egresado">Egresados</option>
-       </select>
-     </div>
-     <div>
-       <label>Órgano (opcional)</label>
-       <select class="in" id="inf_organo">
-         <option value="">Todos los órganos</option>
-       </select>
-     </div>
-     <div>
-       <label>Facultad (opcional)</label>
-       <select class="in" id="inf_facultad">
-         <option value="">Todas las facultades</option>
-       </select>
-     </div>
-   </div>
-   <div class="bar" style="margin-top:16px; margin-bottom:0;">
-     <button class="btn p" onclick="generarInformeVotacion()">📄 Generar anexo</button>
-     <button class="btn" onclick="imprimirInforme()">🖨 Imprimir / PDF (horizontal)</button>
-   </div>
- </div>
-
  <div id="informeOutContainer" class="hide"><div class="acta-page" id="informeOut"></div></div>
 </section>
 
-<!-- SECCIÓN CENSO VOTANTES -->
 <section id="vVotantes" class="hide">
- <div class="top"><h1>Censo Votantes</h1><p>Gestiona el total del censo electoral y las personas habilitadas.</p></div>
+ <div class="top"><h1>Censo Votantes</h1><p>Gestiona el total del censo electoral y las personas habilitadas para votar.</p></div>
  <div class="kpis" id="censoKpisTop"></div>
   <div class="grid" style="margin-bottom:20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
     <div class="card">
       <h3>📊 Avance de habilitación</h3>
-      <div class="progress-container" style="margin-bottom:0">
-        <div class="progress-bar-bg"><div class="progress-bar-fill" id="barVotantes" style="width:0%">0%</div></div>
-      </div>
+      <div class="progress-container" style="margin-bottom:0"><div class="progress-bar-bg"><div class="progress-bar-fill" id="barVotantes" style="width:0%">0%</div></div></div>
       <p class="help" style="margin-top:12px">Fecha y hora de corte: <b id="lblFechaCorte">No definida</b></p>
     </div>
     <div class="card">
@@ -764,18 +796,15 @@ body.logged-in #topbar { display: flex; }
     <div class="card"><h3>🎓 Distribución por Rol</h3><div class="chart-xl" style="height:360px"><canvas id="chartCensoRol"></canvas></div></div>
   </div>
   <div class="card">
-    <h3>📋 Detalle por Facultad y Rol</h3>
-    <div class="wrap">
-      <table class="tbl-pro" style="min-width:100%">
+    <h3>📋 Detalle de Habilitación por Facultad y Rol</h3>
+    <div class="wrap"><table class="tbl-pro" style="min-width:100%">
         <thead><tr><th class="c">#</th><th>Facultad</th><th class="c">Estudiantes</th><th class="c">Docentes</th><th class="c">Egresados</th><th class="c">Presenso / Incl.</th><th class="c">Total</th><th>% del censo</th></tr></thead>
         <tbody id="tablaCensoDetalle"></tbody>
         <tfoot id="tfootCensoDetalle"></tfoot>
-      </table>
-    </div>
+      </table></div>
   </div>
  </section>
 
-<!-- SECCIÓN ANALÍTICA -->
 <section id="vAnal" class="hide">
  <div class="top"><h1>Analítica y Estadísticas</h1><p>Participación, comparativas y métricas del proceso electoral.</p></div>
  <div class="kpis" id="analKpis"></div>
@@ -787,7 +816,7 @@ body.logged-in #topbar { display: flex; }
   <div class="card"><h3>📊 Votos válidos por Facultad</h3><div class="chart-xl"><canvas id="chartFac"></canvas></div></div>
   <div class="dash-grid wide">
     <div class="card">
-      <h3>🏆 Resultados Electorales</h3>
+      <h3>🏆 Resultados Electorales por Facultad</h3>
       <div class="wrap"><table class="tbl-pro" style="min-width:100%">
           <thead><tr><th>Facultad</th><th>Órgano</th><th>Rol</th><th>Ganador</th><th class="c">Votos</th><th>% del cargo</th></tr></thead>
           <tbody id="tablaResumenResultados"></tbody>
@@ -813,9 +842,8 @@ body.logged-in #topbar { display: flex; }
   </div>
  </section>
 
-<!-- SECCIÓN CARGOS / VACANTES -->
 <section id="vVac" class="hide">
- <div class="top"><h1>Seguimiento de Cargos y Vacantes</h1><p>Verifica cobertura por facultad y rol.</p></div>
+ <div class="top"><h1>Seguimiento de Cargos y Vacantes</h1><p>Verifica que todas las facultades tengan candidatos en todos los roles.</p></div>
  <div class="bar">
    <span class="sp"></span>
    <button class="btn" style="background:#1d6f42;color:white;border-color:#1d6f42" onclick="expVacantesXL()">Descargar Reporte Excel</button>
@@ -825,13 +853,13 @@ body.logged-in #topbar { display: flex; }
  <div class="vac-grid" id="vacList"></div>
 </section>
 
-<!-- SECCIÓN CARGAR VOTOS -->
 <section id="vCargaVotos" class="hide">
  <div class="top"><h1>Cargar Archivo de Votos</h1><p>Sube los archivos Excel con los votos consolidados por órgano.</p></div>
  <div class="grid" style="grid-template-columns: 1fr 2fr; gap: 20px;">
    <div class="card">
      <h3>1. Selecciona el Órgano (Opcional)</h3>
      <div style="margin-bottom: 20px;">
+       <label>Si los archivos no traen el tipo de órgano, selecciónalo aquí.</label>
        <select class="in" id="cargaOrgano" style="width:100%"><option value="">Detectar automáticamente</option></select>
      </div>
      <h3>2. Descarga la Plantilla</h3>
@@ -840,7 +868,7 @@ body.logged-in #topbar { display: flex; }
        <h4 style="margin:0 0 10px; font-size:13px; color:var(--ok)">Columnas esperadas:</h4>
        <ul style="font-size:11.5px; margin:0; padding-left:15px; color:var(--mut); line-height:1.6;">
          <li>Tipo</li><li>Facultad</li><li>Rol</li><li>Doc. principal / Doc. suplente</li>
-         <li>Nombre1 / Nombre2</li><li>Email / Teléfono</li><li>Estado</li><li>Votos</li>
+         <li>Nombre1 / Nombre2</li><li>Email / Teléfono (opcional)</li><li>Estado</li><li>Votos</li>
        </ul>
      </div>
    </div>
@@ -849,7 +877,7 @@ body.logged-in #topbar { display: flex; }
      <div class="upload-zone" id="dropZone" onclick="votosFileInput.click()">
        <div class="upload-icon">📄</div>
        <b>Haz clic o arrastra tus archivos aquí</b>
-       <p class="help">Formatos: .xlsx, .xls, .csv</p>
+       <p class="help">Formatos permitidos: .xlsx, .xls, .csv</p>
        <input type="file" id="votosFileInput" class="hide" accept=".xlsx,.xls,.csv" multiple onchange="procesarArchivosVotos(this)">
      </div>
      <div id="cargaStatus" style="margin-top: 20px; text-align:center; font-weight:600; color:var(--ok); line-height:1.6"></div>
@@ -861,9 +889,8 @@ body.logged-in #topbar { display: flex; }
  </div>
 </section>
 
-<!-- SECCIÓN DIRECTORIO GANADORES -->
 <section id="vGanadores" class="hide">
- <div class="top"><h1>Directorio de Ganadores</h1><p>Información de contacto de los electos.</p></div>
+ <div class="top"><h1>Directorio de Ganadores</h1><p>Consulta la información de contacto de los candidatos electos.</p></div>
  <div class="bar">
    <select class="in" id="gOrgFilter" onchange="renderDirectorio()"><option value="">Todos los órganos</option></select>
    <select class="in" id="gFacFilter" onchange="renderDirectorio()"><option value="">Todas las facultades</option></select>
@@ -879,9 +906,8 @@ body.logged-in #topbar { display: flex; }
    </table></div>
 </section>
 
-<!-- SECCIÓN REGISTRO SOPORTE -->
 <section id="vSoporte" class="hide">
- <div class="top"><h1>Registro de Soporte</h1><p>Gestiona los casos, PQRS y solicitudes.</p></div>
+ <div class="top"><h1>Registro de Soporte</h1><p>Gestiona los casos, PQRS y solicitudes de soporte técnico o electoral.</p></div>
  <div class="kpis" id="sopKpis"></div>
  <div class="dash-grid">
    <div class="card"><h3>📞 Casos por canal</h3><div class="chart-md"><canvas id="chartSopCanal"></canvas></div></div>
@@ -893,7 +919,7 @@ body.logged-in #topbar { display: flex; }
    <div class="grid">
      <div><label>Nombre Completo</label><input class="in" id="sop_nombre" placeholder="Ej. Juan Pérez"></div>
      <div><label>Documento</label><input class="in" id="sop_doc" placeholder="Ej. 10203040"></div>
-     <div><label>Motivo</label><input class="in" id="sop_motivo" placeholder="Ej. No aparece en el censo"></div>
+     <div><label>Motivo del Soporte</label><input class="in" id="sop_motivo" placeholder="Ej. No aparece en el censo"></div>
      <div><label>¿Quién lo gestiona?</label><input class="in" id="sop_gestor" placeholder="Ej. Coordinador Electoral"></div>
    </div>
    <div style="margin-top:16px;background:#f0f7f2;padding:14px;border-radius:14px">
@@ -909,7 +935,7 @@ body.logged-in #topbar { display: flex; }
    </div>
    <div class="grid" style="margin-top:12px;">
      <div><label>¿Fue Solucionado?</label><select class="in" id="sop_solucionado"><option value="no">No</option><option value="si">Sí</option></select></div>
-     <div style="grid-column: span 2;"><label>Observaciones (Opcional)</label><input class="in" id="sop_observaciones" placeholder="Detalles"></div>
+     <div style="grid-column: span 2;"><label>Observaciones (Opcional)</label><input class="in" id="sop_observaciones" placeholder="Detalles de la solución o gestión"></div>
    </div>
    <div style="margin-top:16px"><button class="btn p" onclick="guardarSoporte()">➕ Registrar Caso</button></div>
  </div>
@@ -999,13 +1025,12 @@ body.logged-in #topbar { display: flex; }
   <div class="dh"><h3>👥 Gestión de usuarios</h3><button onclick="dlgUsuarios.close()">✕</button></div>
   <div class="db">
     <div class="card" style="margin-bottom:12px;">
-      <h3 id="u_form_title">Nuevo usuario</h3>
-      <input type="hidden" id="u_edit_id">
+      <h3>Nuevo usuario</h3>
       <div class="grid">
         <div><label>Usuario</label><input class="in" id="u_new_user"></div>
         <div><label>Nombre completo</label><input class="in" id="u_new_nombre"></div>
-        <div><label>Correo electrónico</label><input class="in" id="u_new_email" type="email" placeholder="usuario@unbosque.edu.co"></div>
-        <div><label>Contraseña</label><input class="in" id="u_new_pass" type="password" placeholder="Contraseña obligatoria"></div>
+        <div><label>Correo electrónico</label><input class="in" id="u_new_email" type="email"></div>
+        <div><label>Contraseña</label><input class="in" id="u_new_pass" type="password"></div>
         <div><label>Rol</label>
           <select class="in" id="u_new_rol">
             <option value="administrador">Administrador</option>
@@ -1018,16 +1043,13 @@ body.logged-in #topbar { display: flex; }
         </div>
       </div>
       <div style="margin-top:10px;">
-        <label style="font-weight:700">Módulos permitidos</label>
+        <label style="font-weight:700">Módulos permitidos (para Editor/Lectura)</label>
         <div id="u_new_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
       </div>
-      <div style="margin-top:12px; display:flex; gap:8px;">
-        <button class="btn p" onclick="guardarUsuario()">💾 Guardar</button>
-        <button class="btn hide" id="u_btn_cancel" onclick="resetUsuarioForm()">Cancelar edición</button>
-      </div>
+      <div style="margin-top:12px;"><button class="btn p" onclick="crearUsuario()">➕ Crear usuario</button></div>
     </div>
     <div class="wrap"><table class="tbl-pro" style="min-width:100%">
-      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Módulos</th><th>Estado</th><th class="c">Acciones</th></tr></thead>
+      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Módulos</th><th>Estado</th><th class="c">Acción</th></tr></thead>
       <tbody id="tablaUsuarios"></tbody>
     </table></div>
   </div>
@@ -1038,7 +1060,7 @@ body.logged-in #topbar { display: flex; }
   <div class="dh"><h3>📜 Log de auditoría</h3><button onclick="dlgLog.close()">✕</button></div>
   <div class="db">
     <div class="bar">
-      <input class="in" id="logBuscar" placeholder="🔎 Buscar" oninput="renderLog()" style="flex:1;">
+      <input class="in" id="logBuscar" placeholder="🔎 Buscar por usuario, acción o módulo" oninput="renderLog()" style="flex:1;">
       <button class="btn sm" onclick="expLogXL()">Exportar Excel</button>
       <button class="btn sm" onclick="limpiarLog()" style="color:#b03a2e;">Limpiar log</button>
     </div>
@@ -1050,33 +1072,41 @@ body.logged-in #topbar { display: flex; }
   <div class="df"><button class="btn" onclick="dlgLog.close()">Cerrar</button></div>
 </dialog>
 
-<dialog id="dlgRecuperar">
-  <div class="dh"><h3>🔑 Restablecer contraseña</h3><button onclick="dlgRecuperar.close()">✕</button></div>
+<dialog id="dlgReset">
+  <div class="dh"><h3>🔑 Restablecer contraseña</h3><button onclick="dlgReset.close()">✕</button></div>
   <div class="db">
-    <div id="recuperarStep1">
-      <p class="help" style="margin-top:0">Ingresa tu correo electrónico registrado. Te enviaremos un enlace para restablecer tu contraseña.</p>
-      <label>Correo electrónico</label>
-      <input class="in" id="rec_email" type="email" placeholder="tu@unbosque.edu.co" style="width:100%">
-      <div id="rec_error" style="color:var(--alert-line);font-size:12.5px;margin-top:10px;min-height:16px;"></div>
-      <button class="btn p" onclick="enviarRecuperacion()" style="margin-top:12px;width:100%">📧 Enviar enlace</button>
+    <div class="tabs">
+      <button id="tabResetCorreo" class="on" onclick="switchResetTab('correo')">📧 Enviar por correo</button>
+      <button id="tabResetManual" onclick="switchResetTab('manual')">🔧 Cambio manual</button>
     </div>
-    <div id="recuperarStep2" class="hide">
-      <p style="color:var(--ok);font-weight:600;">✅ Si el correo está registrado, recibirás un enlace de recuperación.</p>
-      <p class="help">Revisa tu bandeja de entrada (y spam). El enlace expira en 1 hora.</p>
-      <p class="help" style="margin-top:12px;padding:10px;background:#fff3cd;border-radius:8px;color:#856404;">
-        <b>Nota administrativa:</b> Si eres administrador y necesitas restablecer la contraseña de un usuario manualmente, ve a <b>Usuarios</b> → botón 🔑.
-      </p>
+
+    <div id="panelResetCorreo">
+      <p class="help" style="margin-top:0">Se enviará un enlace de restablecimiento al correo registrado del usuario.</p>
+      <label>Correo electrónico del usuario</label>
+      <input class="in" id="resetEmail" type="email" placeholder="usuario@unbosque.edu.co" style="width:100%">
+      <div id="resetEmailMsg" style="font-size:12.5px;margin-top:10px;min-height:18px;"></div>
+      <div style="margin-top:16px"><button class="btn p" onclick="enviarResetCorreo()">📧 Enviar enlace</button></div>
+    </div>
+
+    <div id="panelResetManual" class="hide">
+      <p class="help" style="margin-top:0">Si eres administrador, puedes cambiar la contraseña de cualquier usuario directamente.</p>
+      <label>Usuario</label>
+      <input class="in" id="resetUser" placeholder="nombre de usuario" style="width:100%;margin-bottom:12px">
+      <label>Nueva contraseña</label>
+      <input class="in" id="resetPass1" type="password" placeholder="Mínimo 6 caracteres" style="width:100%;margin-bottom:12px">
+      <label>Confirmar contraseña</label>
+      <input class="in" id="resetPass2" type="password" style="width:100%">
+      <div id="resetManualMsg" style="font-size:12.5px;margin-top:10px;min-height:18px;"></div>
+      <div style="margin-top:16px"><button class="btn p" onclick="cambiarPassManual()">🔧 Cambiar contraseña</button></div>
     </div>
   </div>
-  <div class="df"><button class="btn" onclick="dlgRecuperar.close()">Cerrar</button></div>
+  <div class="df"><button class="btn" onclick="dlgReset.close()">Cerrar</button></div>
 </dialog>
 
 <div id="toast"></div>
 
 <script>
-/* ============================================================
-   CONFIGURACIÓN SUPABASE
-   ============================================================ */
+/* CONFIGURACIÓN SUPABASE */
 const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
 const SUPABASE_ANON_KEY = 'TU-ANON-KEY-AQUI';
 
@@ -1109,9 +1139,7 @@ try {
   }
 } catch(e) { console.error('Supabase init error:', e); }
 
-/* ============================================================
-   CONSTANTES Y ESTADO
-   ============================================================ */
+/* CONSTANTES */
 const $=id=>document.getElementById(id);
 const ORG={'Consejo de Facultad':['Estudiante','Egresado','Docente'],'Consejo Directivo':['Estudiante','Docente'],'Consejo Académico':['Estudiante','Egresado','Docente'],'Comité de Posgrado':['Estudiante','Egresado']};
 const CH={Docente:['th'],Egresado:['eg'],Estudiante:['sg','fp']};
@@ -1130,6 +1158,7 @@ const K='cand_v2', K_CRON='cronograma_v2', K_FIRMAS='firmas_acta_v1', K_VOTANTES
 const K_CENSO='censo_data_v1', K_ORG_ACTIVOS='org_activos_v1', K_SOPORTE='soporte_data_v1';
 const K_TEXTO_ACTA='texto_acta_v4', K_FONT_SIZE='acta_font_size';
 const K_SESSION = 'session_v1', K_CERRADA = 'elecciones_cerradas_v1', K_LOG_LOCAL = 'log_auditoria_local_v1';
+const K_LAST_ACTIVITY = 'session_last_activity';
 
 const CARGOS_TITULAR = ['Vicerrector(a) Académico','Secretaría General','Director (a) de Tecnología','Director (a) Registro y Control Académico','Director (a) de Auditoría Interna'];
 const CARGOS_DELEGADO = ['Delegado (a) de la Vicerrectoría Académica','Delegado (a) de la Secretaría General','Delegado (a) de la Dirección de Tecnología','Delegado (a) de la Dirección de Registro y Control Académico','Delegado (a) de la Dirección de Auditoría Interna'];
@@ -1142,7 +1171,6 @@ const FACULTADES = [
 ];
 const ORG_GLOBALES = ['Consejo Directivo', 'Consejo Académico', 'Comité de Posgrado'];
 const esGlobal = (org) => ORG_GLOBALES.includes(org);
-const esVotoBlanco = (c) => String(c?.pri?.nombre || '').trim().toUpperCase() === 'VOTO EN BLANCO';
 
 let D=[],editId=null,CRON=[],FIRMAS=[];
 let VOTANTES = { totalCenso: 0, totalHabilitados: 0, fechaCorte: '', historial: [] };
@@ -1151,22 +1179,20 @@ let ORG_ACTIVOS = JSON.parse(localStorage.getItem(K_ORG_ACTIVOS) || '["Consejo d
 let chartRolesInstance, chartOrganosInstance, chartFacInstance, chartHistInstance, chartCensoFacInstance, chartCensoRolInstance;
 let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDiaInstance;
 
-/* ============================================================
-   AUTH STATE
-   ============================================================ */
+/* AUTH */
 const MODULOS = [
   {key:'vCron', label:'Cronograma'}, {key:'vSeg', label:'Seguimiento candidatos'},
   {key:'vVotantes', label:'Censo Votantes'}, {key:'vAnal', label:'Analítica'},
   {key:'vVac', label:'Cargos / Vacantes'}, {key:'vCargaVotos', label:'Cargar Votos'},
-  {key:'vAct', label:'Generar Actas'}, {key:'vAnexos', label:'Anexos e Informes'},
-  {key:'vGanadores', label:'Directorio Ganadores'}, {key:'vSoporte', label:'Registro Soporte'}
+  {key:'vAct', label:'Actas'}, {key:'vGanadores', label:'Directorio Ganadores'},
+  {key:'vSoporte', label:'Registro Soporte'}
 ];
 const ROLES = {
   administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
   editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
   lectura:       {label:'Lectura',       mods:[],  puedeEditar:[],       color:'t'},
   agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
-  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vAnexos','vVac','vGanadores','vAnal'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct','vAnexos'], color:'p'},
+  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
   auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'}
 };
 
@@ -1231,7 +1257,6 @@ async function doLogin(){
       id: data.id,
       username: data[CONFIG.col_user],
       nombre: data[CONFIG.col_nombre] || data[CONFIG.col_user],
-      email: data[CONFIG.col_email] || '',
       rol: data[CONFIG.col_rol],
       modulos: Array.isArray(data[CONFIG.col_modulos]) ? data[CONFIG.col_modulos] : []
     };
@@ -1249,10 +1274,14 @@ async function doLogin(){
 }
 
 function doLogout(){
-  if(!confirm('¿Cerrar sesión?')) return;
+  if(!confirm('¿Cerrar sesión ahora?')) return;
+  detenerTimerSesion();
   registrarLog('Cierre de sesión', '-', SESSION?.username || '');
   SESSION = null;
-  localStorage.removeItem(K_SESSION);
+  try {
+    localStorage.removeItem(K_SESSION);
+    localStorage.removeItem(K_LAST_ACTIVITY);
+  } catch(e){}
   location.reload();
 }
 
@@ -1282,21 +1311,77 @@ async function guardarEstadoElecciones(cerrado){
   } catch(e) { console.warn('Guardar estado elecciones:', e.message); }
 }
 
+/* SESIÓN CON TIMER 5 MINUTOS */
+const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
+let _sessionCheckInterval = null;
+
+function registrarActividad(){
+  if(!SESSION) return;
+  try { localStorage.setItem(K_LAST_ACTIVITY, String(Date.now())); } catch(e){}
+}
+
+['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt => {
+  document.addEventListener(evt, registrarActividad, { passive: true, capture: true });
+});
+
+function iniciarTimerSesion(){
+  if(_sessionCheckInterval) clearInterval(_sessionCheckInterval);
+  if(!SESSION) return;
+  const ultimo = Number(localStorage.getItem(K_LAST_ACTIVITY) || 0);
+  if(!ultimo || (Date.now() - ultimo) > SESSION_TIMEOUT_MS){
+    try { localStorage.setItem(K_LAST_ACTIVITY, String(Date.now())); } catch(e){}
+  }
+  _sessionCheckInterval = setInterval(() => {
+    if(!SESSION) return;
+    const ultimo = Number(localStorage.getItem(K_LAST_ACTIVITY) || 0);
+    const restante = SESSION_TIMEOUT_MS - (Date.now() - ultimo);
+    const el = $('sessionTimer');
+    if(el){
+      if(restante > 0){
+        const min = Math.floor(restante/60000);
+        const seg = Math.floor((restante%60000)/1000);
+        el.textContent = `Sesión: ${String(min).padStart(2,'0')}:${String(seg).padStart(2,'0')}`;
+        el.style.color = restante < 60000 ? '#F7941D' : '#9ac0b0';
+      } else {
+        el.textContent = 'Sesión expirada';
+        el.style.color = '#e74c3c';
+      }
+    }
+    if(restante <= 0){
+      clearInterval(_sessionCheckInterval);
+      _sessionCheckInterval = null;
+      toast('⏱️ Sesión expirada por inactividad. Cerrando...');
+      registrarLog('Cierre automático por inactividad', '-', '5 minutos sin actividad');
+      SESSION = null;
+      try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
+      setTimeout(() => { window.location.reload(); }, 1800);
+    }
+  }, 10000);
+}
+
+function detenerTimerSesion(){
+  if(_sessionCheckInterval){ clearInterval(_sessionCheckInterval); _sessionCheckInterval = null; }
+}
+
+function actualizarUserCard(){
+  if(!SESSION){ $('userCard').classList.add('hide'); return; }
+  $('userCard').classList.remove('hide');
+  $('userCardRole').textContent = ROLES[SESSION.rol]?.label || SESSION.rol;
+  $('userCardName').textContent = (SESSION.nombre || SESSION.username) + ' · ' + (ROLES[SESSION.rol]?.label || SESSION.rol);
+}
+
 function aplicarSesion(){
   document.body.classList.remove('logged-out');
   document.body.classList.add('logged-in');
   $('loginScreen').classList.add('hide');
-  $('topbar').classList.remove('hide');
   $('sideActions').classList.remove('hide');
-  $('userInfo').textContent = (SESSION.nombre || SESSION.username) + ' · ' + (ROLES[SESSION.rol]?.label || SESSION.rol);
-  const badge = $('badgeRol');
-  badge.textContent = (ROLES[SESSION.rol]?.label || SESSION.rol);
-  badge.className = 'tag ' + (ROLES[SESSION.rol]?.color || 'b');
+  actualizarUserCard();
   aplicarPermisosUI();
   actualizarBannerCierre();
+  iniciarTimerSesion();
   const mods = getModulosPermitidos();
   if(mods.length){
-    const idx = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vAnexos','vGanadores','vSoporte'].indexOf(mods[0]) + 1;
+    const idx = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].indexOf(mods[0]) + 1;
     if(idx > 0) tab(idx);
   }
 }
@@ -1327,10 +1412,7 @@ function puedeEditar(modulo){
 }
 
 function aplicarPermisosUI(){
-  const mapa = {
-    vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',
-    vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9',vAnexos:'n10'
-  };
+  const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9'};
   const permitidos = getModulosPermitidos();
   MODULOS.forEach(m => {
     const btn = $(mapa[m.key]);
@@ -1342,24 +1424,6 @@ function aplicarPermisosUI(){
   if($('btnVerUsuarios')) $('btnVerUsuarios').style.display = esAdmin ? '' : 'none';
   if($('btnVerLog')) $('btnVerLog').style.display = (esAdmin || esAuditor) ? '' : 'none';
   if($('btnLimpiar')) $('btnLimpiar').style.display = '';
-  
-  // Bloquear textarea del acta si no tiene permiso de edición
-  const ta = $('at');
-  if(ta){
-    const puedeEditarActa = SESSION?.rol === 'administrador' || 
-      (Array.isArray(ROLES[SESSION?.rol]?.puedeEditar) && ROLES[SESSION?.rol].puedeEditar.includes('vAct')) ||
-      (SESSION?.rol === 'editor' && (SESSION?.modulos||[]).includes('vAct'));
-    ta.readOnly = (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') ? true : !puedeEditarActa;
-    ta.style.background = ta.readOnly ? '#f5f5f5' : '#fff';
-    ta.style.cursor = ta.readOnly ? 'not-allowed' : 'text';
-  }
-  const btnRestaurar = $('btnRestaurarActa');
-  if(btnRestaurar){
-    const puedeEditarActa = SESSION?.rol === 'administrador' || 
-      (Array.isArray(ROLES[SESSION?.rol]?.puedeEditar) && ROLES[SESSION?.rol].puedeEditar.includes('vAct'));
-    btnRestaurar.style.display = puedeEditarActa ? '' : 'none';
-  }
-  
   deshabilitarBotonesEdicion();
 }
 
@@ -1371,7 +1435,7 @@ function deshabilitarBotonesEdicion(){
     'button[onclick="openForm()"]','button[onclick="saveForm()"]','button[onclick="aprobarTodos()"]',
     'button[onclick="addActividad()"]','button[onclick="saveActividad()"]',
     'button[onclick="guardarVotantes()"]','button[onclick="guardarSoporte()"]',
-    'button[onclick="genActa()"]','button[onclick="guardarUsuario()"]',
+    'button[onclick="genActa()"]','button[onclick="crearUsuario()"]',
     'button[onclick="guardarTextoActa()"]'
   ];
   selectores.forEach(s => {
@@ -1386,7 +1450,7 @@ function limpiarPantalla(){
     const el = $(id); if(el) el.value = '';
   });
   const mods = getModulosPermitidos();
-  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9,vAnexos:10};
+  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9};
   if(mods.length) tab(mapa[mods[0]] || 1);
   try{ draw(); }catch(e){}
   try{ renderSoportes(); }catch(e){}
@@ -1405,7 +1469,7 @@ async function toggleCerrarElecciones(){
   await guardarEstadoElecciones(nuevo);
   registrarLog(nuevo ? 'Cerrar elecciones' : 'Reabrir elecciones', '-', 'Estado cambiado');
   actualizarBannerCierre();
-  aplicarPermisosUI();
+  deshabilitarBotonesEdicion();
   toast(nuevo ? '🔒 Elecciones cerradas.' : '🔓 Elecciones reabiertas.');
 }
 
@@ -1416,13 +1480,12 @@ function actualizarBannerCierre(){
   if(txt) txt.textContent = ELECCIONES_CERRADAS ? 'Reabrir elecciones' : 'Cerrar elecciones';
 }
 
-/* ========== USUARIOS ========== */
+/* USUARIOS */
 async function abrirUsuarios(){
   if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
   $('u_new_mods').innerHTML = MODULOS.map(m => 
     `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`
   ).join('');
-  resetUsuarioForm();
   await cargarUsuariosDeSupabase();
   renderTablaUsuarios();
   dlgUsuarios.showModal();
@@ -1437,22 +1500,9 @@ async function cargarUsuariosDeSupabase(){
   } catch(e) { console.warn('Usuarios:', e.message); USERS_CACHE = []; }
 }
 
-function resetUsuarioForm(){
-  $('u_edit_id').value = '';
-  $('u_new_user').value = '';
-  $('u_new_nombre').value = '';
-  $('u_new_email').value = '';
-  $('u_new_pass').value = '';
-  $('u_new_rol').value = 'lectura';
-  document.querySelectorAll('.u_mod').forEach(c => c.checked = false);
-  $('u_form_title').textContent = 'Nuevo usuario';
-  $('u_btn_cancel').classList.add('hide');
-  $('u_new_pass').placeholder = 'Contraseña obligatoria';
-}
-
 function renderTablaUsuarios(){
   if(USERS_CACHE.length === 0){
-    $('tablaUsuarios').innerHTML = '<tr><td colspan="6" class="empty">No hay usuarios.</td></tr>';
+    $('tablaUsuarios').innerHTML = '<tr><td colspan="6" class="empty">No hay usuarios cargados.</td></tr>';
     return;
   }
   $('tablaUsuarios').innerHTML = USERS_CACHE.map(u => {
@@ -1463,11 +1513,10 @@ function renderTablaUsuarios(){
       <td><b>${esc(u[CONFIG.col_user])}</b></td>
       <td>${esc(u[CONFIG.col_nombre]||'')}</td>
       <td><span class="tag ${ROLES[rol]?.color||'b'}">${ROLES[rol]?.label||rol}</span></td>
-      <td style="font-size:11.5px">${(rol==='editor'||rol==='lectura'||rol==='agente_mesa') ? mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ')||'—' : '—'}</td>
+      <td style="font-size:11.5px">${(rol==='editor'||rol==='lectura') ? mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ')||'—' : '—'}</td>
       <td>${activo ? '<span class="pill ok">Activo</span>' : '<span class="pill no">Inactivo</span>'}</td>
-      <td class="c" style="white-space:nowrap;">
-        <button class="ic" title="Editar" onclick="editarUsuario('${u.id}')">✎</button>
-        <button class="ic" title="Restablecer contraseña" onclick="restablecerPassword('${u.id}')">🔑</button>
+      <td class="c" style="white-space:nowrap">
+        <button class="ic" title="Restablecer contraseña" onclick="abrirResetParaUsuario('${esc(u[CONFIG.col_user])}','${esc(u.email||'')}')">🔑</button>
         <button class="ic" title="Activar/Desactivar" onclick="toggleActivoUsuario('${u.id}')">${activo?'⏸':'▶'}</button>
         <button class="ic" title="Eliminar" onclick="eliminarUsuario('${u.id}')">🗑</button>
       </td>
@@ -1475,91 +1524,33 @@ function renderTablaUsuarios(){
   }).join('');
 }
 
-function editarUsuario(id){
-  const u = USERS_CACHE.find(x => x.id === id);
-  if(!u) return;
-  $('u_edit_id').value = id;
-  $('u_new_user').value = u[CONFIG.col_user] || '';
-  $('u_new_nombre').value = u[CONFIG.col_nombre] || '';
-  $('u_new_email').value = u[CONFIG.col_email] || '';
-  $('u_new_pass').value = '';
-  $('u_new_pass').placeholder = 'Dejar vacío para mantener actual';
-  $('u_new_rol').value = u[CONFIG.col_rol] || 'lectura';
-  const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
-  document.querySelectorAll('.u_mod').forEach(c => {
-    c.checked = mods.includes(c.value);
-  });
-  $('u_form_title').textContent = 'Editar usuario: ' + u[CONFIG.col_user];
-  $('u_btn_cancel').classList.remove('hide');
-  $('u_new_user').focus();
-}
-
-async function guardarUsuario(){
-  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
-  const editId = $('u_edit_id').value;
+async function crearUsuario(){
   const username = $('u_new_user').value.trim();
   const nombre = $('u_new_nombre').value.trim();
   const email = $('u_new_email').value.trim();
   const pass = $('u_new_pass').value;
   const rol = $('u_new_rol').value;
-  if(!username){ toast('El nombre de usuario es obligatorio'); return; }
-  if(!editId && !pass){ toast('La contraseña es obligatoria para nuevos usuarios'); return; }
-  
-  const mods = [...document.querySelectorAll('.u_mod:checked')].map(i => i.value);
-  
+  if(!username || !pass){ toast('Usuario y contraseña obligatorios'); return; }
+  if(!supabaseClient){ toast('Sin conexión a la base de datos'); return; }
+  const mods = [...document.querySelectorAll('.u_mod:checked')].map(i=>i.value);
   try {
-    if(editId){
-      const update = {
-        [CONFIG.col_user]: username,
-        [CONFIG.col_nombre]: nombre,
-        [CONFIG.col_email]: email,
-        [CONFIG.col_rol]: rol,
-        [CONFIG.col_modulos]: mods
-      };
-      if(pass) update[CONFIG.col_pass] = pass;
-      const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).update(update).eq('id', editId);
-      if(error) throw error;
-      registrarLog('Editar usuario', 'Usuarios', username);
-      toast('✅ Usuario actualizado');
-    } else {
-      const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([{
-        [CONFIG.col_user]: username,
-        [CONFIG.col_nombre]: nombre,
-        [CONFIG.col_email]: email,
-        [CONFIG.col_pass]: pass,
-        [CONFIG.col_rol]: rol,
-        [CONFIG.col_modulos]: mods,
-        [CONFIG.col_activo]: true
-      }]);
-      if(error) throw error;
-      registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
-      toast('✅ Usuario creado');
-    }
-    resetUsuarioForm();
+    const insertData = {
+      [CONFIG.col_user]: username,
+      [CONFIG.col_nombre]: nombre,
+      [CONFIG.col_pass]: pass,
+      [CONFIG.col_rol]: rol,
+      [CONFIG.col_modulos]: mods,
+      [CONFIG.col_activo]: true
+    };
+    if(email) insertData.email = email;
+    const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([insertData]);
+    if(error) throw error;
+    registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
+    $('u_new_user').value=''; $('u_new_nombre').value=''; $('u_new_pass').value=''; $('u_new_email').value='';
     await cargarUsuariosDeSupabase();
     renderTablaUsuarios();
-  } catch(e) {
-    console.error(e);
-    toast('❌ Error: ' + (e.message || 'No se pudo guardar'));
-  }
-}
-
-async function restablecerPassword(id){
-  if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
-  const u = USERS_CACHE.find(x => x.id === id);
-  if(!u) return;
-  const nueva = prompt(`Nueva contraseña para "${u[CONFIG.col_user]}":\n(deja vacío para cancelar)`);
-  if(nueva === null || nueva === '') return;
-  if(nueva.length < 4){ toast('La contraseña debe tener al menos 4 caracteres'); return; }
-  try {
-    const { error } = await supabaseClient.from(CONFIG.tabla_usuarios)
-      .update({[CONFIG.col_pass]: nueva}).eq('id', id);
-    if(error) throw error;
-    registrarLog('Restablecer contraseña', 'Usuarios', u[CONFIG.col_user]);
-    toast('✅ Contraseña restablecida');
-  } catch(e) {
-    toast('❌ Error: ' + e.message);
-  }
+    toast('✅ Usuario creado');
+  } catch(e) { toast('❌ Error: ' + (e.message || 'No se pudo crear')); }
 }
 
 async function toggleActivoUsuario(id){
@@ -1587,50 +1578,7 @@ async function eliminarUsuario(id){
   } catch(e) { toast('Error: ' + e.message); }
 }
 
-/* ========== RECUPERAR CONTRASEÑA ========== */
-function abrirRecuperarPass(){
-  $('rec_email').value = '';
-  $('rec_error').textContent = '';
-  $('recuperarStep1').classList.remove('hide');
-  $('recuperarStep2').classList.add('hide');
-  dlgRecuperar.showModal();
-}
-
-async function enviarRecuperacion(){
-  const email = $('rec_email').value.trim();
-  $('rec_error').textContent = '';
-  if(!email){ $('rec_error').textContent = 'Ingresa tu correo'; return; }
-  
-  try {
-    if(!supabaseClient) throw new Error('Sin conexión al servidor');
-    
-    // Buscar usuario por email
-    const { data } = await supabaseClient
-      .from(CONFIG.tabla_usuarios)
-      .select(CONFIG.col_user)
-      .eq(CONFIG.col_email, email)
-      .maybeSingle();
-    
-    // Por seguridad no revelamos si el correo existe o no
-    // Intentar enviar correo de recuperación si Supabase Auth está configurado
-    if(supabaseClient.auth && supabaseClient.auth.resetPasswordForEmail){
-      try {
-        await supabaseClient.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin
-        });
-      } catch(e) { /* silencioso */ }
-    }
-    
-    $('recuperarStep1').classList.add('hide');
-    $('recuperarStep2').classList.remove('hide');
-    registrarLog('Solicitud recuperación', 'Auth', email);
-  } catch(e) {
-    console.error(e);
-    $('rec_error').textContent = 'Error al enviar: ' + (e.message || 'Intenta de nuevo');
-  }
-}
-
-/* ========== LOG ========== */
+/* LOG */
 async function abrirLog(){
   if(!(SESSION?.rol === 'administrador' || SESSION?.rol === 'auditor')){ toast('Sin permiso'); return; }
   await cargarLogDeSupabase();
@@ -1691,9 +1639,138 @@ function expLogXL(){
   XLSX.writeFile(wb, 'log-auditoria.xlsx');
 }
 
-/* ============================================================
-   NORMALIZACIÓN Y UTILIDADES
-   ============================================================ */
+/* RESET PASSWORD */
+let _resetOrigenLogin = false;
+
+function abrirResetDesdeLogin(){
+  _resetOrigenLogin = true;
+  switchResetTab('correo');
+  $('resetEmail').value = '';
+  $('resetEmailMsg').textContent = '';
+  $('resetManualMsg').textContent = '';
+  if(!SESSION || SESSION.rol !== 'administrador'){
+    $('tabResetManual').style.display = 'none';
+  } else {
+    $('tabResetManual').style.display = '';
+  }
+  dlgReset.showModal();
+}
+
+function abrirResetParaUsuario(username, email){
+  if(SESSION?.rol !== 'administrador'){ toast('Solo administradores'); return; }
+  _resetOrigenLogin = false;
+  switchResetTab('manual');
+  $('resetUser').value = username || '';
+  $('resetPass1').value = '';
+  $('resetPass2').value = '';
+  $('resetManualMsg').textContent = '';
+  $('resetEmail').value = email || '';
+  $('resetEmailMsg').textContent = '';
+  $('tabResetManual').style.display = '';
+  dlgReset.showModal();
+}
+
+function switchResetTab(tab){
+  $('panelResetCorreo').classList.toggle('hide', tab !== 'correo');
+  $('panelResetManual').classList.toggle('hide', tab !== 'manual');
+  $('tabResetCorreo').classList.toggle('on', tab === 'correo');
+  $('tabResetManual').classList.toggle('on', tab === 'manual');
+}
+
+async function enviarResetCorreo(){
+  const email = $('resetEmail').value.trim();
+  const msg = $('resetEmailMsg');
+  msg.style.color = '#b03a2e';
+  msg.textContent = '';
+  if(!email || !/^\S+@\S+\.\S+$/.test(email)){
+    msg.textContent = 'Ingresa un correo válido.';
+    return;
+  }
+  if(!supabaseClient){
+    msg.textContent = 'No hay conexión con el servidor.';
+    return;
+  }
+  try {
+    const { data } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .select(CONFIG.col_user)
+      .eq('email', email)
+      .maybeSingle();
+
+    if(data){
+      const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      const expira = new Date(Date.now() + 60*60*1000).toISOString();
+      try {
+        await supabaseClient.from(CONFIG.tabla_usuarios)
+          .update({ reset_token: token, reset_expira: expira })
+          .eq('email', email);
+      } catch(e) {}
+
+      try {
+        const { error: errAuth } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + window.location.pathname
+        });
+        if(errAuth) throw errAuth;
+        msg.style.color = '#14744a';
+        msg.textContent = '✅ Se envió un correo con instrucciones. Revisa tu bandeja.';
+        registrarLog('Solicitud de restablecimiento por correo', 'Usuarios', email);
+      } catch(err) {
+        msg.style.color = '#b35a06';
+        msg.innerHTML = `⚠️ El envío automático falló. Contacta al administrador.<br><small>Token generado: <code>${token}</code></small>`;
+        registrarLog('Reset correo falló (mostrando token)', 'Usuarios', email);
+      }
+    } else {
+      msg.style.color = '#14744a';
+      msg.textContent = '✅ Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.';
+    }
+  } catch(err) {
+    console.error(err);
+    msg.style.color = '#b03a2e';
+    msg.textContent = 'Error: ' + (err.message || 'No se pudo procesar la solicitud.');
+  }
+}
+
+async function cambiarPassManual(){
+  if(SESSION?.rol !== 'administrador'){ toast('Solo administradores'); return; }
+  const user = $('resetUser').value.trim();
+  const p1 = $('resetPass1').value;
+  const p2 = $('resetPass2').value;
+  const msg = $('resetManualMsg');
+  msg.style.color = '#b03a2e';
+  msg.textContent = '';
+
+  if(!user){ msg.textContent = 'Ingresa el nombre de usuario.'; return; }
+  if(!p1 || p1.length < 6){ msg.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+  if(p1 !== p2){ msg.textContent = 'Las contraseñas no coinciden.'; return; }
+  if(!supabaseClient){ msg.textContent = 'No hay conexión con el servidor.'; return; }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .update({ [CONFIG.col_pass]: p1 })
+      .eq(CONFIG.col_user, user)
+      .select();
+
+    if(error) throw error;
+    if(!data || data.length === 0){
+      msg.textContent = 'Usuario no encontrado.';
+      return;
+    }
+    msg.style.color = '#14744a';
+    msg.textContent = '✅ Contraseña actualizada correctamente.';
+    registrarLog('Cambio manual de contraseña', 'Usuarios', user);
+    setTimeout(() => {
+      $('resetPass1').value = '';
+      $('resetPass2').value = '';
+    }, 1500);
+  } catch(err) {
+    console.error(err);
+    msg.style.color = '#b03a2e';
+    msg.textContent = 'Error: ' + (err.message || 'No se pudo actualizar.');
+  }
+}
+
+/* UTILIDADES */
 const normNombre = (s) => {
   if(!s) return '';
   return String(s).trim().replace(/\s+/g, ' ').toLowerCase().split(' ').map(w => {
@@ -1729,6 +1806,32 @@ function normalizarNombresGlobal() {
     if(c.sup && c.sup.nombre){ const n = normNombre(c.sup.nombre); if(n !== c.sup.nombre){ c.sup.nombre = n; cambios++; } }
   });
   if(cambios) save();
+}
+function limpiarVotosEnBlancoInvalidos() {
+  const esBl = c => String(c.pri.nombre||'').replace(/\s+/g,' ').trim().toUpperCase() === 'VOTO EN BLANCO';
+  const nf = t => norm(t).replace(/\s+/g,' ');
+  const nuevoD = [];
+  const indice = new Map();
+  let cambios = 0;
+  D.forEach(c => {
+    const blanco = esBl(c);
+    if (blanco) {
+      c.pri.nombre = 'Voto en Blanco';
+      if (esGlobal(c.org) && c.votos === 0) { cambios++; return; }
+    }
+    const base = `${c.org}|${esGlobal(c.org) ? '' : nf(c.fac)}|${c.rol}`;
+    const clave = blanco ? `B|${base}` : `C|${base}|${String(c.pri.doc||'').trim() || nf(c.pri.nombre)}`;
+    if (indice.has(clave)) {
+      const i = indice.get(clave);
+      if ((c.votos||0) > (nuevoD[i].votos||0)) nuevoD[i] = c;
+      cambios++;
+      return;
+    }
+    indice.set(clave, nuevoD.length);
+    nuevoD.push(c);
+  });
+  if (cambios > 0 || D.length !== nuevoD.length) { D = nuevoD; save(); }
+  return cambios;
 }
 
 try{ const a=localStorage.getItem(K); if(a) D=JSON.parse(a); }catch(e){}
@@ -1853,35 +1956,57 @@ function toggleErr(pre){
   const v = $(pre+'_nov').value;
   $(pre+'_err_box').classList.toggle('hide', v !== 'Error postulación');
 }
+function inyectarVotosEnBlanco() {
+  const obligatorios = {
+    'Consejo de Facultad': ['Estudiante','Docente','Egresado'],
+    'Consejo Directivo': ['Estudiante','Docente'],
+    'Consejo Académico': ['Estudiante','Docente','Egresado'],
+    'Comité de Posgrado': ['Estudiante','Egresado']
+  };
+  let agregados = 0;
+  ORG_ACTIVOS.forEach(org => {
+    if (esGlobal(org)) {
+      obligatorios[org].forEach(rol => {
+        const existe = D.some(c => c.org === org && c.rol === rol && c.pri.nombre.toUpperCase() === 'VOTO EN BLANCO');
+        if (!existe) {
+          D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: 'N/A',prog: 'N/A',
+            pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null});
+          agregados++;
+        }
+      });
+    } else {
+      FACULTADES.forEach(fac => {
+        obligatorios[org].forEach(rol => {
+          const existe = D.some(c => c.org === org && norm(c.fac).replace(/\s+/g,' ') === norm(fac).replace(/\s+/g,' ') && c.rol === rol && c.pri.nombre.toUpperCase() === 'VOTO EN BLANCO');
+          if (!existe) {
+            D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: fac,prog: 'N/A',
+              pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null});
+            agregados++;
+          }
+        });
+      });
+    }
+  });
+  if (agregados > 0) save();
+}
 
 function updateOrgActivos() {
   ORG_ACTIVOS = [];
   document.querySelectorAll('.ck-org').forEach(chk => { if(chk.checked) ORG_ACTIVOS.push(chk.value); });
   localStorage.setItem(K_ORG_ACTIVOS, JSON.stringify(ORG_ACTIVOS));
+  inyectarVotosEnBlanco();
+  limpiarVotosEnBlancoInvalidos();
   fillSel(); draw(); renderVacantes(); renderDirectorio();
 }
 
 function tab(n){
-  const mapa = {
-    1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',
-    5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',
-    9:'vSoporte',10:'vAnexos'
-  };
+  const mapa = {1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',9:'vSoporte'};
   const modKey = mapa[n];
   if(SESSION && modKey && !puedeVer(modKey)){ toast('⛔ No tienes permiso para este módulo'); return; }
-  
-  ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vAnexos']
-    .forEach((id,i)=>{
-      const t = $(id);
-      if(t) t.classList.toggle('hide', (i+1) !== n);
-    });
-  
-  const botones = ['n1','n2','n3','n4','n5','n6','n7','n8','n9','n10'];
-  botones.forEach((id,i)=>{
-    const b = $(id);
-    if(b) b.classList.toggle('on', (i+1) === n);
+  ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].forEach((id,i)=>{
+    $(id).classList.toggle('hide', i+1 !== n);
+    $('n'+(i+1)).classList.toggle('on', i+1 === n);
   });
-  
   if(n===2) { draw(); }
   if(n===3) { renderCensoData(); }
   if(n===4) { renderAnalitica(); }
@@ -1889,18 +2014,7 @@ function tab(n){
   if(n===7) { updateJornada(); inicializarFirmasOficiales(); renderFirmas(); $('ad').value = new Date().toISOString().slice(0,10); ajustarTamanoLetra($('fontSizeSlider').value); }
   if(n===8) { renderDirectorio(); }
   if(n===9) { renderSoportes(); }
-  if(n===10) { renderAnexosConfig(); }
   deshabilitarBotonesEdicion();
-  aplicarPermisosUI();
-}
-
-function renderAnexosConfig(){
-  const sOrg = $('inf_organo');
-  const sFac = $('inf_facultad');
-  if(sOrg) sOrg.innerHTML = '<option value="">Todos los órganos</option>' + 
-    ORG_ACTIVOS.map(o => `<option>${o}</option>`).join('');
-  if(sFac) sFac.innerHTML = '<option value="">Todas las facultades</option>' + 
-    FACULTADES.map(f => `<option>${f}</option>`).join('');
 }
 
 function _setH(id,h){ const e=document.getElementById(id); if(e) e.innerHTML=h; }
@@ -2045,55 +2159,34 @@ function tablaActaHTML(d){
   return h;
 }
 function generarInformeVotacion() {
+  limpiarVotosEnBlancoInvalidos();
   const jornada = $('inf_jornada').value;
   const sel = $('inf_rol').value;
-  const orgFiltro = $('inf_organo')?.value || '';
-  const facFiltro = $('inf_facultad')?.value || '';
   const roles = sel === 'Todos' ? ['Estudiante','Docente','Egresado'] : [sel];
   const anio = new Date().getFullYear();
   const periodo = `${anio}-${anio+1}`;
   const rolDe = c => mRol(c.rol);
-  
   let html = ''; let secciones = 0; const sinDatos = [];
-  
   roles.forEach(rol => {
-    const L = D.filter(c => 
-      rolDe(c) === rol && 
-      ORG_ACTIVOS.includes(c.org) &&
-      (!orgFiltro || c.org === orgFiltro) &&
-      (!facFiltro || c.fac === facFiltro)
-    );
+    const L = D.filter(c => rolDe(c) === rol && ORG_ACTIVOS.includes(c.org));
     if(L.length === 0){ sinDatos.push(rol + 's'); return; }
-    
     html += `<div data-keep="1" ${secciones ? 'data-newpage="1"' : ''} style="text-align:center; margin-bottom: 14px;"><h2 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase;">Informe de votaciones ${jornada==='2'?'segunda':'primera'} jornada ${periodo}_${rol}s</h2></div>`;
     secciones++;
-    
     const gruposOrg = {};
     L.forEach(c => { (gruposOrg[c.org] = gruposOrg[c.org] || []).push(c); });
-    
-    const orgsFiltrados = orgFiltro ? [orgFiltro] : ORG_ACTIVOS;
-    orgsFiltrados.filter(o => gruposOrg[o]).forEach(org => {
+    ORG_ACTIVOS.filter(o => gruposOrg[o]).forEach(org => {
       const isG = esGlobal(org);
       let candidatos = gruposOrg[org];
       candidatos.sort((a,b) => { if(!isG && a.fac !== b.fac) return a.fac.localeCompare(b.fac); return (b.votos||0) - (a.votos||0); });
       const ganadoresPorFac = {};
-      if (isG) { 
-        const maxV = Math.max(...candidatos.map(c=>c.votos||0)); 
-        if(maxV > 0) ganadoresPorFac['GLOBAL'] = candidatos.filter(c=>c.votos===maxV); 
-      } else { 
-        [...new Set(candidatos.map(c=>c.fac))].forEach(f => { 
-          const maxV = Math.max(...candidatos.filter(c=>c.fac===f).map(c=>c.votos||0)); 
-          if(maxV > 0) ganadoresPorFac[f] = candidatos.filter(c=>c.fac===f && c.votos===maxV); 
-        }); 
-      }
-      
+      if (isG) { const maxV = Math.max(...candidatos.map(c=>c.votos||0)); if(maxV > 0) ganadoresPorFac['GLOBAL'] = candidatos.filter(c=>c.votos===maxV); }
+      else { [...new Set(candidatos.map(c=>c.fac))].forEach(f => { const maxV = Math.max(...candidatos.filter(c=>c.fac===f).map(c=>c.votos||0)); if(maxV > 0) ganadoresPorFac[f] = candidatos.filter(c=>c.fac===f && c.votos===maxV); }); }
       const TH = (w, t) => `<th style="background:#f0f0f0; border:1px solid #000; padding:4px; text-align:center; font-weight:bold; ${w?`width:${w};`:''}">${t}</th>`;
       html += `<table style="width:100%; border-collapse:collapse; font-family:Arial, sans-serif; font-size:11px; margin-bottom:20px;"><thead><tr>
               ${isG ? TH('40px','ROL') : ''}${TH('40px','CONSEJO')}
               ${!isG ? TH('22%','FACULTAD') + TH('9%','ROL') : ''}
               ${TH(isG?'35%':'25%','NOMBRE PRINCIPAL')}${TH(isG?'35%':'18%','NOMBRE SUPLENTE')}${TH('5%','VOTOS')}
             </tr></thead><tbody>`;
-      
       const rowspanCount = candidatos.length;
       candidatos.forEach((c, i) => {
         const esGanador = isG ? (ganadoresPorFac['GLOBAL'] && ganadoresPorFac['GLOBAL'].includes(c)) : (ganadoresPorFac[c.fac] && ganadoresPorFac[c.fac].includes(c));
@@ -2115,17 +2208,15 @@ function generarInformeVotacion() {
       html += `</tbody></table>`;
     });
   });
-  
-  if(secciones === 0){ toast('No hay datos para los filtros seleccionados'); return; }
+  if(secciones === 0){ toast('No hay datos de votaciones'); return; }
   $('informeOutContainer').classList.remove('hide');
   $('actaOutContainer').classList.add('hide');
   const total = paginarDoc($('informeOut'), {nodes: nodosDesdeHTML(html), landscape:true, bodyClass:'informe-body'});
-  const aviso = sinDatos.length ? ` · sin datos: ${sinDatos.join(', ')}` : '';
-  toast(`✅ Anexo generado: ${secciones} rol(es), ${total} página(s)${aviso}`);
+  toast(`✅ Informe generado: ${secciones} rol(es), ${total} página(s)`);
   setTimeout(() => { $('informeOutContainer').scrollIntoView({behavior:'smooth'}); }, 100);
 }
 function imprimirInforme() {
-  if(!$('informeOut').innerHTML.trim()) { toast('Primero genera el anexo'); return; }
+  if(!$('informeOut').innerHTML.trim()) { toast('Primero genera el informe'); return; }
   let st = document.getElementById('pgInforme');
   if(!st){ st = document.createElement('style'); st.id = 'pgInforme'; document.head.appendChild(st); }
   st.textContent = '@page { size: letter landscape; margin: 0; }';
@@ -2157,24 +2248,15 @@ function rowP(c,w,lab,p,first,n,duplaColor){
  ${first?`<td class="rs" rowspan="${n}"><button class="ic" onclick="openForm('${c.id}')" title="Editar">✎</button><button class="ic" onclick="del('${c.id}')" title="Eliminar">🗑</button></td>`:''}</tr>`;
 }
 function draw(){
- // ✅ Excluir voto en blanco de los KPIs de fórmulas/personas
- const LD_RAW = D.filter(c => ORG_ACTIVOS.includes(c.org));
- const LD = LD_RAW.filter(c => !esVotoBlanco(c));
- const L = filtered().filter(c => ORG_ACTIVOS.includes(c.org));
- const T = LD.flatMap(c=>ppl(c).map(([,p])=>estado(c,p)[0]));
- const n = T.length || 1;
+ const LD = D.filter(c => ORG_ACTIVOS.includes(c.org));
+ const L=filtered().filter(c => ORG_ACTIVOS.includes(c.org)),T=LD.flatMap(c=>ppl(c).map(([,p])=>estado(c,p)[0])),n=T.length||1;
  const cnt=x=>T.filter(t=>t===x).length,h=cnt('Habilitado'),rv=cnt('En revisión'),nh=cnt('No habilitado'),rn=cnt('Renunció');
- 
- const formulasAprobadas = LD.filter(c=>{ 
-   const P=ppl(c); 
-   return P.every(([,p])=>estado(c,p)[0]==='Habilitado'); 
- }).length;
+ const formulasAprobadas = LD.filter(c=>{ const P=ppl(c); return P.every(([,p])=>estado(c,p)[0]==='Habilitado'); }).length;
  const pctAprobadas = LD.length > 0 ? Math.round((formulasAprobadas / LD.length) * 100) : 0;
  const TOTAL_FORMULAS = LD.length;
  const pctH = T.length ? Math.round(h/T.length*100) : 0;
  const pctRv = T.length ? Math.round(rv/T.length*100) : 0;
  const pctNh = T.length ? Math.round((nh+rn)/T.length*100) : 0;
- 
  const ICO = {
    ok:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>',
    users:'<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
@@ -2193,7 +2275,6 @@ function draw(){
    kcard('Personas habilitadas', h, T.length, pctH, 'cumplen requisitos', '#1f6fd1', '#5aa9f5', '#e4f0fd', ICO.users) +
    kcard('En revisión', rv, T.length, pctRv, 'pendientes de validar', '#d98a0b', '#f7b84b', '#fff2d9', ICO.clock) +
    kcard('No habilitados / renuncias', nh+rn, T.length, pctNh, 'requieren atención', '#d1433a', '#f08a82', '#fde7e5', ICO.alert);
- 
  const novCnt = {};
  Object.keys(NOV).forEach(k=>{ if(k) novCnt[k]=0; });
  LD.forEach(c=>ppl(c).forEach(([,p])=>{ if(p.nov && novCnt[p.nov]!==undefined) novCnt[p.nov]++; }));
@@ -2206,8 +2287,6 @@ function draw(){
  $('seg').innerHTML=[[h,'var(--oscuro)'],[rv,'var(--naranja)'],[nh,'var(--no)'],[rn,'#9aa1b5']].map(s=>`<i style="width:${s[0]/n*100}%;background:${s[1]}"></i>`).join('');
  $('pct').textContent=T.length?Math.round(h/n*100)+'% habilitado':'';
  $('vacio').classList.toggle('hide',LD.length>0);
- 
- // La tabla SÍ muestra el voto en blanco (para visualizarlo)
  [...$('tbl').tBodies].forEach(b=>b.remove());
  $('tbl').insertAdjacentHTML('beforeend',L.map((c,i)=>{
    const P=ppl(c);
@@ -2313,6 +2392,7 @@ function importXL(inp){
    try {
      const wb=XLSX.read(e.target.result,{type:'array'});
      let n=0;
+     const antesD = D.length;
      const sheet = wb.Sheets[wb.SheetNames[0]];
      const jsonArr = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
      if(jsonArr.length < 2) { toast('El archivo no tiene datos válidos'); return; }
@@ -2348,9 +2428,13 @@ function importXL(inp){
            pri: mk(nomPri, docPri, telPri, emailPri, parsedPri),sup: nomSup ? mk(nomSup, docSup, telSup, emailSup, parsedSup) : null});
         n++;
      }
+     limpiarVotosEnBlancoInvalidos();
+     inyectarVotosEnBlanco();
+     const repetidos = Math.max(0, antesD + n - D.length);
      save(); draw();
-     alert(`Se cargaron ${n} registros.`);
-     toast(`✅ ${n} fórmulas cargadas`);
+     const nota = repetidos ? ` (${repetidos} repetidos descartados)` : '';
+     alert(`Se cargaron ${n} registros${nota}.`);
+     toast(`✅ ${n} fórmulas cargadas${nota}`);
    } catch(err) { console.error(err); alert('❌ Error al leer el archivo.'); toast('No se pudo leer el archivo.'); }
    inp.value='';
  };
@@ -2755,6 +2839,7 @@ function genActa(){
  partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
  nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${fir}${chkFirmada?`<div style="text-align:center;">${chkFirmada}</div>`:''}</div>`));
  $('actaOutContainer').classList.remove('hide');
+ $('informeOutContainer').classList.add('hide');
  const total = paginarDoc($('actaOut'), {nodes, landscape:false});
  $('actaOutContainer').scrollIntoView({behavior:'smooth'});
  ajustarTamanoLetra($('fontSizeSlider').value);
@@ -3145,7 +3230,7 @@ setInterval(()=>{
   });
 }, 60000);
 
-/* ========== CENSO ========== */
+/* CENSO */
 const fmt = n => Number(n||0).toLocaleString('es-CO');
 const KPI_ICO = {
   ok:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>',
@@ -3349,11 +3434,11 @@ function guardarVotantes(){
   lanzarNotificacion('Censo actualizado', `${hab} habilitados de ${total}.`);
 }
 
-/* ========== ANALÍTICA ========== */
+/* ANALÍTICA */
 function renderAnalitica(){
   const ACT = D.filter(c => ORG_ACTIVOS.includes(c.org));
   const esBl = c => String(c.pri.nombre||'').toUpperCase() === 'VOTO EN BLANCO';
-  const LD = ACT.filter(c => !esBl(c));  // Ya excluye voto en blanco de fórmulas/personas
+  const LD = ACT.filter(c => !esBl(c));
   const BL = ACT.filter(esBl);
   const sum = arr => arr.reduce((x,c)=>x+(c.votos||0), 0);
   const totalCand = LD.length;
@@ -3435,7 +3520,7 @@ function renderAnalitica(){
     </tr>`).join('') : '<tr><td colspan="4" class="empty">Aún no hay votos cargados.</td></tr>';
 }
 
-/* ========== VACANTES ========== */
+/* VACANTES */
 function renderVacantes(){
   const facs = FACULTADES;
   const obligatorios = {
@@ -3526,7 +3611,7 @@ function expVacantesXL() {
   toast('Reporte descargado');
 }
 
-/* ========== CARGA DE VOTOS ========== */
+/* CARGA DE VOTOS */
 function descargarPlantillaVotos() {
   const data = [
     ['Tipo', 'Facultad', 'Rol', 'Doc. principal', 'Nombre1', 'Email1', 'Teléfono1', 'Doc. suplente', 'Nombre2', 'Email2', 'Teléfono2', 'Estado', 'Votos'],
@@ -3645,6 +3730,7 @@ function procesarArchivosVotos(input) {
     }
     let gan = {marcados:0, grupos:0};
     try {
+      limpiarVotosEnBlancoInvalidos();
       gan = calcularGanadores();
       save(); draw();
       try { if(typeof renderAnalitica === 'function') renderAnalitica(); } catch(e){}
@@ -3681,7 +3767,7 @@ dropZone.addEventListener('drop', (e) => {
   if(files.length > 0) { $('votosFileInput').files = files; procesarArchivosVotos($('votosFileInput')); }
 });
 
-/* ========== SOPORTE ========== */
+/* SOPORTE */
 function guardarSoporte() {
    if(SESSION && !puedeEditar('vSoporte')){ toast('⛔ Sin permiso'); return; }
    if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
@@ -3851,7 +3937,7 @@ function procesarExcelForms(input) {
   reader.readAsArrayBuffer(file);
 }
 
-/* ========== DIRECTORIO GANADORES ========== */
+/* DIRECTORIO GANADORES */
 function renderDirectorio() {
   const orgFil = $('gOrgFilter').value;
   const facFil = $('gFacFilter').value;
@@ -3951,10 +4037,12 @@ function importarRespaldo(input) {
   reader.readAsText(file);
 }
 
-/* ========== INIT ========== */
+/* INIT */
 normalizarFacultadesGlobal();
 normalizarNombresGlobal();
 document.querySelectorAll('.ck-org').forEach(chk => { chk.checked = ORG_ACTIVOS.includes(chk.value); });
+inyectarVotosEnBlanco(); 
+limpiarVotosEnBlancoInvalidos();
 fillSel();
 draw();
 migrarCron();
@@ -3965,9 +4053,8 @@ renderFirmas();
 renderCensoData(); 
 renderVacantes();
 renderSoportes();
-renderAnexosConfig();
 
-/* Init auth */
+/* INIT AUTH */
 (async function initAuth(){
   if(SESSION && supabaseClient){
     try {
