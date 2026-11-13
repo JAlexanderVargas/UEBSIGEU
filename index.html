@@ -2521,7 +2521,7 @@ async function eliminarFirma(id) {
    ========================================== */
 // true  = el QR grupal solo deja firmar a la siguiente persona pendiente (orden estricto)
 // false = muestra el orden y preselecciona el turno, pero permite elegir a cualquiera pendiente
-const FIRMA_GRUPAL_ORDEN_ESTRICTO = true;
+const FIRMA_GRUPAL_ORDEN_ESTRICTO = false;
 
 let _listaGrupal = null;        // [{nombre, cargo}] en orden (viene en la URL del QR grupal)
 let _firmanteIndividual = null; // {nombre, cargo, orden} (viene en la URL del QR individual)
@@ -2551,13 +2551,10 @@ async function renderGrupalPublico(actaId) {
 
   info.innerHTML = `
     Acta N.º <b>${_numActa(actaId)}</b><br>
-    <b>Modo Mesa:</b> las firmas se registran en orden.<br>
+    <b>Modo Mesa:</b> selecciona tu nombre en la lista y firma.
     ${sig === -1
       ? '<div style="margin:12px 0;color:#14744a;font-weight:800;">✅ Ya se registraron todas las firmas.</div>'
-      : `<div style="margin:12px 0;padding:10px 12px;border-left:4px solid var(--oscuro);background:#f0f7f2;border-radius:8px;">
-           Turno <b>${sig + 1}</b> de ${total}:<br><b>${esc(_listaGrupal[sig].nombre)}</b><br>
-           <span style="color:var(--mut)">${esc(_listaGrupal[sig].cargo || 'Sin cargo')}</span>
-         </div>`}`;
+      : `<div style="margin:8px 0 12px;font-size:12px;color:var(--mut)">${total - firmadas.filter(k => _listaGrupal.some(f => _kFirmante(f.nombre) === k)).length} de ${total} firma(s) pendiente(s)</div>`}`;
 
   if (sig === -1) { _mostrarPad(false); return; }
 
@@ -2568,9 +2565,10 @@ async function renderGrupalPublico(actaId) {
   select.innerHTML = _listaGrupal.map((f, i) => {
     const firmada = firmadas.includes(_kFirmante(f.nombre));
     const bloqueada = !firmada && FIRMA_GRUPAL_ORDEN_ESTRICTO && i !== sig;
-    const etiqueta = `${i + 1}. ${f.nombre} — ${f.cargo || 'Sin cargo'}${firmada ? ' ✅' : ''}${bloqueada ? ' 🔒' : ''}`;
-    return `<option value="${i}" ${firmada || bloqueada ? 'disabled' : ''} ${i === sig ? 'selected' : ''}>${esc(etiqueta)}</option>`;
+    const etiqueta = `${i + 1}. ${f.nombre} — ${f.cargo || 'Sin cargo'}${firmada ? ' ✅ (ya firmó)' : ''}${bloqueada ? ' 🔒' : ''}`;
+    return `<option value="${i}" ${firmada || bloqueada ? 'disabled' : ''} ${FIRMA_GRUPAL_ORDEN_ESTRICTO && i === sig ? 'selected' : ''}>${esc(etiqueta)}</option>`;
   }).join('');
+  if (!FIRMA_GRUPAL_ORDEN_ESTRICTO) select.insertAdjacentHTML('afterbegin', '<option value="" selected>-- Selecciona tu nombre --</option>');
   info.appendChild(select);
 }
 
