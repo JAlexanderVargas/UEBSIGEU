@@ -1422,42 +1422,64 @@ async function doLogin(){
   $('loginErr').textContent = '';
   $('loginLoad').classList.remove('hide');
   $('loginBtn').disabled = true;
+  
   try {
     if(!supabaseClient){ $('loginErr').textContent = '⚠️ No hay conexión configurada.'; return; }
 
-    // 1) Intento con Auth (si existe el usuario allí)
-    let authOk = false, uid = null;
+    let perfil = null;
+    let uidAuth = null;
+
+    // --- 1) INTENTO CON SUPABASE AUTH ---
     try {
+      // Si el usuario ingresa un correo, lo usamos. Si no, probamos con el formato interno
       const email = u.includes('@') ? u : `${u}@unbosque.local`;
       const { data: authData, error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: p });
-      if (!authErr && authData?.user) { authOk = true; uid = authData.user.id; }
-    } catch(e) { /* silencio, probamos fallback */ }
-
-    let perfil = null;
-    if (authOk) {
-      const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', uid).maybeSingle();
-      perfil = data;
+      
+      if (!authErr && authData?.user) {
+        uidAuth = authData.user.id;
+        // Buscar perfil por id
+        const { data: p1 } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', uidAuth).maybeSingle();
+        if (p1) perfil = p1;
+      }
+    } catch(e) { 
+      console.warn('Auth falló, probando fallback:', e.message); 
     }
 
-    // 2) FALLBACK: validar contra la tabla si Auth no lo encontró
+    // --- 2) FALLBACK: VALIDAR CONTRA TABLA (Rescate) ---
     if (!perfil) {
-      const { data, error } = await supabaseClient.from(CONFIG.tabla_usuarios)
-        .select('*').eq(CONFIG.col_user, u).eq(CONFIG.col_activo, true).maybeSingle();
+      const { data, error } = await supabaseClient
+        .from(CONFIG.tabla_usuarios)
+        .select('*')
+        .eq(CONFIG.col_user, u)
+        .eq(CONFIG.col_activo, true)
+        .maybeSingle();
+        
       if (error) throw error;
       if (!data) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
-      if (String(data[CONFIG.col_pass] || '') !== p) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
+      
+      // Validación de contraseña directa (asegúrate de que 'password_hash' existe y tiene la clave)
+      const storedPass = String(data[CONFIG.col_pass] || '');
+      if (storedPass !== p && storedPass !== '') { 
+        $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; 
+        return; 
+      }
+      
       perfil = data;
-      uid = data.id;
+      uidAuth = data.id;
     }
 
     if (!perfil) { $('loginErr').textContent = 'Usuario no encontrado.'; return; }
     if (perfil[CONFIG.col_activo] === false) { $('loginErr').textContent = 'Usuario inactivo.'; return; }
 
+    // Normalizar el rol (por si acaso el ENUM devuelve 'leer' o algo raro)
+    let rolFinal = perfil[CONFIG.col_rol];
+    if (rolFinal === 'leer') rolFinal = 'lectura';
+
     SESSION = {
-      id: uid,
+      id: uidAuth || perfil.id,
       username: perfil[CONFIG.col_user],
       nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user],
-      rol: perfil[CONFIG.col_rol],
+      rol: rolFinal,
       modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []
     };
     saveSession();
@@ -3648,11 +3670,18 @@ renderSoportes();
 (async function initAuth(){
   if(SESSION){
     document.body.classList.add('logged-in'); document.body.classList.remove('logged-out');
+    if (SESSION.rol === 'leer') SESSION.rol = 'lectura'; // Normalizar
+    saveSession();
     aplicarSesion();
+    
     if(supabaseClient){
       try {
-        const { data: perfil } = await supabaseClient.from(CONFIG.tabla_usuarios)
-          .select('*').eq('id', SESSION.id).maybeSingle();
+        const { data: perfil } = await supabaseClient
+          .from(CONFIG.tabla_usuarios)
+          .select('*')
+          .eq('id', SESSION.id)
+          .maybeSingle();
+          
         if(!perfil || perfil[CONFIG.col_activo] === false){
           detenerTimerSesion();
           SESSION = null;
@@ -3660,7 +3689,11 @@ renderSoportes();
           location.reload();
           return;
         }
-        SESSION = {...SESSION, nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user], rol: perfil[CONFIG.col_rol], modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []};
+        
+        let rolFinal = perfil[CONFIG.col_rol];
+        if (rolFinal === 'leer') rolFinal = 'lectura';
+        
+        SESSION = {...SESSION, nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user], rol: rolFinal, modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []};
         saveSession();
         await cargarEstadoElecciones();
         actualizarUserCard(); aplicarPermisosUI(); actualizarBannerCierre();
