@@ -226,8 +226,63 @@ dialog[open]{animation:pop .18s ease-out}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dlg{margin:0}
 
-#toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,30px);background:var(--oscuro);color:var(--blanco);padding:12px 20px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:99;border-left:4px solid var(--naranja)}
-#toast.on{opacity:1;transform:translate(-50%,0)}
+/* Aviso (toast) en la CAPA SUPERIOR: queda por encima de los diálogos modales */
+#toast{position:fixed;inset:auto auto 24px 50%;margin:0;border:0;padding:0;background:transparent;overflow:visible;width:max-content;max-width:min(580px,92vw);height:auto;transform:translate(-50%,30px);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:2147483647;color:#fff}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast::backdrop{background:transparent}
+#toast .t-in{display:flex;align-items:flex-start;gap:12px;padding:13px 12px 13px 18px;border-radius:14px;background:var(--oscuro);border-left:5px solid var(--naranja);box-shadow:0 18px 44px -10px rgba(0,0,0,.55);font-weight:600;line-height:1.4}
+#toast.err .t-in{background:#8f1f16;border-left-color:#ff9a8d}
+#toast.warn .t-in{background:#7a4a05;border-left-color:#ffc861}
+#toast .t-msg{flex:1;white-space:pre-line;word-break:break-word;font-size:14px}
+#toast .t-x{border:0;background:rgba(255,255,255,.18);color:#fff;width:26px;height:26px;border-radius:8px;cursor:pointer;font-weight:800;flex:none;line-height:1}
+#toast .t-x:hover{background:rgba(255,255,255,.32)}
+
+/* ===== Modo solo lectura / permisos ===== */
+.ro-banner{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:#fff7e0;border:1px solid #f0d58a;color:#7a5a06;font-weight:700;font-size:13px}
+.ro-banner[hidden]{display:none!important}
+section.ro .wo,
+section.ro input[type=file],
+section.ro .upload-zone,
+section.ro .cr-actions,
+section.ro .del-firma,
+section.ro [onclick*="openForm("],
+section.ro [onclick^="del("],
+section.ro [onclick*="aprobarTodos("],
+section.ro [onclick*="xl.click"],
+section.ro [onclick*="addActividad("],
+section.ro [onclick*="editAct("],
+section.ro [onclick*="delAct("],
+section.ro [onclick*="toggleAct("],
+section.ro [onclick*="cronFileInput.click"],
+section.ro [onclick*="guardarVotantes("],
+section.ro [onclick*="votosFileInput.click"],
+section.ro [onclick*="guardarSoporte("],
+section.ro [onclick*="editarSoporte("],
+section.ro [onclick*="delSoporte("],
+section.ro [onclick*="restaurarTextoActa("],
+section.ro [onclick*="addFirma("],
+section.ro [onclick*="delFirma("],
+section.ro [onclick*="eliminarFirma("],
+section.ro [onclick*="generarEnlaceFirma("],
+section.ro [onclick*="generarQRGrupal("],
+section.ro [onclick*="enviarEnlacePorCorreo("],
+section.ro [onclick*="demo("]{display:none!important}
+section.ro [onclick*="toggleSoporteSolucionado("]{pointer-events:none;cursor:default}
+section.ro .firma-item{pointer-events:none}
+section.ro #at{pointer-events:none}
+.ck.lock,.ck:disabled.lock{opacity:.55;cursor:not-allowed}
+.chip-t input:disabled + span{cursor:not-allowed;opacity:.85}
+.chip-t .chip-edit{font-style:normal;font-size:11px;opacity:.8}
+.perm-box{margin-top:12px;padding:12px 14px;border-radius:12px;background:#eef7f1;border:1px solid #cfe6d8;font-size:13px;line-height:1.45}
+.perm-box b{color:var(--oscuro)}
+.perm-legend{font-size:11.5px;color:var(--mut);margin-top:6px}
+.cron-radio{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.matriz-roles{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.matriz-roles th,.matriz-roles td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.matriz-roles th{background:#f3f9f5;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px}
+details.matriz>summary{cursor:pointer;font-weight:800}
+.validador-pend{display:inline-block;margin-left:6px;padding:2px 10px;border-radius:99px;background:#fff;color:#b35a06;font-weight:800}
+:focus-visible{outline:3px solid var(--naranja);outline-offset:2px}
 
 .cron-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .cron-panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; position: relative; }
@@ -615,7 +670,7 @@ body.logged-in #topbar { display: flex; }
 <main>
 <section id="vCron">
  <div class="top"><h1>Cronograma y Configuración</h1><p>Visualiza el cronograma y define qué órganos están activos para esta jornada.</p></div>
- <div class="card">
+ <div class="card" id="cardOrgActivos">
    <h3>⚙️ Órganos Activos en esta Jornada</h3>
    <p class="help" style="margin-top:0">Selecciona los órganos que participarán.</p>
    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:10px">
@@ -796,7 +851,7 @@ body.logged-in #topbar { display: flex; }
       <div class="progress-container" style="margin-bottom:0"><div class="progress-bar-bg"><div class="progress-bar-fill" id="barVotantes" style="width:0%">0%</div></div></div>
       <p class="help" style="margin-top:12px">Fecha y hora de corte: <b id="lblFechaCorte">No definida</b></p>
     </div>
-    <div class="card">
+    <div class="card wo">
       <h3>⚙️ Configuración Manual del Censo</h3>
       <div style="display:grid;gap:12px">
         <div><label>Total de personas en el censo base</label><input class="in" type="number" min="1" id="inpTotalCenso" placeholder="Ej. 5000" style="width:100%"></div>
@@ -805,7 +860,7 @@ body.logged-in #topbar { display: flex; }
       </div>
     </div>
   </div>
-  <div class="card" style="border-left: 4px solid var(--naranja);">
+  <div class="card wo" style="border-left: 4px solid var(--naranja);">
    <h3>📥 Carga Masiva del Censo (Excel)</h3>
    <div class="bar">
      <input type="file" id="fileCenso" class="in" accept=".xlsx,.xls,.csv" onchange="procesarExcelCenso(this)" style="width:300px">
@@ -896,7 +951,7 @@ body.logged-in #topbar { display: flex; }
        </ul>
      </div>
    </div>
-   <div class="card">
+   <div class="card wo">
      <h3>3. Sube los Archivos (Máx 4)</h3>
      <div class="upload-zone" id="dropZone" onclick="votosFileInput.click()">
        <div class="upload-icon">📄</div>
@@ -954,7 +1009,7 @@ body.logged-in #topbar { display: flex; }
    <div class="card"><h3>✅ Estado de los casos</h3><div class="chart-md"><canvas id="chartSopEstado"></canvas></div></div>
    <div class="card"><h3>📈 Casos por día</h3><div class="chart-md"><canvas id="chartSopDia"></canvas></div></div>
  </div>
- <div class="card">
+ <div class="card wo">
    <h3>📝 Nuevo Registro de Soporte</h3>
    <div class="grid">
      <div><label>Nombre Completo</label><input class="in" id="sop_nombre" placeholder="Ej. Juan Pérez"></div>
@@ -979,7 +1034,7 @@ body.logged-in #topbar { display: flex; }
    </div>
    <div style="margin-top:16px"><button class="btn p" onclick="guardarSoporte()">➕ Registrar Caso</button></div>
  </div>
- <div class="card" id="cardFormsExcel">
+ <div class="card wo" id="cardFormsExcel">
    <h3>📥 Cargar Excel de Forms</h3>
    <div class="bar">
      <input type="file" id="formsFileInput" class="in" accept=".xlsx,.xls,.csv" onchange="procesarExcelForms(this)" style="width:300px">
@@ -1064,6 +1119,7 @@ body.logged-in #topbar { display: flex; }
 <dialog id="dlgUsuarios">
   <div class="dh"><h3>👥 Gestión de usuarios</h3><button onclick="dlgUsuarios.close()">✕</button></div>
   <div class="db">
+    <details class="card matriz" style="margin-bottom:12px;"><summary>📋 Matriz de roles y permisos</summary><div id="matrizRoles" class="wrap"></div></details>
     <div class="card" style="margin-bottom:12px;">
       <h3>Nuevo usuario</h3>
       <div class="grid">
@@ -1071,11 +1127,13 @@ body.logged-in #topbar { display: flex; }
         <div><label>Nombre completo</label><input class="in" id="u_new_nombre"></div>
         <div><label>Correo electrónico</label><input class="in" id="u_new_email" type="email"></div>
         <div><label>Contraseña</label><input class="in" id="u_new_pass" type="password"></div>
-        <div><label>Rol Base</label>
-          <select class="in" id="u_new_rol">
+        <div><label>Rol</label>
+          <select class="in" id="u_new_rol" onchange="actualizarPermisosUI('u_new',true)">
             <option value="administrador">Administrador</option>
-            <option value="coordinador">Coordinador Electoral</option>
+            <option value="editor">Editor</option>
+            <option value="lectura">Lectura</option>
             <option value="agente_mesa">Agente Mesa de Servicio</option>
+            <option value="coordinador">Coordinador Electoral</option>
             <option value="auditor">Auditor</option>
             <option value="th">Talento Humano</option>
             <option value="egresados">Egresados</option>
@@ -1083,23 +1141,18 @@ body.logged-in #topbar { display: flex; }
             <option value="fac_prog">Facultad / Programa</option>
           </select>
         </div>
-        <div><label>Cronograma que verá</label>
-          <select class="in" id="u_new_cron">
-            <option value="ambos">Público e Interno</option>
-            <option value="publico">Solo Público</option>
-            <option value="interno">Solo Interno</option>
-          </select>
-        </div>
       </div>
-      
-      <div style="margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
-        <label style="font-weight:700">Permisos Personalizados (Módulos Permitidos)</label>
+      <div id="u_new_perm" class="perm-box"></div>
+      <div style="margin-top:12px;">
+        <label style="font-weight:700">Módulos del sistema</label>
         <div id="u_new_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
-        
-        <label style="font-weight:700; margin-top:12px; display:block;">Permisos de Edición (¿Puede escribir/cargar?)</label>
-        <div id="u_new_edit" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
+        <div class="perm-legend">✎ = puede editar ese módulo · sin ✎ = solo consulta. Los roles con módulos fijos se marcan automáticamente.</div>
       </div>
-
+      <div id="u_new_cronbox" class="hide" style="margin-top:12px;">
+        <label style="font-weight:700">📅 Cronograma visible</label>
+        <div id="u_new_cron" class="cron-radio"></div>
+        <div class="perm-legend">Elige si esta persona verá solo el cronograma público, solo el interno o ambos.</div>
+      </div>
       <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
         <input type="checkbox" id="u_new_enviar_correo" style="width:16px; height:16px; accent-color:var(--oscuro);" checked>
         <label for="u_new_enviar_correo" style="margin:0; font-weight:600; font-size:13px; cursor:pointer;">Enviar credenciales por correo al crear</label>
@@ -1107,7 +1160,7 @@ body.logged-in #topbar { display: flex; }
       <div style="margin-top:12px;"><button class="btn p" onclick="crearUsuario()">➕ Crear usuario</button></div>
     </div>
     <div class="wrap"><table class="tbl-pro" style="min-width:100%">
-      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol / Cronograma</th><th>Módulos</th><th>Estado</th><th class="c">Acción</th></tr></thead>
+      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Módulos</th><th>Estado</th><th class="c">Acción</th></tr></thead>
       <tbody id="tablaUsuarios"></tbody>
     </table></div>
   </div>
@@ -1122,11 +1175,13 @@ body.logged-in #topbar { display: flex; }
       <div><label>Usuario</label><input class="in" id="u_edit_user" disabled style="background:#f5f5f5;"></div>
       <div><label>Nombre completo</label><input class="in" id="u_edit_nombre"></div>
       <div><label>Correo electrónico</label><input class="in" id="u_edit_email" type="email"></div>
-      <div><label>Rol Base</label>
-        <select class="in" id="u_edit_rol">
+      <div><label>Rol</label>
+        <select class="in" id="u_edit_rol" onchange="actualizarPermisosUI('u_edit',true)">
           <option value="administrador">Administrador</option>
-          <option value="coordinador">Coordinador Electoral</option>
+          <option value="editor">Editor</option>
+          <option value="lectura">Lectura</option>
           <option value="agente_mesa">Agente Mesa de Servicio</option>
+          <option value="coordinador">Coordinador Electoral</option>
           <option value="auditor">Auditor</option>
           <option value="th">Talento Humano</option>
           <option value="egresados">Egresados</option>
@@ -1134,23 +1189,18 @@ body.logged-in #topbar { display: flex; }
           <option value="fac_prog">Facultad / Programa</option>
         </select>
       </div>
-      <div><label>Cronograma que verá</label>
-        <select class="in" id="u_edit_cron">
-          <option value="ambos">Público e Interno</option>
-          <option value="publico">Solo Público</option>
-          <option value="interno">Solo Interno</option>
-        </select>
+    </div>
+      <div id="u_edit_perm" class="perm-box"></div>
+      <div style="margin-top:12px;">
+        <label style="font-weight:700">Módulos del sistema</label>
+        <div id="u_edit_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
+        <div class="perm-legend">✎ = puede editar ese módulo · sin ✎ = solo consulta. Los roles con módulos fijos se marcan automáticamente.</div>
       </div>
-    </div>
-    
-    <div style="margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
-      <label style="font-weight:700">Permisos Personalizados (Módulos Permitidos)</label>
-      <div id="u_edit_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
-      
-      <label style="font-weight:700; margin-top:12px; display:block;">Permisos de Edición (¿Puede escribir/cargar?)</label>
-      <div id="u_edit_edit" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
-    </div>
-
+      <div id="u_edit_cronbox" class="hide" style="margin-top:12px;">
+        <label style="font-weight:700">📅 Cronograma visible</label>
+        <div id="u_edit_cron" class="cron-radio"></div>
+        <div class="perm-legend">Elige si esta persona verá solo el cronograma público, solo el interno o ambos.</div>
+      </div>
     <div style="margin-top:16px;"><label style="font-weight:700">Estado</label>
       <select class="in" id="u_edit_activo" style="width:100%"><option value="true">Activo</option><option value="false">Inactivo</option></select>
     </div>
@@ -1206,7 +1256,7 @@ body.logged-in #topbar { display: flex; }
   <div class="df"><button class="btn" onclick="dlgReset.close()">Cerrar</button></div>
 </dialog>
 
-<div id="toast"></div>
+<div id="toast" popover="manual" role="status" aria-live="assertive"></div>
 
 <script>
 const SUPABASE_URL = 'https://doqoiporsulytaytuokc.supabase.co';
@@ -1284,30 +1334,33 @@ let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDi
 
 let publicSignaturePad = null;
 
-const MODULOS = [
-  {key:'vCron',label:'Cronograma'},
-  {key:'vSeg',label:'Seguimiento candidatos'},
-  {key:'vVotantes',label:'Censo Votantes'},
-  {key:'vAnal',label:'Analítica'},
-  {key:'vVac',label:'Cargos / Vacantes'},
-  {key:'vCargaVotos',label:'Cargar Votos'},
-  {key:'vAct',label:'Actas'},
-  {key:'vGanadores',label:'Directorio Ganadores'},
-  {key:'vSoporte',label:'Registro Soporte'},
-  {key:'vDocs',label:'Actas, Anexos, Informes'}
-];
+const MODULOS = [{key:'vCron',label:'Cronograma'},{key:'vSeg',label:'Seguimiento candidatos'},{key:'vVotantes',label:'Censo Votantes'},{key:'vAnal',label:'Analítica'},{key:'vVac',label:'Cargos / Vacantes'},{key:'vCargaVotos',label:'Cargar Votos'},{key:'vAct',label:'Actas'},{key:'vGanadores',label:'Directorio Ganadores'},{key:'vSoporte',label:'Registro Soporte'},{key:'vDocs',label:'Actas, Anexos, Informes'}];
 
 const ROLES = {
-  administrador: {label:'Administrador', mods:'*', edit:'*', color:'r'},
-  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal','vDocs'], edit:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
-  agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte'], edit:['vSoporte'], color:'o'},
-  auditor:       {label:'Auditor',       mods:'*', edit:[], color:'g'},
-  th:            {label:'Talento Humano',       mods:['vSeg','vCron'], edit:[], validador:['th'], color:'o'},
-  egresados:     {label:'Egresados',            mods:['vSeg','vCron'], edit:[], validador:['eg'], color:'t'},
-  sec_general:   {label:'Secretaría General',   mods:['vSeg','vCron'], edit:[], validador:['sg'], color:'b'},
-  fac_prog:      {label:'Facultad / Programa',  mods:['vSeg','vCron'], edit:[], validador:['fp'], color:'p'},
+  administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
+  editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
+  lectura:       {label:'Lectura',       mods:[],  puedeEditar:[],       color:'t'},
+  agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
+  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal','vDocs'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
+  auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'},
+  th:            {label:'Talento Humano',       mods:['vSeg','vCron'], puedeEditar:[], validador:['th'], cronVista:'interno', color:'o'},
+  egresados:     {label:'Egresados',            mods:['vSeg','vCron'], puedeEditar:[], validador:['eg'], cronVista:'publico', color:'t'},
+  sec_general:   {label:'Secretaría General',   mods:['vSeg','vCron'], puedeEditar:[], validador:['sg'], cronVista:'ambos',   color:'b'},
+  fac_prog:      {label:'Facultad / Programa',  mods:['vSeg','vCron'], puedeEditar:[], validador:['fp'], cronVista:'interno', color:'p'},
 };
 
+const ROLES_DESC = {
+  administrador:'Acceso total: usuarios, auditoría, cierre de elecciones y todos los módulos.',
+  editor:'Ve y edita únicamente los módulos que se le asignen.',
+  lectura:'Solo consulta los módulos asignados. No edita, elimina, modifica ni carga archivos.',
+  agente_mesa:'Registra casos de soporte; consulta directorio de ganadores y censo.',
+  coordinador:'Gestiona cronograma, seguimiento, votos y actas; consulta el resto de sus módulos.',
+  auditor:'Consulta todos los módulos y el registro de auditoría. No modifica nada.',
+  th:'Valida solo la columna de Talento Humano y únicamente de los candidatos Docentes.',
+  egresados:'Valida solo la columna de Egresados y únicamente de los candidatos Egresados.',
+  sec_general:'Valida solo la columna de Secretaría General y únicamente de los candidatos Estudiantes.',
+  fac_prog:'Valida solo la columna de Facultad / Programa y únicamente de los candidatos Estudiantes.'
+};
 let SESSION = null;
 try { SESSION = JSON.parse(localStorage.getItem(K_SESSION) || 'null'); } catch(e) {}
 let LOG = [];
@@ -1515,63 +1568,83 @@ function aplicarSesion(){
   }
 }
 
-// Obtener módulos permitidos combinando el rol base con los personalizados guardados
+/* =====================================================================
+   PERMISOS (reorganizados)
+   - Los tokens 'cron:publico' / 'cron:interno' viajan dentro del arreglo
+     "modulos" (no requiere cambios en la base de datos).
+   ===================================================================== */
+const CRON_TOK = {publico:'cron:publico', interno:'cron:interno'};
+const _modKeys = () => MODULOS.map(m=>m.key);
+function modulosDeLista(arr){ const k=_modKeys(); return (Array.isArray(arr)?arr:[]).filter(x=>k.includes(x)); }
+function cronVistaDeLista(arr, rolKey){
+  const a = Array.isArray(arr) ? arr : [];
+  const p = a.includes(CRON_TOK.publico), i = a.includes(CRON_TOK.interno);
+  if(p && i) return 'ambos';
+  if(p) return 'publico';
+  if(i) return 'interno';
+  return ROLES[rolKey]?.cronVista || 'ambos';
+}
+function getCronVista(){
+  if(!SESSION) return 'ambos';
+  if(SESSION.rol === 'administrador') return 'ambos';
+  return cronVistaDeLista(SESSION.modulos, SESSION.rol);
+}
 function getModulosPermitidos(){
   if(!SESSION) return [];
-  if(SESSION.rol === 'administrador' || SESSION.rol === 'auditor') return MODULOS.map(m=>m.key);
-  if(SESSION.rol === 'agente_mesa') return ['vSoporte']; // Restricción explícita
-  
-  // Si tiene permisos personalizados guardados, los usamos
-  if (Array.isArray(SESSION.modulos)) {
-    return SESSION.modulos;
-  }
-  
   const rol = ROLES[SESSION.rol];
   if(!rol) return [];
-  if(Array.isArray(rol.mods)) return rol.mods;
-  return [];
+  if(rol.mods === '*') return MODULOS.map(m=>m.key);
+  if(SESSION.rol === 'editor' || SESSION.rol === 'lectura') return modulosDeLista(SESSION.modulos);
+  return rol.mods;
 }
-
-// Verificar si puede editar un módulo
-function puedeEditar(modulo){
-  if(!SESSION) return false;
-  if(ELECCIONES_CERRADAS && SESSION.rol !== 'administrador') return false;
-  if(SESSION.rol === 'administrador') return true;
-  
-  // Si tiene permisos personalizados de edición, los usamos
-  if (Array.isArray(SESSION.modulosEdit)) {
-    return SESSION.modulosEdit.includes(modulo);
-  }
-
-  const rol = ROLES[SESSION.rol];
-  if(!rol) return false;
-  if(rol.edit === '*') return true;
-  if(Array.isArray(rol.edit)) return rol.edit.includes(modulo);
-  return false;
-}
-
 function puedeVer(modulo){ if(!SESSION) return false; return getModulosPermitidos().includes(modulo); }
 
-function puedeValidar(campoCheck){
+// ¿Es un rol validador (TH, Egresados, Sec. General, Facultad/Programa)?
+function esValidadorRol(){ return !!ROLES[SESSION?.rol]?.validador; }
+function clavesValidador(){ return esValidadorRol() ? ROLES[SESSION.rol].validador.filter(k=>KEYS.includes(k)) : null; }
+// Un validador solo ve / aprueba a los candidatos cuyo rol tiene SU columna de validación.
+function enAlcance(c){
+  const kv = clavesValidador();
+  if(!kv) return true;
+  return (CH[c.rol] || []).some(k => kv.includes(k));
+}
+
+function puedeEditar(modulo){
   if(!SESSION) return false;
   if(SESSION.rol === 'administrador') return true;
   if(ELECCIONES_CERRADAS) return false;
-  
-  // Si es validador, solo puede su campo
   const rol = ROLES[SESSION.rol];
-  if(rol && rol.validador) {
-    return rol.validador.includes(campoCheck) || rol.validador.includes('nov');
+  if(!rol) return false;
+  if(rol.validador) return false;                                   // validadores nunca editan datos
+  if(SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;   // solo lectura
+  if(!getModulosPermitidos().includes(modulo)) return false;
+  if(SESSION.rol === 'editor') return true;                          // editor: edita los módulos que tiene asignados
+  if(rol.puedeEditar === '*') return true;
+  return Array.isArray(rol.puedeEditar) && rol.puedeEditar.includes(modulo);
+}
+
+// campoCheck: 'th' | 'eg' | 'sg' | 'fp' | 'nov'.  cand (opcional): candidato sobre el que se actúa.
+function puedeValidar(campoCheck, cand){
+  if(!SESSION) return false;
+  if(SESSION.rol === 'administrador') return true;
+  if(ELECCIONES_CERRADAS) return false;
+  const rol = ROLES[SESSION.rol];
+  if(!rol) return false;
+  if(rol.validador){
+    if(cand && !enAlcance(cand)) return false;                       // fuera de su alcance
+    if(campoCheck === 'nov') return true;                            // novedades: solo de su alcance
+    return rol.validador.includes(campoCheck);                       // solo SU columna
   }
-  
-  // Si es coordinador o tiene permiso de edición en vSeg, puede validar todo
-  return puedeEditar('vSeg');
+  if(SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;
+  if(rol.puedeEditar === '*' || (Array.isArray(rol.puedeEditar) && rol.puedeEditar.includes('vSeg'))) return true;
+  if(SESSION.rol === 'editor' && modulosDeLista(SESSION.modulos).includes('vSeg')) return true;
+  return false;
 }
 
 function aplicarPermisosUI(){
   const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9',vDocs:'n10'};
   const permitidos = getModulosPermitidos();
   MODULOS.forEach(m => { const btn = $(mapa[m.key]); if(btn) btn.style.display = permitidos.includes(m.key) ? '' : 'none'; });
-  
   const esAdmin = SESSION?.rol === 'administrador';
   const esAuditor = SESSION?.rol === 'auditor';
   if($('btnCerrarElec')) $('btnCerrarElec').style.display = esAdmin ? '' : 'none';
@@ -1584,7 +1657,8 @@ function aplicarPermisosUI(){
   if(infoBox && rol?.validador){
     const etiquetas = {th:'Talento Humano', eg:'Egresados', sg:'Secretaría General', fp:'Facultad / Programa'};
     infoBox.classList.remove('hide');
-    infoBox.innerHTML = `🛡️ <b>Modo validador:</b> solo puedes marcar tu columna (<b>${rol.validador.map(v=>etiquetas[v]).join(', ')}</b>) y registrar novedades. No puedes agregar, editar ni eliminar candidatos, ni aprobar masivamente.`;
+    const rolesAlc = Object.keys(CH).filter(r => CH[r].some(k => rol.validador.includes(k)));
+    infoBox.innerHTML = `🛡️ <b>Modo validador:</b> solo ves a los candidatos de <b>${rolesAlc.join(' / ')}</b> y solo puedes marcar ✔ o ✕ en tu columna (<b>${rol.validador.map(v=>etiquetas[v]).join(', ')}</b>) y registrar novedades. No puedes agregar, editar, eliminar ni aprobar masivamente. <span class="validador-pend" id="validadorPend"></span>`;
   } else if(infoBox) {
     infoBox.classList.add('hide');
   }
@@ -1594,12 +1668,12 @@ function aplicarPermisosUI(){
 
   const esValidador = !!rol?.validador;
   const botones = {
-    btnOpenForm: !puedeEditar('vSeg'),
-    btnCargarExcel: !puedeEditar('vSeg'),
-    btnPlantilla: !puedeEditar('vSeg'),
-    btnAprobarTodos: !puedeEditar('vSeg'),
-    btnExpXL: !puedeEditar('vSeg'),
-    btnExpPDF: !puedeEditar('vSeg')
+    btnOpenForm: esValidador,
+    btnCargarExcel: esValidador,
+    btnPlantilla: esValidador,
+    btnAprobarTodos: esValidador,
+    btnExpXL: esValidador,
+    btnExpPDF: esValidador
   };
   Object.entries(botones).forEach(([id, bloquear]) => {
     const b = $(id);
@@ -1607,9 +1681,10 @@ function aplicarPermisosUI(){
     if(bloquear) { b.disabled = true; b.style.opacity = 0.45; b.style.cursor = 'not-allowed'; b.title = 'Tu rol no permite esta acción'; }
     else { b.disabled = false; b.style.opacity = ''; b.style.cursor = ''; b.title = ''; }
   });
-  const xlInput = $('xl'); if(xlInput && !puedeEditar('vSeg')) xlInput.disabled = true;
+  const xlInput = $('xl'); if(xlInput && esValidador) xlInput.disabled = true;
 
   deshabilitarBotonesEdicion();
+  try{ aplicarVistaCron(); aplicarAlcanceSeguimiento(); aplicarModoLectura(); }catch(e){ console.warn('permisos UI:', e); }
 }
 
 function deshabilitarBotonesEdicion(){
@@ -1617,24 +1692,12 @@ function deshabilitarBotonesEdicion(){
   const rol = ROLES[SESSION?.rol];
   const esValidador = !!(rol && rol.validador);
   const noEditable = ELECCIONES_CERRADAS || SESSION?.rol === 'lectura' || SESSION?.rol === 'auditor' || esValidador;
-  
-  // Actualizar lógica para botones basada en puedeEditar
-  document.querySelectorAll('button[onclick^="addActividad"], button[onclick^="saveActividad"]').forEach(b => {
-      if(!puedeEditar('vCron')) { b.disabled = true; b.style.opacity = 0.5; }
-  });
-  document.querySelectorAll('button[onclick^="guardarVotantes"]').forEach(b => {
-      if(!puedeEditar('vVotantes')) { b.disabled = true; b.style.opacity = 0.5; }
-  });
-  document.querySelectorAll('button[onclick^="guardarSoporte"]').forEach(b => {
-      if(!puedeEditar('vSoporte') && SESSION?.rol !== 'agente_mesa') { b.disabled = true; b.style.opacity = 0.5; }
-  });
-  document.querySelectorAll('button[onclick^="genActa"]').forEach(b => {
-      if(!puedeEditar('vAct')) { b.disabled = true; b.style.opacity = 0.5; }
-  });
-
-  if(!puedeEditar('vSeg')) {
-      document.querySelectorAll('#gb input, .nv, .ck').forEach(el => { el.disabled = true; });
-  }
+  if(!noEditable) return;
+  const selectores = ['button[onclick="openForm()"]','button[onclick="saveForm()"]','button[onclick="aprobarTodos()"]','button[onclick="addActividad()"]','button[onclick="saveActividad()"]','button[onclick="guardarVotantes()"]','button[onclick="guardarSoporte()"]','button[onclick="genActa()"]','button[onclick="crearUsuario()"]','button[onclick="guardarTextoActa()"]'];
+  selectores.forEach(s => { document.querySelectorAll(s).forEach(b => { b.disabled = true; b.style.opacity = 0.5; b.style.cursor = 'not-allowed'; }); });
+  document.querySelectorAll('#gb input').forEach(el => { el.disabled = true; });
+  const _puedeValidarAlgo = !!SESSION && (KEYS.some(k => puedeValidar(k)) || puedeValidar('nov'));
+  if(!_puedeValidarAlgo) document.querySelectorAll('.nv, .ck').forEach(el => { el.disabled = true; });
 }
 
 function limpiarPantalla(){
@@ -1673,8 +1736,8 @@ function actualizarBannerCierre(){
 
 async function abrirUsuarios(){
   if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
-  $('u_new_mods').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`).join('');
-  $('u_new_edit').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_edit_mod"><span>${m.label}</span></label>`).join('');
+  actualizarPermisosUI('u_new', true);
+  renderMatrizRoles();
   await cargarUsuariosDeSupabase();
   renderTablaUsuarios();
   dlgUsuarios.showModal();
@@ -1697,15 +1760,11 @@ function renderTablaUsuarios(){
     const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
     const rolDef = ROLES[rol];
     let modsLabel = '—';
-    
-    if(rol === 'administrador' || rol === 'auditor') modsLabel = 'Todos';
-    else if(rol === 'agente_mesa') modsLabel = 'Soporte';
-    else if(Array.isArray(rolDef?.mods) && mods.length === 0) modsLabel = rolDef.mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ');
-    else if(mods.length) modsLabel = mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ');
-    
-    const cronVista = u.cron_vista || 'ambos';
-    const cronBadge = `<span class="rol-validador-badge">Cron: ${cronVista}</span>`;
-    
+    if(rolDef && rolDef.mods === '*') modsLabel = 'Todos';
+    else if(Array.isArray(rolDef?.mods) && rolDef.mods.length) modsLabel = rolDef.mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ');
+    else if(modulosDeLista(mods).length) modsLabel = modulosDeLista(mods).map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ');
+    const _incCron = rolDef?.mods === '*' || (Array.isArray(rolDef?.mods) && rolDef.mods.includes('vCron')) || mods.includes('vCron');
+    const cronBadge = (_incCron && rol !== 'administrador') ? ` <span class="rol-validador-badge">Cron: ${({ambos:'público + interno',publico:'solo público',interno:'solo interno'})[cronVistaDeLista(mods, rol)]}</span>` : '';
     return `<tr>
       <td><b>${esc(u[CONFIG.col_user])}</b></td>
       <td>${esc(u[CONFIG.col_nombre]||'')}</td>
@@ -1730,15 +1789,11 @@ function abrirEditarUsuario(id) {
   $('u_edit_user').value = u[CONFIG.col_user];
   $('u_edit_nombre').value = u[CONFIG.col_nombre] || '';
   $('u_edit_email').value = u.email || '';
-  $('u_edit_rol').value = u[CONFIG.col_rol] || 'th';
-  $('u_edit_cron').value = u.cron_vista || 'ambos';
+  $('u_edit_rol').value = u[CONFIG.col_rol] || 'lectura';
   $('u_edit_activo').value = u[CONFIG.col_activo] ? 'true' : 'false';
   
   const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
-  $('u_edit_mods').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_edit_mod" ${mods.includes(m.key)?'checked':''}><span>${m.label}</span></label>`).join('');
-  
-  const edits = Array.isArray(u.modulos_edit) ? u.modulos_edit : [];
-  $('u_edit_edit').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_edit_can_edit" ${edits.includes(m.key)?'checked':''}><span>${m.label}</span></label>`).join('');
+  actualizarPermisosUI('u_edit', false, {mods: modulosDeLista(mods), cron: cronVistaDeLista(mods, u[CONFIG.col_rol] || 'lectura')});
   
   dlgEditarUsuario.showModal();
 }
@@ -1748,19 +1803,18 @@ async function guardarEdicionUsuario() {
   const nombre = $('u_edit_nombre').value.trim();
   const email = $('u_edit_email').value.trim();
   const rol = $('u_edit_rol').value;
-  const cron = $('u_edit_cron').value;
   const activo = $('u_edit_activo').value === 'true';
-  const mods = [...document.querySelectorAll('.u_edit_mod:checked')].map(i=>i.value);
-  const edits = [...document.querySelectorAll('.u_edit_can_edit:checked')].map(i=>i.value);
+  const {mods} = leerPermisos('u_edit');
 
-  if(!supabaseClient) return;
+  if(!supabaseClient){ toast('❌ Sin conexión a la base de datos'); return; }
+  if(!nombre){ toast('Completa el nombre del usuario'); return; }
+  if((rol==='editor' || rol==='lectura') && !modulosDeLista(mods).length){ toast('Selecciona al menos un módulo para este rol'); return; }
+  if(SESSION && id === SESSION.id && (rol !== 'administrador' || !activo)){ toast('❌ No puedes quitarte el rol de administrador ni desactivarte a ti mismo'); return; }
   try {
     const updateData = {
       [CONFIG.col_nombre]: nombre,
       [CONFIG.col_rol]: rol,
       [CONFIG.col_modulos]: mods,
-      modulos_edit: edits,
-      cron_vista: cron,
       [CONFIG.col_activo]: activo
     };
     if(email) updateData.email = email;
@@ -1768,6 +1822,7 @@ async function guardarEdicionUsuario() {
     const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).update(updateData).eq('id', id);
     if(error) throw error;
     
+    registrarLog('Editar permisos', 'Usuarios', `${$('u_edit_user').value} → ${rol} [${mods.join(', ')}]`);
     toast('✅ Usuario actualizado');
     dlgEditarUsuario.close();
     await cargarUsuariosDeSupabase();
@@ -1783,15 +1838,14 @@ async function crearUsuario(){
   const email = $('u_new_email').value.trim();
   const pass = $('u_new_pass').value;
   const rol = $('u_new_rol').value;
-  const cron = $('u_new_cron').value;
   const enviarCorreo = $('u_new_enviar_correo').checked;
   
   if(!username || !pass || !email){ toast('Usuario, correo y contraseña son obligatorios'); return; }
   if(pass.length < 6){ toast('La contraseña debe tener al menos 6 caracteres'); return; }
   if(!supabaseClient){ toast('Sin conexión a la base de datos'); return; }
   
-  let mods = [...document.querySelectorAll('.u_mod:checked')].map(i=>i.value);
-  let edits = [...document.querySelectorAll('.u_edit_mod:checked')].map(i=>i.value);
+  const {mods} = leerPermisos('u_new');
+  if((rol==='editor' || rol==='lectura') && !modulosDeLista(mods).length){ toast('Selecciona al menos un módulo para este rol'); return; }
   
   try {
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -1810,8 +1864,6 @@ async function crearUsuario(){
       [CONFIG.col_pass]: pass,
       [CONFIG.col_rol]: rol,
       [CONFIG.col_modulos]: mods,
-      modulos_edit: edits,
-      cron_vista: cron,
       [CONFIG.col_activo]: true,
       email: email
     };
@@ -2077,7 +2129,46 @@ const ini=n=>String(n||'?').split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').to
 const ppl=r=>[['Principal',r.pri],...(r.sup?[['Suplente',r.sup]]:[])];
 const optNov=(all)=>Object.entries(NOV).map(([v,l])=>`<option value="${v}">${v===''&&all?'Todas las novedades':l}</option>`).join('');
 const optErr=()=>Object.entries(ERRORS).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+let tt, _ttHide;
+function toast(m, tipo){
+  const t=$('toast'); if(!t) return;
+  const txt=String(m ?? '');
+  const lim=txt.trim();
+  const esErr = tipo==='error' || /^(❌|⛔|🚫|Error|No se pudo|Sin permiso|Sin conexión|Solo (el )?admin)/i.test(lim);
+  const esAv  = !esErr && (tipo==='warn' || /^(⚠|🔒|Primero|Debe |Selecciona|Completa)/i.test(lim));
+  t.classList.remove('err','warn','ok');
+  t.classList.add(esErr?'err':esAv?'warn':'ok');
+  t.textContent='';
+  const box=document.createElement('div'); box.className='t-in';
+  const sp=document.createElement('span'); sp.className='t-msg'; sp.textContent=txt;
+  const x=document.createElement('button'); x.className='t-x'; x.type='button'; x.setAttribute('aria-label','Cerrar aviso'); x.textContent='✕';
+  x.onclick=()=>_toastOcultar();
+  box.append(sp,x); t.appendChild(box);
+  clearTimeout(tt); clearTimeout(_ttHide);
+  try{
+    if(t.showPopover){ if(t.matches(':popover-open')) t.hidePopover(); t.showPopover(); }   // se re-apila ENCIMA de cualquier diálogo abierto
+  }catch(e){}
+  requestAnimationFrame(()=>t.classList.add('on'));
+  tt=setTimeout(_toastOcultar, esErr ? 7500 : esAv ? 5000 : 3200);
+}
+function _toastOcultar(){
+  const t=$('toast'); if(!t) return;
+  t.classList.remove('on');
+  clearTimeout(_ttHide);
+  _ttHide=setTimeout(()=>{ try{ if(t.matches && t.matches(':popover-open')) t.hidePopover(); }catch(e){} },300);
+}
+// Cualquier error inesperado ahora se muestra en pantalla (antes solo iba a la consola)
+let _lastErrMsg='', _lastErrAt=0;
+function _reportarErrorGlobal(msg){
+  msg=String(msg||'').replace(/^Uncaught (\w+: )?/,'').slice(0,220);
+  if(!msg || /ResizeObserver|Script error|Non-Error promise rejection/i.test(msg)) return;
+  const now=Date.now(); if(msg===_lastErrMsg && now-_lastErrAt<4000) return;
+  _lastErrMsg=msg; _lastErrAt=now;
+  console.error('[Error capturado]', msg);
+  try{ toast('❌ Ocurrió un error: '+msg,'error'); }catch(e){}
+}
+window.addEventListener('error', ev=>_reportarErrorGlobal(ev.message || ev.error?.message));
+window.addEventListener('unhandledrejection', ev=>_reportarErrorGlobal(ev.reason?.message || ev.reason));
 const cleanFac = (f) => String(f || '').replace(/^Facultad de /i, '').replace(/^Departamento de /i, '');
 
 const NUM_BASE=['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
@@ -2133,6 +2224,11 @@ function inyectarVotosEnBlanco() {
 }
 
 function updateOrgActivos() {
+  if(SESSION && !puedeEditar('vCron')){
+    toast('⛔ Sin permiso para cambiar los órganos activos');
+    document.querySelectorAll('.ck-org').forEach(chk => { chk.checked = ORG_ACTIVOS.includes(chk.value); });
+    return;
+  }
   ORG_ACTIVOS = [];
   document.querySelectorAll('.ck-org').forEach(chk => { if(chk.checked) ORG_ACTIVOS.push(chk.value); });
   localStorage.setItem(K_ORG_ACTIVOS, JSON.stringify(ORG_ACTIVOS));
@@ -2148,15 +2244,7 @@ function tab(n){
   try{ if(SESSION) localStorage.setItem('ultima_tab_v1', String(n)); }catch(e){}
   ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vDocs'].forEach((id,i)=>{ $(id).classList.toggle('hide', i+1 !== n); $('n'+(i+1)).classList.toggle('on', i+1 === n); });
 
-  if(n===1){
-    const usuarioCron = USERS_CACHE.find(u => u.id === SESSION?.id)?.cron_vista || 'ambos';
-    const panelPub = $('panelCronPub'), panelInt = $('panelCronInt');
-    if(panelPub && panelInt){
-      if(usuarioCron === 'publico'){ panelPub.style.display=''; panelInt.style.display='none'; }
-      else if(usuarioCron === 'interno'){ panelPub.style.display='none'; panelInt.style.display=''; }
-      else { panelPub.style.display=''; panelInt.style.display=''; }
-    }
-  }
+  if(n===1){ aplicarVistaCron(); }
   if(n===2) { draw(); }
   if(n===3) { renderCensoData(); }
   if(n===4) { renderAnalitica(); }
@@ -2315,29 +2403,13 @@ function generarInformeVotacion() {
 }
 function imprimirInforme() { if(!$('informeOut').innerHTML.trim()) { toast('Primero genera el informe'); return; } let st = document.getElementById('pgInforme'); if(!st){ st = document.createElement('style'); st.id = 'pgInforme'; document.head.appendChild(st); } st.textContent = '@page { size: letter landscape; margin: 0; }'; document.body.classList.add('printing-informe'); const limpiar = () => { document.body.classList.remove('printing-informe'); const x = document.getElementById('pgInforme'); if(x) x.remove(); window.removeEventListener('afterprint', limpiar); }; window.addEventListener('afterprint', limpiar); window.print(); }
 
-function filtered(){ 
-  const q=norm($('q').value),o=$('fo').value,r=$('fr').value,e=$('fe').value,n=$('fnov').value; 
-  
-  return D.filter(c => {
-    // FILTRO DE VALIDADORES: Solo ven los que les corresponde
-    if (SESSION.rol === 'th' && c.rol !== 'Docente') return false;
-    if (SESSION.rol === 'egresados' && c.rol !== 'Egresado') return false;
-    if (SESSION.rol === 'sec_general' && c.rol !== 'Estudiante') return false;
-    if (SESSION.rol === 'fac_prog' && c.rol !== 'Estudiante') return false;
-
-    const P=ppl(c);
-    return (!q||P.some(([,p])=>norm(p.nombre).includes(q)||norm(p.doc).includes(q)))&&
-           (!o||c.org===o)&&
-           (!r||c.rol===r)&&
-           (!e||P.some(([,p])=>estado(c,p)[0]===e))&&
-           (!n||P.some(([,p])=>(p.nov||'')===n));
-  }); 
-}
+function filtered(){ const q=norm($('q').value),o=$('fo').value,r=$('fr').value,e=$('fe').value,n=$('fnov').value; return D.filter(c=>{if(!enAlcance(c)) return false; const P=ppl(c);return(!q||P.some(([,p])=>norm(p.nombre).includes(q)||norm(p.doc).includes(q)))&&(!o||c.org===o)&&(!r||c.rol===r)&&(!e||P.some(([,p])=>estado(c,p)[0]===e))&&(!n||P.some(([,p])=>(p.nov||'')===n))}); }
 
 function rowP(c,w,lab,p,first,n,duplaColor){
  const [e,m]=estado(c,p),act=CH[c.rol]||[];
  const isVotoBlanco = p.nombre.toUpperCase() === 'VOTO EN BLANCO';
- const puedeTocarEsteCheck = k => puedeValidar(k);
+ const puedeTocarEsteCheck = k => puedeValidar(k, c);
+ const _quien = {th:'Talento Humano',eg:'Egresados',sg:'Secretaría General',fp:'Facultad / Programa'};
  const chkTraza = (k) => {
    const meta = p.ckMeta && p.ckMeta[k];
    if(!meta || !meta.v) return '';
@@ -2350,13 +2422,15 @@ function rowP(c,w,lab,p,first,n,duplaColor){
    const v=p.ck[k]||'';
    if (isVotoBlanco) return `<td class="c" style="color:#ccc;">-</td>`;
    const puede = puedeTocarEsteCheck(k);
+   const activo = on && puede;
+   const tip = on && !puede ? `title="Solo ${_quien[k]} puede validar esta columna"` : '';
    return `<td class="c">
-     <button class="ck ${v}" id="ck_${c.id}_${w}_${k}" ${on?'':'disabled'} onclick="cyc('${c.id}','${w}','${k}')" ${puede?'':'style="opacity:.5"'}>${on?(v==='ok'?'✔':v==='x'?'✕':''):'–'}</button>
+     <button class="ck ${v} ${on && !puede ? 'lock' : ''}" id="ck_${c.id}_${w}_${k}" ${activo?'':'disabled'} ${tip} onclick="cyc('${c.id}','${w}','${k}')">${on?(v==='ok'?'✔':v==='x'?'✕':''):'–'}</button>
      ${chkTraza(k)}
    </td>`;
  };
  const novTraza = p.novMeta && p.novMeta.v ? `<span class="nv-traza" title="${esc(p.novMeta.by||'')} — ${new Date(p.novMeta.at).toLocaleString('es-CO')}">✍ ${esc((p.novMeta.by||'').split(' ')[0])} ${new Date(p.novMeta.at).toLocaleDateString('es-CO')}</span>` : '';
- const puedeNov = puedeValidar('nov');
+ const puedeNov = puedeValidar('nov', c);
  const hasAlert = e==='No habilitado' || e==='Renunció';
  return `<tr class="${hasAlert?'alert-row':''}"><td style="border-left:5px solid ${duplaColor}"><span class="cg ${w}">${lab}</span></td>
  <td><div class="pn"><i class="av">${esc(ini(p.nombre))}</i><div><b>${hasAlert?'<span class="alert-icon">⚠</span>':''}${esc(p.nombre)}</b><small>${esc(p.doc)} · ${esc(p.tel||'Sin cel')}</small><small>${esc(p.email||'Sin correo')}</small></div></div></td>
@@ -2367,7 +2441,7 @@ function rowP(c,w,lab,p,first,n,duplaColor){
  ${first?`<td class="rs" rowspan="${n}"><button class="ic" onclick="openForm('${c.id}')" title="Editar">✎</button><button class="ic" onclick="del('${c.id}')" title="Eliminar">🗑</button></td>`:''}</tr>`;
 }
 function draw(){
- const LDall = D.filter(c => ORG_ACTIVOS.includes(c.org));
+ const LDall = D.filter(c => ORG_ACTIVOS.includes(c.org) && enAlcance(c));
  const _esBl = c => String(c.pri.nombre||'').replace(/\s+/g,' ').trim().toUpperCase() === 'VOTO EN BLANCO';
  const LD = LDall.filter(c => !_esBl(c));
  const L=filtered().filter(c => ORG_ACTIVOS.includes(c.org)),T=LD.flatMap(c=>ppl(c).map(([,p])=>estado(c,p)[0])),n=T.length||1;
@@ -2390,14 +2464,16 @@ function draw(){
  [...$('tbl').tBodies].forEach(b=>b.remove());
  $('tbl').insertAdjacentHTML('beforeend',L.map((c,i)=>{ const P=ppl(c); const duplaColor = ['#70BE33','#F7941D','#3498db','#9b59b6','#e74c3c','#1abc9c','#f39c12','#34495e'][i % 8]; return `<tbody class="grp">${P.map(([lab,p],j)=>rowP(c,lab==='Principal'?'pri':'sup',lab,p,j===0,P.length,duplaColor)).join('')}</tbody>`; }).join(''));
  deshabilitarBotonesEdicion();
+ try{ const kv = clavesValidador(), pe = $('validadorPend'); if(kv && pe){ let pend = 0; LD.forEach(c => ppl(c).forEach(([,p]) => { if(kv.some(k => (CH[c.rol]||[]).includes(k) && !p.ck[k])) pend++; })); pe.textContent = pend ? `${pend} pendiente(s) por validar` : '✔ Todo validado'; } }catch(e){}
 }
 
 const per=(c,w)=>w==='pri'?c.pri:c.sup;
 function cyc(id,w,k){
-  const chkField = k;
-  if(SESSION && !puedeValidar(chkField)){ toast('⛔ No tienes permiso para marcar este check'); return; }
-  if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
   const c = D.find(x=>x.id===id);
+  if(!c) return;
+  if(SESSION && !puedeValidar(k, c)){ toast('⛔ No tienes permiso para marcar esta casilla (solo tu columna y tus candidatos)'); return; }
+  if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
+  if(!(CH[c.rol]||[]).includes(k)) return;
   const p = per(c,w);
   if(p.nombre.toUpperCase() === 'VOTO EN BLANCO') return;
   p.ck[k] = ({'':'ok', ok:'x', x:''})[p.ck[k]||''];
@@ -2412,7 +2488,7 @@ function cyc(id,w,k){
   if(p.ck[k]==='x'){ toast('⚠️ Condición marcada como NO cumple.'); playSound(); }
 }
 function setNov(id,w,v){
-  if(SESSION && !puedeValidar('nov')){ toast('⛔ No tienes permiso para cambiar novedades'); return; }
+  if(SESSION && !puedeValidar('nov', D.find(x=>x.id===id))){ toast('⛔ No tienes permiso para cambiar novedades de este candidato'); draw(); return; }
   if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; }
   const c = D.find(x=>x.id===id);
   const p = per(c,w);
@@ -3370,7 +3446,54 @@ function editAct(id){ if(SESSION && !puedeEditar('vCron')){ toast('⛔ Sin permi
 function saveActividad(){ if(SESSION && !puedeEditar('vCron')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } const nombre = $('a_nombre').value.trim(); if(!nombre){ toast('Escribe un nombre'); return; } const fIni = $('a_fecha').value || new Date().toISOString().slice(0,10); let fFin = $('a_fin').value || ''; if(fFin && fFin < fIni){ toast('La fecha de fin no puede ser anterior'); return; } const editId = $('dlgAct').dataset.editId; if(editId) { const a = CRON.find(x=>x.id===editId); if(a) { a.nombre = nombre; a.fecha = fIni; a.fechaFin = fFin; a.responsable = $('a_resp').value.trim(); a.tipo = $('a_tipo').value; a.etapa = $('a_etapa').value; a.desc = $('a_desc').value.trim(); a.publica = $('a_publica').checked; } } else { CRON.push({id:uid(), nombre, fecha:fIni, fechaFin:fFin, responsable:$('a_resp').value.trim(), tipo:$('a_tipo').value, etapa:$('a_etapa').value, desc:$('a_desc').value.trim(), completado:false, motivo:'', publica:$('a_publica').checked, manual:true}); } saveCron(); $('dlgAct').close(); renderCronograma(); lanzarNotificacion(editId ? 'Actividad actualizada' : 'Actividad creada', nombre); }
 function toggleAct(id){ if(SESSION && !puedeEditar('vCron')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } const a = CRON.find(x=>x.id===id); if(a){ a.completado = !a.completado; saveCron(); renderCronograma(false); if(a.completado){ playSound(); toast('✅ Completada'); } } }
 function delAct(id){ if(SESSION && !puedeEditar('vCron')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } if(confirm('¿Eliminar esta actividad?')){ CRON = CRON.filter(x=>x.id!==id); saveCron(); renderCronograma(false); } }
-function descargarCronImagen(elementId, nombreArchivo) { const node = $(elementId); html2canvas(node, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => { const link = document.createElement('a'); link.download = nombreArchivo + '.png'; link.href = canvas.toDataURL('image/png'); link.click(); toast('Imagen descargada'); }).catch(err => { console.error(err); toast('Error al generar la imagen'); }); }
+async function descargarCronImagen(elementId, nombreArchivo){
+  const node = $(elementId);
+  if(!node){ toast('❌ No se encontró el cronograma a descargar'); return; }
+  if(node.offsetParent === null){ toast('⚠️ Este cronograma no está visible con tu perfil'); return; }
+  if(typeof html2canvas !== 'function'){ toast('❌ No se cargó la librería de imágenes. Revisa tu conexión y recarga la página.'); return; }
+  toast('⏳ Generando imagen…');
+  // html2canvas no entiende color-mix() ni animaciones: se neutralizan SOLO en la copia que se fotografía.
+  const FIX = `*,*::before,*::after{animation:none!important;transition:none!important}
+    .cr-item,.cr-stage,.cr-stat,.cr-next{opacity:1!important;transform:none!important;filter:none!important}
+    .cr-item{background:linear-gradient(100deg,var(--tsoft,#eef2ef) 0%,#fff 48%)!important;border:1px solid var(--tsoft,#dfe6e2)!important;box-shadow:none!important}
+    .cr-d{border:1px solid var(--tsoft,#dfe6e2)!important}
+    .cr-stat{border:1px solid #d5e3db!important}
+    .cr-ico{box-shadow:none!important}
+    .cr-stage{box-shadow:none!important}
+    .cron-panel{overflow:visible!important;box-shadow:none!important}
+    .progress-bar-fill{background:#0B7A4B!important;background-size:auto!important}`;
+  const quitar = '.cr-actions,.bar,.cr-filtros,.cr-save,.cron-header button,.no-img';
+  const dpr = Math.min(2, window.devicePixelRatio > 1 ? 2 : 1.5);
+  const alto = node.scrollHeight, ancho = node.scrollWidth;
+  const scale = Math.max(.5, Math.min(dpr, 15000/Math.max(alto,1), Math.sqrt(1.2e8/Math.max(alto*ancho,1))));
+  const opts = (extra) => Object.assign({
+    scale, backgroundColor:'#ffffff', useCORS:true, logging:false,
+    scrollX:0, scrollY:-window.scrollY, windowWidth:document.documentElement.clientWidth,
+    onclone:(doc)=>{
+      const st = doc.createElement('style'); st.textContent = FIX; doc.head.appendChild(st);
+      const cl = doc.getElementById(elementId);
+      if(cl){ cl.querySelectorAll(quitar).forEach(x=>x.remove()); cl.style.height='auto'; cl.style.overflow='visible'; }
+    }
+  }, extra||{});
+  try{
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    let canvas;
+    try { canvas = await html2canvas(node, opts()); }
+    catch(e1){ console.warn('html2canvas (modo normal) falló, reintentando:', e1); canvas = await html2canvas(node, opts({foreignObjectRendering:true})); }
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    if(!blob) throw new Error('El navegador no pudo crear el archivo PNG (imagen demasiado grande).');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${nombreArchivo}_${new Date().toISOString().slice(0,10)}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    toast('✅ Imagen descargada');
+    registrarLog('Descargar imagen', 'Cronograma', nombreArchivo);
+  }catch(err){
+    console.error(err);
+    toast('❌ No se pudo generar la imagen: ' + (err?.message || err), 'error');
+  }
+}
 function descargarPlantillaCronograma() { const data = [['Etapa', 'Actividad', 'Responsable', 'Fecha Inicio', 'Fecha Fin', 'Estado / Observación', 'Visible en Público (SI/NO)'],['Preelectoral', 'Convocatoria oficial', 'Vicerrectoría', '2026-01-15', '2026-01-20', 'Completado', 'SI'],['Electoral', 'Jornada de votación', 'Registro', '2026-03-10', '2026-03-10', 'Pendiente', 'SI'],['Postelectoral', 'Escrutinio', 'Secretaría', '2026-03-11', '2026-03-12', 'En curso', 'NO'],['Posesión', 'Toma de posesión', 'Rectoría', '2026-03-20', '2026-03-20', 'Pendiente', 'SI']]; const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Cronograma'); XLSX.writeFile(wb, 'plantilla-cronograma.xlsx'); }
 const ETAPAS_BASE = ['Preelectoral','Electoral','Postelectoral','Segunda Vuelta', 'Posesión'];
 const TIPOS_CRON = ['Inscripción','Campaña','Votación','Escrutinio','Poselectoral','Otro'];
@@ -3700,6 +3823,154 @@ renderCensoData();
 renderVacantes();
 renderSoportes();
 
+
+/* =====================================================================
+   PERMISOS: UI de usuarios, vista de cronograma, alcance y solo-lectura
+   ===================================================================== */
+function _capacidadesRol(rolKey){
+  const def = ROLES[rolKey];
+  const fijo = !!def && (def.mods === '*' || (Array.isArray(def.mods) && def.mods.length > 0));
+  const puedeEd = (modKey, seleccionados) => {
+    if(rolKey === 'administrador') return true;
+    if(rolKey === 'editor') return seleccionados.includes(modKey);
+    if(rolKey === 'lectura' || rolKey === 'auditor') return false;
+    if(def?.validador) return false;
+    if(def?.puedeEditar === '*') return true;
+    return Array.isArray(def?.puedeEditar) && def.puedeEditar.includes(modKey);
+  };
+  return {def, fijo, puedeEd};
+}
+
+function actualizarPermisosUI(pre, cambioRol, init){
+  const rolKey = $(pre+'_rol').value;
+  const {def, fijo, puedeEd} = _capacidadesRol(rolKey);
+  const cls = pre === 'u_new' ? 'u_mod' : 'u_edit_mod';
+  let sel = init?.mods ?? [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
+  if(cambioRol && !init && !(rolKey==='editor'||rolKey==='lectura')) sel = [];
+  const todos = def?.mods === '*';
+  const chips = MODULOS.map(m => {
+    const marcado = todos ? true : (fijo ? def.mods.includes(m.key) : sel.includes(m.key));
+    const edita = marcado && puedeEd(m.key, sel);
+    return `<label class="chip-t"><input type="checkbox" value="${m.key}" class="${cls}" ${marcado?'checked':''} ${fijo?'disabled':''} onchange="actualizarPermisosUI('${pre}',false)"><span>${esc(m.label)}${edita?' <em class="chip-edit">✎</em>':''}</span></label>`;
+  }).join('');
+  $(pre+'_mods').innerHTML = chips;
+  $(pre+'_perm').innerHTML = `<b>${esc(def?.label || rolKey)}</b>: ${esc(ROLES_DESC[rolKey] || '')}`;
+
+  // Selector de cronograma (solo si el rol/usuario tiene el módulo Cronograma)
+  const selFinal = [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
+  const incCron = rolKey !== 'administrador' && (todos || selFinal.includes('vCron'));
+  const box = $(pre+'_cronbox');
+  box.classList.toggle('hide', !incCron);
+  if(incCron){
+    let actual = init?.cron;
+    if(!actual && !cambioRol) actual = document.querySelector(`input[name="${pre}_cronv"]:checked`)?.value;
+    if(!actual) actual = def?.cronVista || 'ambos';
+    const op = [['ambos','🌐🔒 Público + Interno'],['publico','🌐 Solo Público'],['interno','🔒 Solo Interno']];
+    $(pre+'_cron').innerHTML = op.map(([v,l]) => `<label class="chip-t"><input type="radio" name="${pre}_cronv" value="${v}" ${v===actual?'checked':''}><span>${l}</span></label>`).join('');
+  }
+}
+
+function leerPermisos(pre){
+  const rolKey = $(pre+'_rol').value;
+  const def = ROLES[rolKey];
+  const cls = pre === 'u_new' ? 'u_mod' : 'u_edit_mod';
+  let mods = [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
+  if(def && Array.isArray(def.mods) && def.mods.length) mods = [...def.mods];
+  const todos = def?.mods === '*';
+  if(todos) mods = [];
+  const incCron = rolKey !== 'administrador' && (todos || mods.includes('vCron'));
+  const cv = document.querySelector(`input[name="${pre}_cronv"]:checked`)?.value || (def?.cronVista || 'ambos');
+  if(incCron){
+    if(cv === 'ambos' || cv === 'publico') mods.push(CRON_TOK.publico);
+    if(cv === 'ambos' || cv === 'interno') mods.push(CRON_TOK.interno);
+  }
+  return {mods, cron: cv};
+}
+
+function renderMatrizRoles(){
+  const lbl = k => MODULOS.find(m=>m.key===k)?.label || k;
+  const filas = Object.entries(ROLES).map(([k,r]) => {
+    let ver, edit;
+    if(r.mods === '*') ver = 'Todos';
+    else if(k==='editor' || k==='lectura') ver = 'Los que se asignen';
+    else ver = (r.mods||[]).map(lbl).join(', ') || '—';
+    if(r.puedeEditar === '*') edit = 'Todo';
+    else if(k==='editor') edit = 'Los que se asignen';
+    else if(r.validador) edit = 'Solo valida su columna';
+    else edit = (Array.isArray(r.puedeEditar) && r.puedeEditar.length) ? r.puedeEditar.map(lbl).join(', ') : 'Nada (solo lectura)';
+    const cron = r.cronVista ? ({ambos:'Público + Interno',publico:'Solo público',interno:'Solo interno'})[r.cronVista] : '—';
+    return `<tr><td><span class="tag ${r.color||'b'}">${esc(r.label)}</span></td><td>${esc(ver)}</td><td>${esc(edit)}</td><td>${esc(cron)}</td><td>${esc(ROLES_DESC[k]||'')}</td></tr>`;
+  }).join('');
+  $('matrizRoles').innerHTML = `<table class="matriz-roles"><thead><tr><th>Rol</th><th>Puede ver</th><th>Puede editar</th><th>Cronograma</th><th>Descripción</th></tr></thead><tbody>${filas}</tbody></table>`;
+}
+
+// Cronograma: muestra solo el/los panel(es) que corresponden
+function aplicarVistaCron(){
+  const vista = getCronVista();
+  const pub = $('panelCronPub'), int = $('panelCronInt');
+  if(!pub || !int) return;
+  pub.style.display = (vista === 'interno') ? 'none' : '';
+  int.style.display = (vista === 'publico') ? 'none' : '';
+  const grid = pub.parentElement;
+  if(grid) grid.style.gridTemplateColumns = (vista === 'ambos') ? '' : '1fr';
+  const org = $('cardOrgActivos');
+  if(org) org.style.display = (vista === 'publico') ? 'none' : '';
+}
+
+// Seguimiento: el validador solo ve los roles que le corresponden en el filtro
+function aplicarAlcanceSeguimiento(){
+  const fr = $('fr'); if(!fr) return;
+  const kv = clavesValidador();
+  [...fr.options].forEach(o => {
+    if(!o.value) return;
+    const ok = !kv || (CH[o.value]||[]).some(k => kv.includes(k));
+    o.hidden = !ok; o.disabled = !ok;
+  });
+  if(kv && fr.value && fr.selectedOptions[0]?.disabled) fr.value = '';
+}
+
+// Solo lectura: oculta / bloquea todo lo que modifica, elimina o carga
+const _LOCK_SEL = '.ck-org, #inpTotalCenso, #inpTotalHabilitados, #at, .firma-item input, .firma-item select, input[onchange*="toggleGanador"], input[onchange*="setV("], select[onchange*="setV("]';
+function aplicarModoLectura(){
+  if(!SESSION) return;
+  MODULOS.forEach(m => {
+    const sec = $(m.key); if(!sec) return;
+    const ro = !puedeEditar(m.key);
+    sec.classList.toggle('ro', ro);
+    let b = sec.querySelector(':scope > .ro-banner');
+    if(!b){
+      b = document.createElement('div'); b.className = 'ro-banner'; b.hidden = true;
+      const top = sec.querySelector(':scope > .top');
+      if(top) top.after(b); else sec.prepend(b);
+    }
+    const validadorSeg = (m.key === 'vSeg' && esValidadorRol());
+    const txt = (ELECCIONES_CERRADAS && SESSION.rol !== 'administrador')
+      ? '🔒 Elecciones cerradas: este módulo está en solo lectura.'
+      : '👁 Modo solo lectura: puedes consultar y descargar, pero no editar, eliminar, modificar ni cargar archivos.';
+    if(b.textContent !== txt) b.textContent = txt;
+    const ocultar = !(ro && !validadorSeg);
+    if(b.hidden !== ocultar) b.hidden = ocultar;
+    sec.querySelectorAll(_LOCK_SEL).forEach(el => {
+      if(el.tagName === 'TEXTAREA') { if(el.readOnly !== ro) el.readOnly = ro; }
+      else if(el.disabled !== ro) el.disabled = ro;
+    });
+  });
+}
+(function(){ let t=null; new MutationObserver(()=>{ if(!SESSION) return; clearTimeout(t); t=setTimeout(()=>{ try{ aplicarModoLectura(); }catch(e){} },60); }).observe(document.body,{childList:true,subtree:true}); })();
+
+// Defensa en profundidad: cualquier acción de escritura sin guarda propia queda bloqueada para lectores
+function _guardar(nombre, modulo){
+  const orig = window[nombre]; if(typeof orig !== 'function') return;
+  window[nombre] = function(...args){
+    if(SESSION && !puedeEditar(modulo)){ toast('⛔ Tu perfil es de solo lectura: no puedes realizar esta acción'); return; }
+    return orig.apply(this, args);
+  };
+}
+[['addFirma','vAct'],['delFirma','vAct'],['updateFirma','vAct'],['toggleDelegado','vAct'],['eliminarFirma','vAct'],
+ ['guardarTextoActa','vAct'],['restaurarTextoActa','vAct'],['generarEnlaceFirma','vAct'],['generarQRGrupal','vAct'],
+ ['enviarEnlacePorCorreo','vAct'],['demo','vSeg']].forEach(([f,m]) => _guardar(f,m));
+{ const _abc = actualizarBannerCierre; actualizarBannerCierre = function(){ _abc(); try{ aplicarModoLectura(); aplicarPermisosUI(); }catch(e){} }; }
+
 (async function initAuth(){
   if(SESSION){
     document.body.classList.add('logged-in'); document.body.classList.remove('logged-out');
@@ -3730,7 +4001,7 @@ renderSoportes();
         let rolFinal = perfil[CONFIG.col_rol];
         if (rolFinal === 'leer') rolFinal = 'lectura';
         
-        SESSION = {...SESSION, nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user], rol: rolFinal, modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : [], modulosEdit: Array.isArray(perfil.modulos_edit) ? perfil.modulos_edit : []};
+        SESSION = {...SESSION, nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user], rol: rolFinal, modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []};
         saveSession();
         await cargarEstadoElecciones();
         actualizarUserCard(); aplicarPermisosUI(); actualizarBannerCierre();
