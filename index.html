@@ -1414,7 +1414,7 @@ document.addEventListener('keydown', e => {
   doLogin();
 });
 
-/* === MODIFICADO === Login */
+/* === MODIFICADO === Login vía supabase.auth con mapa de correos y fallback de tabla */
 async function doLogin(){
   if($('loginBtn').disabled) return;
   const u = $('loginUser').value.trim();
@@ -1426,26 +1426,28 @@ async function doLogin(){
   try {
     if(!supabaseClient){ $('loginErr').textContent = '⚠️ No hay conexión configurada.'; return; }
 
+    // Mapeo de usuarios a correos para que "admin" funcione sin escribir el correo completo
+    const emailMap = {
+      'admin': 'admin@unbosque.edu.co',
+      'administración': 'admin@unbosque.edu.co',
+      'hernandezdiana': 'hernandezdiana@unbosque.edu.co'
+    };
+    
+    const email = u.includes('@') ? u : (emailMap[u.toLowerCase()] || `${u}@unbosque.edu.co`);
+
     let perfil = null;
     let uidAuth = null;
 
-    // --- 1) INTENTO CON SUPABASE AUTH ---
-    try {
-      // Si el usuario ingresa un correo, lo usamos. Si no, probamos con el formato interno
-      const email = u.includes('@') ? u : `${u}@unbosque.local`;
-      const { data: authData, error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: p });
-      
-      if (!authErr && authData?.user) {
-        uidAuth = authData.user.id;
-        // Buscar perfil por id
-        const { data: p1 } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', uidAuth).maybeSingle();
-        if (p1) perfil = p1;
-      }
-    } catch(e) { 
-      console.warn('Auth falló, probando fallback:', e.message); 
+    // 1) LOGIN VÍA SUPABASE AUTH
+    const { data: authData, error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: p });
+    
+    if (!authErr && authData?.user) {
+      uidAuth = authData.user.id;
+      const { data: p1 } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', uidAuth).maybeSingle();
+      if (p1) perfil = p1;
     }
 
-    // --- 2) FALLBACK: VALIDAR CONTRA TABLA (Rescate) ---
+    // 2) FALLBACK: VALIDAR CONTRA TABLA (Por si algo falla en Auth)
     if (!perfil) {
       const { data, error } = await supabaseClient
         .from(CONFIG.tabla_usuarios)
@@ -1457,7 +1459,6 @@ async function doLogin(){
       if (error) throw error;
       if (!data) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
       
-      // Validación de contraseña directa (asegúrate de que 'password_hash' existe y tiene la clave)
       const storedPass = String(data[CONFIG.col_pass] || '');
       if (storedPass !== p && storedPass !== '') { 
         $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; 
@@ -1471,7 +1472,7 @@ async function doLogin(){
     if (!perfil) { $('loginErr').textContent = 'Usuario no encontrado.'; return; }
     if (perfil[CONFIG.col_activo] === false) { $('loginErr').textContent = 'Usuario inactivo.'; return; }
 
-    // Normalizar el rol (por si acaso el ENUM devuelve 'leer' o algo raro)
+    // Normalizar el rol
     let rolFinal = perfil[CONFIG.col_rol];
     if (rolFinal === 'leer') rolFinal = 'lectura';
 
@@ -1494,6 +1495,7 @@ async function doLogin(){
     $('loginBtn').disabled = false;
   }
 }
+
 /* === MODIFICADO === Logout también cierra sesión de supabase.auth */
 function doLogout(){
   if(!confirm('¿Cerrar sesión ahora?')) return;
@@ -1792,8 +1794,6 @@ async function crearUsuario(){
   try {
     const insertData = {[CONFIG.col_user]: username,[CONFIG.col_nombre]: nombre,[CONFIG.col_rol]: rol,[CONFIG.col_modulos]: mods,[CONFIG.col_activo]: true};
     if(email) insertData.email = email;
-    // NOTA: para seguridad real, crear el usuario en auth.users desde una Edge Function con service_role
-    // y guardar solo el id aquí. Aquí se deja preparado para cuando migres.
     const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([insertData]);
     if(error) throw error;
     registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
@@ -1961,8 +1961,6 @@ async function cambiarPassManual(){
   if(p1 !== p2){ msg.textContent = 'Las contraseñas no coinciden.'; return; }
   if(!supabaseClient){ msg.textContent = 'No hay conexión con el servidor.'; return; }
   try {
-    // NOTA: Con auth real esto debe hacerse con una Edge Function que llame a admin.updateUserById.
-    // Se deja compatibilidad por si sigues usando la tabla mientras migras.
     const { data, error } = await supabaseClient.from(CONFIG.tabla_usuarios).update({ [CONFIG.col_pass]: p1 }).eq(CONFIG.col_user, user).select();
     if(error) throw error;
     if(!data || data.length === 0){ msg.textContent = 'Usuario no encontrado.'; return; }
@@ -3655,13 +3653,12 @@ normalizarFacultadesGlobal();
 normalizarNombresGlobal();
 document.querySelectorAll('.ck-org').forEach(chk => { chk.checked = ORG_ACTIVOS.includes(chk.value); });
 inyectarVotosEnBlanco(); 
-limpiarVotosEnBlancoInvalido s?0:limpiarVotosEnBlancoInvalidos(); /* fallback seguro */
+limpiarVotosEnBlancoInvalidos();
 fillSel();
 draw();
 migrarCron();
 renderCronograma();
 inicializarFirmasOficiales();
-migrarFirmas?0:migrarFirmas /* referencia opcional */
 renderFirmas();
 renderCensoData(); 
 renderVacantes();
@@ -3676,13 +3673,23 @@ renderSoportes();
     
     if(supabaseClient){
       try {
-        const { data: perfil } = await supabaseClient
-          .from(CONFIG.tabla_usuarios)
-          .select('*')
-          .eq('id', SESSION.id)
-          .maybeSingle();
-          
+        // Revalidar con auth.getUser() si hay sesión de Supabase Auth, si no, por tabla
+        const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
+        
+        let perfil = null;
+        if(!userErr && userData?.user) {
+          const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', userData.user.id).maybeSingle();
+          perfil = data;
+        }
+        
+        // Si falló Auth, buscar por tabla (fallback)
+        if(!perfil) {
+           const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', SESSION.id).maybeSingle();
+           perfil = data;
+        }
+
         if(!perfil || perfil[CONFIG.col_activo] === false){
+          await supabaseClient.auth.signOut();
           detenerTimerSesion();
           SESSION = null;
           try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
@@ -3703,7 +3710,7 @@ renderSoportes();
     document.body.classList.add('logged-out'); $('loginScreen').classList.remove('hide'); setTimeout(()=>$('loginUser')?.focus(), 100);
   }
 })();
-  
+
 setInterval(async () => { if(SESSION && supabaseClient){ await cargarEstadoElecciones(); actualizarBannerCierre(); } }, 60000);
 </script>
 </body>
