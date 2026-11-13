@@ -1414,7 +1414,7 @@ document.addEventListener('keydown', e => {
   doLogin();
 });
 
-/* === MODIFICADO === Login vía supabase.auth (contraseñas nunca viajan en claro al JS) */
+/* === MODIFICADO === Login */
 async function doLogin(){
   if($('loginBtn').disabled) return;
   const u = $('loginUser').value.trim();
@@ -1423,30 +1423,36 @@ async function doLogin(){
   $('loginLoad').classList.remove('hide');
   $('loginBtn').disabled = true;
   try {
-    if(!supabaseClient){ $('loginErr').textContent = '⚠️ No hay conexión configurada con el servidor.'; return; }
+    if(!supabaseClient){ $('loginErr').textContent = '⚠️ No hay conexión configurada.'; return; }
 
-    // Supabase auth: usa el correo o un usuario convertido a email interno
-    const email = u.includes('@') ? u : `${u}@unbosque.local`;
-    const { data: authData, error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: p });
-    if(authErr) {
-      $('loginErr').textContent = 'Usuario o contraseña incorrectos.';
-      return;
-    }
-    const uid = authData.user.id;
+    // 1) Intento con Auth (si existe el usuario allí)
+    let authOk = false, uid = null;
+    try {
+      const email = u.includes('@') ? u : `${u}@unbosque.local`;
+      const { data: authData, error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: p });
+      if (!authErr && authData?.user) { authOk = true; uid = authData.user.id; }
+    } catch(e) { /* silencio, probamos fallback */ }
 
-    // Cargar perfil desde la tabla (RLS garantiza que solo el propio usuario lo ve)
-    const { data: perfil, error: perfilErr } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', uid).maybeSingle();
-    if(perfilErr) throw perfilErr;
-    if(!perfil){
-      $('loginErr').textContent = 'Usuario sin perfil asignado. Contacta al administrador.';
-      await supabaseClient.auth.signOut();
-      return;
+    let perfil = null;
+    if (authOk) {
+      const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', uid).maybeSingle();
+      perfil = data;
     }
-    if(perfil[CONFIG.col_activo] === false){
-      $('loginErr').textContent = 'Usuario inactivo. Contacta al administrador.';
-      await supabaseClient.auth.signOut();
-      return;
+
+    // 2) FALLBACK: validar contra la tabla si Auth no lo encontró
+    if (!perfil) {
+      const { data, error } = await supabaseClient.from(CONFIG.tabla_usuarios)
+        .select('*').eq(CONFIG.col_user, u).eq(CONFIG.col_activo, true).maybeSingle();
+      if (error) throw error;
+      if (!data) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
+      if (String(data[CONFIG.col_pass] || '') !== p) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
+      perfil = data;
+      uid = data.id;
     }
+
+    if (!perfil) { $('loginErr').textContent = 'Usuario no encontrado.'; return; }
+    if (perfil[CONFIG.col_activo] === false) { $('loginErr').textContent = 'Usuario inactivo.'; return; }
+
     SESSION = {
       id: uid,
       username: perfil[CONFIG.col_user],
@@ -1460,13 +1466,12 @@ async function doLogin(){
     aplicarSesion();
   } catch(err) {
     console.error(err);
-    $('loginErr').textContent = '❌ Error de conexión: ' + (err.message || 'Verifica tu conexión');
+    $('loginErr').textContent = '❌ ' + (err.message || 'Error de conexión');
   } finally {
     $('loginLoad').classList.add('hide');
     $('loginBtn').disabled = false;
   }
 }
-
 /* === MODIFICADO === Logout también cierra sesión de supabase.auth */
 function doLogout(){
   if(!confirm('¿Cerrar sesión ahora?')) return;
@@ -3646,19 +3651,9 @@ renderSoportes();
     aplicarSesion();
     if(supabaseClient){
       try {
-        // Revalidar con auth.getUser() (más seguro que consultar la tabla)
-        const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
-        if(userErr) throw userErr;
-        if(!userData?.user){
-          detenerTimerSesion();
-          SESSION = null;
-          try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
-          location.reload();
-          return;
-        }
-        const { data: perfil } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', userData.user.id).maybeSingle();
+        const { data: perfil } = await supabaseClient.from(CONFIG.tabla_usuarios)
+          .select('*').eq('id', SESSION.id).maybeSingle();
         if(!perfil || perfil[CONFIG.col_activo] === false){
-          await supabaseClient.auth.signOut();
           detenerTimerSesion();
           SESSION = null;
           try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
@@ -3669,13 +3664,13 @@ renderSoportes();
         saveSession();
         await cargarEstadoElecciones();
         actualizarUserCard(); aplicarPermisosUI(); actualizarBannerCierre();
-      } catch(e) { console.warn('No se pudo validar la sesión; se conserva la guardada:', e.message || e); }
+      } catch(e) { console.warn('No se pudo validar sesión:', e.message); }
     }
   } else {
     document.body.classList.add('logged-out'); $('loginScreen').classList.remove('hide'); setTimeout(()=>$('loginUser')?.focus(), 100);
   }
 })();
-
+  
 setInterval(async () => { if(SESSION && supabaseClient){ await cargarEstadoElecciones(); actualizarBannerCierre(); } }, 60000);
 </script>
 </body>
