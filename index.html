@@ -184,46 +184,14 @@ textarea.in{min-height:110px;resize:vertical}
 tr.posible-ganador td { background-color: #FFF3CD !important; font-weight: 600; }
 tr.posible-ganador td:first-child { border-left: 4px solid #FFC107 !important; }
 
-/* === FIRMAS (ESTILO IMAGEN DE EJEMPLO) === */
+/* === FIRMAS === */
 .acta-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 80px; margin-top: 60px; margin-bottom: 80px; }
-.acta-firma-item {
-  text-align: center;
-  margin-bottom: 40px;
-  page-break-inside: avoid;
-}
-.acta-firma-item .firma-img-wrap {
-  height: 60px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  margin-bottom: 4px;
-}
-.acta-firma-item img {
-  max-height: 60px;
-  max-width: 80%;
-  width: auto;
-  object-fit: contain;
-}
-.acta-firma-item .firma-linea {
-  border-top: 1.5px solid #000;
-  width: 85%;
-  margin: 0 auto 6px;
-}
-.acta-firma-item .firma-nombre {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .3px;
-  color: #000;
-  line-height: 1.3;
-}
-.acta-firma-item .firma-cargo {
-  font-size: 10px;
-  font-weight: 600;
-  color: #000;
-  line-height: 1.3;
-  margin-top: 1px;
-}
+.acta-firma-item { text-align: center; margin-bottom: 40px; page-break-inside: avoid; }
+.acta-firma-item .firma-img-wrap { height: 60px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 4px; }
+.acta-firma-item img { max-height: 60px; max-width: 80%; width: auto; object-fit: contain; }
+.acta-firma-item .firma-linea { border-top: 1.5px solid #000; width: 85%; margin: 0 auto 6px; }
+.acta-firma-item .firma-nombre { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; color: #000; line-height: 1.3; }
+.acta-firma-item .firma-cargo { font-size: 10px; font-weight: 600; color: #000; line-height: 1.3; margin-top: 1px; }
 
 .acta-footer { background: #00201A !important; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; position: relative; margin-top: auto; }
 .acta-footer-logo { display: flex; align-items: center; gap: 5px; }
@@ -232,8 +200,7 @@ tr.posible-ganador td:first-child { border-left: 4px solid #FFC107 !important; }
 .acta-page-num { position: absolute; left: 50%; transform: translateX(-50%); background: #fff; color: #00201A; width: 60px; height: 30px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; bottom: 10px; box-shadow: 0 0 0 3px #00201A; }
 
 .firmas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-top:12px}
-.firma-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcfb;position:relative}
-.firma-item{min-width:0}
+.firma-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcfb;position:relative;min-width:0}
 .firma-item label{font-size:11.5px;margin:6px 0 2px;display:block}
 .firma-item .in{width:100%;max-width:100%;box-sizing:border-box;text-overflow:ellipsis}
 .firma-item select.in{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:26px;cursor:pointer}
@@ -505,140 +472,35 @@ body.logged-in #topbar { display: flex; }
 #loginScreen .in { padding: 12px; }
 
 .user-card {
-  margin: 0 0 14px;
-  padding: 12px 14px;
-  background: linear-gradient(135deg, #14523e 0%, #0B3B2C 100%);
-  border-radius: 14px;
-  border: 1px solid #2a5e4d;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  position: relative;
+  margin: 0 0 14px; padding: 12px 14px; background: linear-gradient(135deg, #14523e 0%, #0B3B2C 100%);
+  border-radius: 14px; border: 1px solid #2a5e4d; display: flex; flex-direction: column; gap: 8px; position: relative;
 }
-.user-card .user-name {
-  font-size: 13.5px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.25;
-  word-break: break-word;
-}
-.user-card .user-role {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .6px;
-  text-transform: uppercase;
-  color: #C6ED6E;
-}
+.user-card .user-name { font-size: 13.5px; font-weight: 800; color: #fff; line-height: 1.25; word-break: break-word; }
+.user-card .user-role { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #C6ED6E; }
 .user-card .btn-logout {
-  margin-top: 4px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.18);
-  color: #fff;
-  border-radius: 9px;
-  padding: 8px 12px;
-  font-size: 12.5px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all .18s;
+  margin-top: 4px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: #fff;
+  border-radius: 9px; padding: 8px 12px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .18s;
 }
-.user-card .btn-logout:hover {
-  background: rgba(231,76,60,.85);
-  border-color: #e74c3c;
-}
-.user-card .session-timer {
-  font-size: 11px;
-  color: #9ac0b0;
-  text-align: center;
-  font-weight: 600;
-  letter-spacing: .3px;
-}
+.user-card .btn-logout:hover { background: rgba(231,76,60,.85); border-color: #e74c3c; }
+.user-card .session-timer { font-size: 11px; color: #9ac0b0; text-align: center; font-weight: 600; letter-spacing: .3px; }
 
-.reset-link {
-  background: none;
-  border: none;
-  color: var(--oscuro);
-  font-size: 12.5px;
-  font-weight: 700;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 6px 0;
-  text-align: center;
-  display: block;
-  width: 100%;
-  margin-top: 8px;
-}
+.reset-link { background: none; border: none; color: var(--oscuro); font-size: 12.5px; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 6px 0; text-align: center; display: block; width: 100%; margin-top: 8px; }
 .reset-link:hover { color: var(--naranja); }
 
-#dlgReset .db .tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid var(--line);
-}
-#dlgReset .db .tabs button {
-  border: 0;
-  background: none;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
-  color: var(--mut);
-  border-bottom: 3px solid transparent;
-  font-size: 13px;
-}
-#dlgReset .db .tabs button.on {
-  color: var(--oscuro);
-  border-bottom-color: var(--naranja);
-}
+#dlgReset .db .tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+#dlgReset .db .tabs button { border: 0; background: none; padding: 10px 16px; font-weight: 700; cursor: pointer; color: var(--mut); border-bottom: 3px solid transparent; font-size: 13px; }
+#dlgReset .db .tabs button.on { color: var(--oscuro); border-bottom-color: var(--naranja); }
 
-/* Firma pad */
-.signature-pad-container {
-  border: 2px dashed var(--line);
-  border-radius: 12px;
-  background: #fff;
-  position: relative;
-  overflow: hidden;
-  touch-action: none;
-}
-.signature-pad-container canvas {
-  width: 100%;
-  height: 200px;
-  display: block;
-}
+.signature-pad-container { border: 2px dashed var(--line); border-radius: 12px; background: #fff; position: relative; overflow: hidden; touch-action: none; }
+.signature-pad-container canvas { width: 100%; height: 200px; display: block; }
 
-/* Página pública de firma */
-#publicSignView {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  overflow-y: auto;
-}
-#publicSignView .sign-card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 30px;
-  width: min(500px, 100%);
-  box-shadow: 0 30px 80px rgba(0,0,0,.35);
-}
+#publicSignView { position: fixed; inset: 0; z-index: 10000; background: linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+#publicSignView .sign-card { background: #fff; border-radius: 20px; padding: 30px; width: min(500px, 100%); box-shadow: 0 30px 80px rgba(0,0,0,.35); }
 #publicSignView h2 { margin: 0 0 6px; color: var(--oscuro); font-size: 20px; }
 #publicSignView .sign-sub { color: var(--mut); font-size: 13px; margin-bottom: 20px; }
 
-.qr-box {
-  background: #fff;
-  padding: 16px;
-  border-radius: 14px;
-  border: 2px solid var(--line);
-  display: inline-block;
-  text-align: center;
-}
+.qr-box { background: #fff; padding: 16px; border-radius: 14px; border: 2px solid var(--line); display: inline-block; text-align: center; }
 .qr-box small { margin-top: 8px; word-break: break-all; }
 .qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:12px;text-align:center}
 .qr-card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px 10px;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
@@ -654,18 +516,10 @@ body.logged-in #topbar { display: flex; }
 .qr-orden li .t{flex:1;line-height:1.25}
 .qr-orden li .t small{display:block;color:var(--mut);font-weight:600}
 
-/* === NUEVO === Trazabilidad de validaciones */
 .ck-traza { font-size:9.5px; color:#6b8378; display:block; line-height:1.1; margin-top:3px; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .nv-traza { font-size:9.5px; color:#6b8378; display:block; line-height:1.1; margin-top:3px; font-style:italic; }
-.rol-validador-badge {
-  display:inline-block; padding:2px 8px; border-radius:99px;
-  background:#fff3cd; color:#856404; font-size:10.5px; font-weight:700;
-  margin-left:4px;
-}
-.validador-info-box {
-  background:#eaf3fd; border:1px solid #b3d4f5; border-radius:10px;
-  padding:8px 12px; font-size:12.5px; color:#1b5fae; margin-bottom:12px;
-}
+.rol-validador-badge { display:inline-block; padding:2px 8px; border-radius:99px; background:#fff3cd; color:#856404; font-size:10.5px; font-weight:700; margin-left:4px; }
+.validador-info-box { background:#eaf3fd; border:1px solid #b3d4f5; border-radius:10px; padding:8px 12px; font-size:12.5px; color:#1b5fae; margin-bottom:12px; }
 </style>
 </head>
 <body class="logged-out">
@@ -1218,7 +1072,6 @@ body.logged-in #topbar { display: flex; }
             <option value="agente_mesa">Agente Mesa de Servicio</option>
             <option value="coordinador">Coordinador Electoral</option>
             <option value="auditor">Auditor</option>
-            <!-- === NUEVO === Roles validadores -->
             <option value="th">Talento Humano (validador TH)</option>
             <option value="egresados">Egresados (validador EG)</option>
             <option value="sec_general">Secretaría General (validador SG)</option>
@@ -1230,6 +1083,10 @@ body.logged-in #topbar { display: flex; }
         <label style="font-weight:700">Módulos permitidos (para Editor/Lectura)</label>
         <div id="u_new_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
       </div>
+      <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="u_new_enviar_correo" style="width:16px; height:16px; accent-color:var(--oscuro);" checked>
+        <label for="u_new_enviar_correo" style="margin:0; font-weight:600; font-size:13px; cursor:pointer;">Enviar credenciales por correo al crear</label>
+      </div>
       <div style="margin-top:12px;"><button class="btn p" onclick="crearUsuario()">➕ Crear usuario</button></div>
     </div>
     <div class="wrap"><table class="tbl-pro" style="min-width:100%">
@@ -1238,6 +1095,44 @@ body.logged-in #topbar { display: flex; }
     </table></div>
   </div>
   <div class="df"><button class="btn" onclick="dlgUsuarios.close()">Cerrar</button></div>
+</dialog>
+
+<!-- DIALOGO EDITAR USUARIO -->
+<dialog id="dlgEditarUsuario">
+  <div class="dh"><h3>✏️ Editar Usuario</h3><button onclick="dlgEditarUsuario.close()">✕</button></div>
+  <div class="db">
+    <input type="hidden" id="u_edit_id">
+    <div class="grid">
+      <div><label>Usuario</label><input class="in" id="u_edit_user" disabled style="background:#f5f5f5;"></div>
+      <div><label>Nombre completo</label><input class="in" id="u_edit_nombre"></div>
+      <div><label>Correo electrónico</label><input class="in" id="u_edit_email" type="email"></div>
+      <div><label>Rol</label>
+        <select class="in" id="u_edit_rol">
+          <option value="administrador">Administrador</option>
+          <option value="editor">Editor</option>
+          <option value="lectura">Lectura</option>
+          <option value="agente_mesa">Agente Mesa de Servicio</option>
+          <option value="coordinador">Coordinador Electoral</option>
+          <option value="auditor">Auditor</option>
+          <option value="th">Talento Humano (validador TH)</option>
+          <option value="egresados">Egresados (validador EG)</option>
+          <option value="sec_general">Secretaría General (validador SG)</option>
+          <option value="fac_prog">Facultad / Programa (validador FP)</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:10px;">
+      <label style="font-weight:700">Módulos permitidos (para Editor/Lectura)</label>
+      <div id="u_edit_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
+    </div>
+    <div style="margin-top:16px;"><label style="font-weight:700">Estado</label>
+      <select class="in" id="u_edit_activo" style="width:100%"><option value="true">Activo</option><option value="false">Inactivo</option></select>
+    </div>
+  </div>
+  <div class="df">
+    <button class="btn" onclick="dlgEditarUsuario.close()">Cancelar</button>
+    <button class="btn p" onclick="guardarEdicionUsuario()">Guardar Cambios</button>
+  </div>
 </dialog>
 
 <dialog id="dlgLog">
@@ -1294,7 +1189,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const EMAILJS_CONFIG = {
   publicKey: 'bKplucMMXJM3iUbfk',
   serviceId: 'service_2uume1n',
-  templateId: 'template_sy5xcrg'
+  templateId: 'template_sy5xcrg' // Asegúrate de incluir {{password}} y {{user_name}} en el cuerpo de tu plantilla
 };
 
 const CONFIG = {
@@ -1365,7 +1260,6 @@ let publicSignaturePad = null;
 
 const MODULOS = [{key:'vCron',label:'Cronograma'},{key:'vSeg',label:'Seguimiento candidatos'},{key:'vVotantes',label:'Censo Votantes'},{key:'vAnal',label:'Analítica'},{key:'vVac',label:'Cargos / Vacantes'},{key:'vCargaVotos',label:'Cargar Votos'},{key:'vAct',label:'Actas'},{key:'vGanadores',label:'Directorio Ganadores'},{key:'vSoporte',label:'Registro Soporte'},{key:'vDocs',label:'Actas, Anexos, Informes'}];
 
-/* === MODIFICADO === ROLES con validadores TH/EG/SG/FP + cronVista */
 const ROLES = {
   administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
   editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
@@ -1373,8 +1267,6 @@ const ROLES = {
   agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
   coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal','vDocs'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
   auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'},
-
-  // NUEVOS ROLES VALIDADORES (solo marcan check/X y novedad, no editan candidatos)
   th:            {label:'Talento Humano',       mods:['vSeg','vCron'], puedeEditar:[], validador:['th'], cronVista:'interno', color:'o'},
   egresados:     {label:'Egresados',            mods:['vSeg','vCron'], puedeEditar:[], validador:['eg'], cronVista:'publico', color:'t'},
   sec_general:   {label:'Secretaría General',   mods:['vSeg','vCron'], puedeEditar:[], validador:['sg'], cronVista:'ambos',   color:'b'},
@@ -1402,7 +1294,6 @@ async function registrarLog(accion, modulo, detalle){
   }
 }
 
-// Enter en usuario/contraseña = Ingresar (se registra de inmediato, sin esperar a la red)
 document.addEventListener('keydown', e => {
   if(e.key !== 'Enter') return;
   const t = e.target;
@@ -1414,7 +1305,6 @@ document.addEventListener('keydown', e => {
   doLogin();
 });
 
-/* === MODIFICADO === Login vía supabase.auth con mapa de correos y fallback de tabla */
 async function doLogin(){
   if($('loginBtn').disabled) return;
   const u = $('loginUser').value.trim();
@@ -1426,11 +1316,9 @@ async function doLogin(){
   try {
     if(!supabaseClient){ $('loginErr').textContent = '⚠️ No hay conexión configurada.'; return; }
 
-    // Mapeo de usuarios a correos para que "admin" funcione sin escribir el correo completo
     const emailMap = {
       'admin': 'admin@unbosque.edu.co',
-      'administración': 'admin@unbosque.edu.co',
-      'hernandezdiana': 'hernandezdiana@unbosque.edu.co'
+      'administración': 'admin@unbosque.edu.co'
     };
     
     const email = u.includes('@') ? u : (emailMap[u.toLowerCase()] || `${u}@unbosque.edu.co`);
@@ -1438,7 +1326,6 @@ async function doLogin(){
     let perfil = null;
     let uidAuth = null;
 
-    // 1) LOGIN VÍA SUPABASE AUTH
     const { data: authData, error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: p });
     
     if (!authErr && authData?.user) {
@@ -1447,7 +1334,6 @@ async function doLogin(){
       if (p1) perfil = p1;
     }
 
-    // 2) FALLBACK: VALIDAR CONTRA TABLA (Por si algo falla en Auth)
     if (!perfil) {
       const { data, error } = await supabaseClient
         .from(CONFIG.tabla_usuarios)
@@ -1472,7 +1358,6 @@ async function doLogin(){
     if (!perfil) { $('loginErr').textContent = 'Usuario no encontrado.'; return; }
     if (perfil[CONFIG.col_activo] === false) { $('loginErr').textContent = 'Usuario inactivo.'; return; }
 
-    // Normalizar el rol
     let rolFinal = perfil[CONFIG.col_rol];
     if (rolFinal === 'leer') rolFinal = 'lectura';
 
@@ -1496,7 +1381,6 @@ async function doLogin(){
   }
 }
 
-/* === MODIFICADO === Logout también cierra sesión de supabase.auth */
 function doLogout(){
   if(!confirm('¿Cerrar sesión ahora?')) return;
   detenerTimerSesion();
@@ -1611,7 +1495,6 @@ function puedeEditar(modulo){
   if(ELECCIONES_CERRADAS) return false;
   const rol = ROLES[SESSION.rol];
   if(!rol) return false;
-  // Los validadores NUNCA "editan" en el sentido clásico
   if(rol.validador) return false;
   if(rol.puedeEditar === '*') return true;
   if(Array.isArray(rol.puedeEditar)){
@@ -1621,7 +1504,6 @@ function puedeEditar(modulo){
   return false;
 }
 
-/* === NUEVO === Permite validar un campo específico (th/eg/sg/fp/nov) */
 function puedeValidar(campoCheck){
   if(!SESSION) return false;
   if(SESSION.rol === 'administrador') return true;
@@ -1629,7 +1511,6 @@ function puedeValidar(campoCheck){
   const rol = ROLES[SESSION.rol];
   if(!rol) return false;
   if(!rol.validador) {
-    // coordinador y editor también pueden validar todos los checks si editan vSeg
     if(rol.puedeEditar === '*' || (Array.isArray(rol.puedeEditar) && rol.puedeEditar.includes('vSeg'))) return true;
     if(SESSION.rol === 'editor' && (SESSION.modulos||[]).includes('vSeg')) return true;
     return false;
@@ -1637,7 +1518,6 @@ function puedeValidar(campoCheck){
   return rol.validador.includes(campoCheck) || rol.validador.includes('nov');
 }
 
-/* === MODIFICADO === Aplica permisos de UI + cronograma + Forms Excel oculto para agente */
 function aplicarPermisosUI(){
   const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9',vDocs:'n10'};
   const permitidos = getModulosPermitidos();
@@ -1649,7 +1529,6 @@ function aplicarPermisosUI(){
   if($('btnVerLog')) $('btnVerLog').style.display = (esAdmin || esAuditor) ? '' : 'none';
   if($('btnLimpiar')) $('btnLimpiar').style.display = '';
 
-  // === NUEVO === Aviso al validador sobre qué campo controla
   const rol = ROLES[SESSION?.rol];
   const infoBox = $('validadorInfoBox');
   if(infoBox && rol?.validador){
@@ -1660,11 +1539,9 @@ function aplicarPermisosUI(){
     infoBox.classList.add('hide');
   }
 
-  // === NUEVO === Ocultar Cargar Excel de Forms para agente_mesa
   const cardForms = $('cardFormsExcel');
   if(cardForms) cardForms.style.display = (SESSION?.rol === 'agente_mesa') ? 'none' : '';
 
-  // === NUEVO === Bloquear botones de edición/exportación en vSeg para validadores
   const esValidador = !!rol?.validador;
   const botones = {
     btnOpenForm: esValidador,
@@ -1685,7 +1562,6 @@ function aplicarPermisosUI(){
   deshabilitarBotonesEdicion();
 }
 
-/* === MODIFICADO === deshabilitarBotonesEdicion respeta validadores */
 function deshabilitarBotonesEdicion(){
   if(SESSION?.rol === 'administrador') return;
   const rol = ROLES[SESSION?.rol];
@@ -1748,7 +1624,6 @@ async function cargarUsuariosDeSupabase(){
   } catch(e) { console.warn('Usuarios:', e.message); USERS_CACHE = []; }
 }
 
-/* === MODIFICADO === muestra cronVista de validadores y botón editar */
 function renderTablaUsuarios(){
   if(USERS_CACHE.length === 0){ $('tablaUsuarios').innerHTML = '<tr><td colspan="6" class="empty">No hay usuarios cargados.</td></tr>'; return; }
   $('tablaUsuarios').innerHTML = USERS_CACHE.map(u => {
@@ -1768,6 +1643,7 @@ function renderTablaUsuarios(){
       <td style="font-size:11.5px">${modsLabel}${cronBadge}</td>
       <td>${activo ? '<span class="pill ok">Activo</span>' : '<span class="pill no">Inactivo</span>'}</td>
       <td class="c" style="white-space:nowrap">
+        <button class="ic" title="Editar permisos" onclick="abrirEditarUsuario('${u.id}')">✎</button>
         <button class="ic" title="Restablecer contraseña" onclick="abrirResetParaUsuario('${esc(u[CONFIG.col_user])}','${esc(u.email||'')}')">🔑</button>
         <button class="ic" title="Activar/Desactivar" onclick="toggleActivoUsuario('${u.id}')">${activo?'⏸':'▶'}</button>
         <button class="ic" title="Eliminar" onclick="eliminarUsuario('${u.id}')">🗑</button>
@@ -1776,32 +1652,129 @@ function renderTablaUsuarios(){
   }).join('');
 }
 
-/* === MODIFICADO === crearUsuario respeta módulos forzados por el rol */
+function abrirEditarUsuario(id) {
+  const u = USERS_CACHE.find(x => x.id === id);
+  if(!u) return;
+  
+  $('u_edit_id').value = u.id;
+  $('u_edit_user').value = u[CONFIG.col_user];
+  $('u_edit_nombre').value = u[CONFIG.col_nombre] || '';
+  $('u_edit_email').value = u.email || '';
+  $('u_edit_rol').value = u[CONFIG.col_rol] || 'lectura';
+  $('u_edit_activo').value = u[CONFIG.col_activo] ? 'true' : 'false';
+  
+  const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
+  $('u_edit_mods').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_edit_mod" ${mods.includes(m.key)?'checked':''}><span>${m.label}</span></label>`).join('');
+  
+  dlgEditarUsuario.showModal();
+}
+
+async function guardarEdicionUsuario() {
+  const id = $('u_edit_id').value;
+  const nombre = $('u_edit_nombre').value.trim();
+  const email = $('u_edit_email').value.trim();
+  const rol = $('u_edit_rol').value;
+  const activo = $('u_edit_activo').value === 'true';
+  const mods = [...document.querySelectorAll('.u_edit_mod:checked')].map(i=>i.value);
+
+  if(!supabaseClient) return;
+  try {
+    const updateData = {
+      [CONFIG.col_nombre]: nombre,
+      [CONFIG.col_rol]: rol,
+      [CONFIG.col_modulos]: mods,
+      [CONFIG.col_activo]: activo
+    };
+    if(email) updateData.email = email;
+
+    const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).update(updateData).eq('id', id);
+    if(error) throw error;
+    
+    toast('✅ Usuario actualizado');
+    dlgEditarUsuario.close();
+    await cargarUsuariosDeSupabase();
+    renderTablaUsuarios();
+  } catch(e) {
+    toast('❌ Error: ' + e.message);
+  }
+}
+
 async function crearUsuario(){
   const username = $('u_new_user').value.trim();
   const nombre = $('u_new_nombre').value.trim();
   const email = $('u_new_email').value.trim();
   const pass = $('u_new_pass').value;
   const rol = $('u_new_rol').value;
-  if(!username || !pass){ toast('Usuario y contraseña obligatorios'); return; }
+  const enviarCorreo = $('u_new_enviar_correo').checked;
+  
+  if(!username || !pass || !email){ toast('Usuario, correo y contraseña son obligatorios'); return; }
   if(pass.length < 6){ toast('La contraseña debe tener al menos 6 caracteres'); return; }
   if(!supabaseClient){ toast('Sin conexión a la base de datos'); return; }
+  
   const rolDef = ROLES[rol];
   let mods = [...document.querySelectorAll('.u_mod:checked')].map(i=>i.value);
   if(rolDef && Array.isArray(rolDef.mods) && rolDef.mods.length){
-    mods = rolDef.mods; // roles con módulos fijos (agente_mesa, coordinador, validadores)
+    mods = rolDef.mods;
   }
+  
   try {
-    const insertData = {[CONFIG.col_user]: username,[CONFIG.col_nombre]: nombre,[CONFIG.col_rol]: rol,[CONFIG.col_modulos]: mods,[CONFIG.col_activo]: true};
-    if(email) insertData.email = email;
+    // 1. Crear en Auth (Supabase) - Opcional si tienes un backend, pero aquí intentamos
+    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      email: email,
+      password: pass,
+      options: { data: { nombre: nombre } }
+    });
+    
+    // Si el error es porque ya existe, lo ignoramos y seguimos (pudo haber sido creado antes)
+    if (authError && !authError.message.includes('already registered')) {
+      throw new Error('Error en Auth: ' + authError.message);
+    }
+
+    // 2. Guardar en la tabla pública
+    const insertData = {
+      [CONFIG.col_user]: username,
+      [CONFIG.col_nombre]: nombre,
+      [CONFIG.col_pass]: pass, // Guardamos para el fallback
+      [CONFIG.col_rol]: rol,
+      [CONFIG.col_modulos]: mods,
+      [CONFIG.col_activo]: true,
+      email: email
+    };
+    
+    // Si tenemos el ID de auth, lo usamos
+    if (authData?.user?.id) insertData.id = authData.user.id;
+
     const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([insertData]);
     if(error) throw error;
+    
+    // 3. Enviar correo con EmailJS
+    if(enviarCorreo && emailjsReady) {
+      try {
+        await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+          to_email: email,
+          to_name: nombre || username,
+          user_name: username,
+          password: pass,
+          app_name: 'Sistema de Elecciones · Universidad El Bosque',
+          current_year: new Date().getFullYear()
+        });
+        toast('✅ Usuario creado y correo enviado');
+      } catch(errEmail) {
+        console.warn('Error enviando correo:', errEmail);
+        toast('✅ Usuario creado, pero el correo falló');
+      }
+    } else {
+      toast('✅ Usuario creado');
+    }
+
     registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
     $('u_new_user').value=''; $('u_new_nombre').value=''; $('u_new_pass').value=''; $('u_new_email').value='';
     await cargarUsuariosDeSupabase();
     renderTablaUsuarios();
-    toast('✅ Usuario creado. Recuerda crearlo también en Supabase Auth con el mismo email.');
-  } catch(e) { toast('❌ Error: ' + (e.message || 'No se pudo crear')); }
+  } catch(e) { 
+    console.error(e);
+    toast('❌ Error: ' + (e.message || 'No se pudo crear')); 
+  }
 }
 
 async function toggleActivoUsuario(id){
@@ -2031,7 +2004,7 @@ const ini=n=>String(n||'?').split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').to
 const ppl=r=>[['Principal',r.pri],...(r.sup?[['Suplente',r.sup]]:[])];
 const optNov=(all)=>Object.entries(NOV).map(([v,l])=>`<option value="${v}">${v===''&&all?'Todas las novedades':l}</option>`).join('');
 const optErr=()=>Object.entries(ERRORS).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),3500)}
 const cleanFac = (f) => String(f || '').replace(/^Facultad de /i, '').replace(/^Departamento de /i, '');
 
 const NUM_BASE=['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
@@ -2095,7 +2068,6 @@ function updateOrgActivos() {
   fillSel(); draw(); renderVacantes(); renderDirectorio();
 }
 
-/* === MODIFICADO === tab() respeta cronVista del rol */
 function tab(n){
   const mapa = {1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',9:'vSoporte',10:'vDocs'};
   const modKey = mapa[n];
@@ -2103,7 +2075,6 @@ function tab(n){
   try{ if(SESSION) localStorage.setItem('ultima_tab_v1', String(n)); }catch(e){}
   ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vDocs'].forEach((id,i)=>{ $(id).classList.toggle('hide', i+1 !== n); $('n'+(i+1)).classList.toggle('on', i+1 === n); });
 
-  // === NUEVO === Cronograma según rol
   if(n===1){
     const rolDef = ROLES[SESSION?.rol];
     const vista = rolDef?.cronVista || 'ambos';
@@ -2274,7 +2245,6 @@ function imprimirInforme() { if(!$('informeOut').innerHTML.trim()) { toast('Prim
 
 function filtered(){ const q=norm($('q').value),o=$('fo').value,r=$('fr').value,e=$('fe').value,n=$('fnov').value; return D.filter(c=>{const P=ppl(c);return(!q||P.some(([,p])=>norm(p.nombre).includes(q)||norm(p.doc).includes(q)))&&(!o||c.org===o)&&(!r||c.rol===r)&&(!e||P.some(([,p])=>estado(c,p)[0]===e))&&(!n||P.some(([,p])=>(p.nov||'')===n))}); }
 
-/* === MODIFICADO === rowP muestra trazabilidad y respeta validador */
 function rowP(c,w,lab,p,first,n,duplaColor){
  const [e,m]=estado(c,p),act=CH[c.rol]||[];
  const isVotoBlanco = p.nombre.toUpperCase() === 'VOTO EN BLANCO';
@@ -2333,7 +2303,6 @@ function draw(){
  deshabilitarBotonesEdicion();
 }
 
-/* === MODIFICADO === cyc y setNov guardan trazabilidad y validan por campo */
 const per=(c,w)=>w==='pri'?c.pri:c.sup;
 function cyc(id,w,k){
   const chkField = k;
@@ -2458,7 +2427,6 @@ function listaGan(){
 function toggleGanador(id, isChecked) { if(SESSION && !puedeEditar('vAct')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } const candidato = D.find(c => c.id === id); if (!candidato) return; if (isChecked) { const ganadorExistente = D.find(c => c.id !== id && c.gan && c.org === candidato.org && c.rol === candidato.rol && (esGlobal(c.org) || norm(c.fac) === norm(candidato.fac))); if (ganadorExistente) { toast(`⚠️ Ya hay un ganador para este cargo: ${ganadorExistente.pri.nombre}.`, 5000); listaGan(); return; } } candidato.gan = isChecked; save(); listaGan(); }
 function setV(id,k,v){ if(SESSION && !puedeEditar('vAct')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } D.find(x=>x.id===id)[k]=v;save() }
 
-/* FUNCIONES DE FIRMAS (TEXTO) */
 function renderFirmas(){
   $('firmasGrid').innerHTML = FIRMAS.map((f,i)=>`
     <div class="firma-item" style="border-left: 4px solid ${f.esDelegado ? 'var(--oscuro)' : 'var(--naranja)'};">
@@ -2496,11 +2464,6 @@ function delFirma(i){ if(FIRMAS.length<=1){toast('Debe haber al menos una firma'
 function updateFirma(i,k,v){ FIRMAS[i][k]=v; saveFirmas(); }
 function inicializarFirmasOficiales() { if (!FIRMAS.some(f => f.esDelegado)) { FIRMAS = CARGOS_DELEGADO.map(cargo => ({nombre: '', cargo: cargo, esDelegado: true})); saveFirmas(); } }
 
-/* ==========================================
-   FIRMAS DIGITALES, QR Y GESTIÓN (POST-ACTA)
-   ========================================== */
-
-/* Devuelve las firmas en el orden configurado, cruzadas con las firmas digitales guardadas */
 function firmasOrdenadas(firmasDB) {
   const key = s => (s || '').toLowerCase().trim();
   const usados = new Set();
@@ -2548,15 +2511,12 @@ async function genActa(){
   `;
 
   let firmasHTML = '<div class="acta-firmas">';
-
   const _ordenadas = firmasOrdenadas(firmasDB);
   _ordenadas.forEach(f => { firmasHTML += firmaItemHTML(f.imgBase64, f.nombre, f.cargo); });
-
   if (_ordenadas.length === 0) {
     firmasHTML += firmaItemHTML(null, 'Nombre', 'Cargo');
     firmasHTML += firmaItemHTML(null, 'Nombre', 'Cargo');
   }
-
   firmasHTML += '</div>';
 
   const chkFirmada = $('chkFirmada').checked ? '<div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div>' : '';
@@ -2768,9 +2728,6 @@ async function eliminarFirma(id) {
   }
 }
 
-/* ==========================================
-   VISTA PÚBLICA PARA FIRMAR
-   ========================================== */
 const FIRMA_GRUPAL_ORDEN_ESTRICTO = false;
 
 let _listaGrupal = null;
@@ -3010,10 +2967,6 @@ async function enviarFirmaPublica() {
   }
 }
 
-
-/* ==========================================
-   MÓDULO: ACTAS, ANEXOS, INFORMES (solo lectura)
-   ========================================== */
 function docsResumen(){
   const el = $('docsResumen'); if(!el) return;
   try {
@@ -3094,9 +3047,6 @@ async function docsDescargarPDF(){
   } finally { btn.disabled = false; }
 }
 
-/* ==========================================
-   EXPORTACIÓN Y PAGINACIÓN
-   ========================================== */
 const CM_PX = 96/2.54;
 const HEAD_HTML = `<div class="acta-header" style="background-color:#007a3d; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-radius: 0; box-sizing: border-box; width: 100%;"><div style="display: flex; align-items: center; gap: 12px; color: #ffffff;"><img src="Logo_de_la_Universidad_El_Bosque.png" alt="Logo U. El Bosque" style="height: 48px; width: auto; filter: brightness(0) invert(1);"></div><div style="background-color: #7ab800; color: #ffffff; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 2px; letter-spacing: 0.5px; white-space: nowrap; font-family: Arial, sans-serif;">Dirección Registro y Control Académico</div></div>`;
 const FOOT_HTML = `<div class="acta-footer" style="background-color:#00201A !important;"><div class="acta-footer-logo"><img src="Logo_RyC.png" alt="Logo RyC"></div><div class="acta-page-num" data-pg="n"></div><div class="acta-footer-info">Av. Cra 9 No. 131 A - 02<br><span style="color:#C6ED6E; font-weight:bold;">PBX (601) 648 9000 EXT 1500 - 1506</span><br><span style="color:#C6ED6E; font-weight:bold;">registroacademico@unbosque.edu.co</span></div></div>`;
@@ -3469,7 +3419,6 @@ dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.clas
 dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
 dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); const files = e.dataTransfer.files; if(files.length > 0) { $('votosFileInput').files = files; procesarArchivosVotos($('votosFileInput')); } });
 
-/* === MODIFICADO === guardarSoporte permite a agente_mesa */
 function guardarSoporte() {
   const rol = ROLES[SESSION?.rol];
   const puedeRegistrar = puedeEditar('vSoporte') || SESSION?.rol === 'agente_mesa';
@@ -3496,7 +3445,6 @@ function guardarSoporte() {
   renderSoportes();
   toast('✅ Caso registrado');
 }
-/* === MODIFICADO === toggleSoporteSolucionado permite a agente_mesa */
 function toggleSoporteSolucionado(id) {
   const puede = puedeEditar('vSoporte') || SESSION?.rol === 'agente_mesa';
   if(SESSION && !puede){ toast('⛔ Sin permiso'); return; }
@@ -3504,7 +3452,6 @@ function toggleSoporteSolucionado(id) {
   const s = SOPORTES.find(x => x.id === id);
   if (s) { s.solucionado = !s.solucionado; saveSoportes(); renderSoportes(); toast(s.solucionado ? '✅ Solucionado' : '⏳ Pendiente'); }
 }
-/* === NUEVO === editarSoporte: agente puede editar observaciones */
 function editarSoporte(id){
   const puede = puedeEditar('vSoporte') || SESSION?.rol === 'agente_mesa';
   if(SESSION && !puede){ toast('⛔ Sin permiso'); return; }
@@ -3540,7 +3487,6 @@ function renderSoporteDash(){
   const ks = Object.keys(dias).sort().slice(-14);
   chartSopDiaInstance = nuevoChart('chartSopDia', chartSopDiaInstance, {type:'line',data:{ labels: ks.map(k=>k.slice(8)+'/'+k.slice(5,7)), datasets:[{ label:'Casos', data: ks.map(k=>dias[k]), borderColor:'#1f6fd1', backgroundColor:'rgba(31,111,209,.15)', fill:true, tension:.35, pointRadius:4, pointBackgroundColor:'#1f6fd1' }] },options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }, grid:{ color:'rgba(11,59,44,.07)' } }, x:{ grid:{ display:false } } } }});
 }
-/* === MODIFICADO === renderSoportes incluye botón editar y aplica restricciones por rol */
 function renderSoportes() {
   renderSoporteDash();
   const q = norm($('sopBuscar') ? $('sopBuscar').value : '');
@@ -3560,7 +3506,6 @@ function renderSoportes() {
   deshabilitarBotonesEdicion();
 }
 function expSoporteXL(){ if(!SOPORTES.length){ toast('No hay casos para exportar'); return; } const rows = SOPORTES.map(x => ({ 'Fecha / Hora':x.fecha, 'Nombre':x.nombre, 'Documento':x.doc, 'Motivo':x.motivo, 'Canales':(x.canales||[]).join(', '), 'Gestionado por':x.gestor||'', 'Estado':x.solucionado?'Solucionado':'Pendiente', 'Observaciones':x.observaciones||'' })); const ws = XLSX.utils.json_to_sheet(rows); ws['!cols'] = [{wch:20},{wch:28},{wch:14},{wch:34},{wch:24},{wch:24},{wch:14},{wch:40}]; const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Soporte'); XLSX.writeFile(wb, 'registro-soporte.xlsx'); }
-/* === MODIFICADO === delSoporte bloquea a agente_mesa */
 function delSoporte(id) {
   if(SESSION?.rol === 'agente_mesa'){ toast('⛔ No puedes eliminar casos'); return; }
   if(SESSION && !puedeEditar('vSoporte')){ toast('⛔ Sin permiso'); return; }
@@ -3568,7 +3513,6 @@ function delSoporte(id) {
   if(confirm('¿Eliminar este registro?')) { SOPORTES = SOPORTES.filter(x => x.id !== id); saveSoportes(); renderSoportes(); }
 }
 function descargarPlantillaForms() { const data = [['Nombre Completo', 'Documento', 'Motivo del Soporte', 'Gestor', 'Canales (separados por coma)', 'Solucionado (SI/NO)', 'Observaciones'],['Juan Pérez', '10203040', 'No aparece en el censo', 'Coordinador Electoral', 'WhatsApp, Forms', 'NO', 'Se escaló a sistemas'],['Ana Gómez', '10203041', 'Problema con el voto', 'Soporte Técnico', 'Teléfono, Correo', 'SI', 'Se reinició la contraseña']]; const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Plantilla_Forms'); XLSX.writeFile(wb, 'plantilla-forms-soporte.xlsx'); }
-/* === MODIFICADO === procesarExcelForms bloquea a agente_mesa */
 function procesarExcelForms(input) {
   if(SESSION?.rol === 'agente_mesa'){ toast('⛔ No tienes permiso para importar Forms'); input.value=''; return; }
   if(SESSION && !puedeEditar('vSoporte')){ toast('⛔ Sin permiso'); return; }
@@ -3667,27 +3611,22 @@ renderSoportes();
 (async function initAuth(){
   if(SESSION){
     document.body.classList.add('logged-in'); document.body.classList.remove('logged-out');
-    if (SESSION.rol === 'leer') SESSION.rol = 'lectura'; // Normalizar
+    if (SESSION.rol === 'leer') SESSION.rol = 'lectura'; 
     saveSession();
     aplicarSesion();
     
     if(supabaseClient){
       try {
-        // Revalidar con auth.getUser() si hay sesión de Supabase Auth, si no, por tabla
         const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
-        
         let perfil = null;
         if(!userErr && userData?.user) {
           const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', userData.user.id).maybeSingle();
           perfil = data;
         }
-        
-        // Si falló Auth, buscar por tabla (fallback)
         if(!perfil) {
            const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', SESSION.id).maybeSingle();
            perfil = data;
         }
-
         if(!perfil || perfil[CONFIG.col_activo] === false){
           await supabaseClient.auth.signOut();
           detenerTimerSesion();
@@ -3696,7 +3635,6 @@ renderSoportes();
           location.reload();
           return;
         }
-        
         let rolFinal = perfil[CONFIG.col_rol];
         if (rolFinal === 'leer') rolFinal = 'lectura';
         
