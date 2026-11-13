@@ -163,7 +163,7 @@ tr.alert-row td:first-child { border-left: 5px solid var(--alert-line) !importan
 .grid .in,textarea.in,.dlg .in{width:100%}
 textarea.in{min-height:110px;resize:vertical}
 
-#actaOutContainer, #informeOutContainer { background: #d9d9d9; padding: 20px; border-radius: 14px; margin-top: 20px; }
+#actaOutContainer, #informeOutContainer, #docsActaWrap { background: #d9d9d9; padding: 20px; border-radius: 14px; margin-top: 20px; overflow-x: auto; }
 .acta-page { background: #fff; width: 21.59cm; min-height: 27.94cm; margin: 0 auto; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; position: relative; font-family: var(--font-acta); color: #000; }
 .acta-header { background: #007a3d !important; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
 .acta-logo { display: flex; align-items: center; gap: 8px; font-family: sans-serif; }
@@ -231,9 +231,12 @@ tr.posible-ganador td:first-child { border-left: 4px solid #FFC107 !important; }
 .acta-footer-info { text-align: right; line-height: 1.4; color: #C6ED6E; font-weight: bold; font-size: 11px; }
 .acta-page-num { position: absolute; left: 50%; transform: translateX(-50%); background: #fff; color: #00201A; width: 60px; height: 30px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; bottom: 10px; box-shadow: 0 0 0 3px #00201A; }
 
-.firmas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
+.firmas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-top:12px}
 .firma-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcfb;position:relative}
-.firma-item label{font-size:11.5px;margin:6px 0 2px}
+.firma-item{min-width:0}
+.firma-item label{font-size:11.5px;margin:6px 0 2px;display:block}
+.firma-item .in{width:100%;max-width:100%;box-sizing:border-box;text-overflow:ellipsis}
+.firma-item select.in{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:26px;cursor:pointer}
 .firma-item .del-firma{position:absolute;top:6px;right:6px;background:none;border:0;color:var(--alert-line);cursor:pointer;font-size:14px;font-weight:700; z-index:10;}
 .firma-item .del-firma:hover{transform:scale(1.2)}
 
@@ -367,7 +370,7 @@ dialog[open]{animation:pop .18s ease-out}
   @page { size: letter; margin: 0; }
   html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; display: block !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   main { padding: 0 !important; }
-  aside, .top, .noprint, #vSeg, #vCron, #vAnal, #vVac, #vVotantes, #vCargaVotos, #vGanadores, #vSoporte, #toast, #topbar, #loginScreen { display: none !important; }
+  aside, .top, .noprint, #vSeg, #vCron, #vAnal, #vVac, #vVotantes, #vCargaVotos, #vGanadores, #vSoporte, #vDocs, #toast, #topbar, #loginScreen { display: none !important; }
   #vAct { display: block !important; }
   body.printing-informe #actaOutContainer { display: none !important; }
   #actaOutContainer, #informeOutContainer { background: none !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; }
@@ -715,6 +718,7 @@ body.logged-in #topbar { display: flex; }
  <button class="nav" id="n7" onclick="tab(7)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Actas</button>
  <button class="nav" id="n8" onclick="tab(8)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Directorio Ganadores</button>
  <button class="nav" id="n9" onclick="tab(9)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>Registro Soporte</button>
+ <button class="nav" id="n10" onclick="tab(10)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Actas, Anexos, Informes</button>
 
  <div id="sideActions" class="hide" style="margin-top:14px;padding-top:14px;border-top:1px solid #2a5e4d;">
    <div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#9ac0b0;padding:0 12px 8px;">Acciones del sistema</div>
@@ -1051,6 +1055,22 @@ body.logged-in #topbar { display: flex; }
    </table></div>
 </section>
 
+<section id="vDocs" class="hide">
+ <div class="top noprint"><h1>Actas, Anexos, Informes</h1><p>Consulta el acta oficial y descárgala en PDF. Este módulo es de solo lectura.</p></div>
+ <div class="card noprint">
+  <h3>📄 Acta oficial</h3>
+  <p class="help" id="docsResumen" style="margin-top:0"></p>
+  <div class="bar">
+    <button class="btn p" id="btnDocsVer" onclick="docsVerActa()">👁 Ver acta</button>
+    <button class="btn" id="btnDocsPDF" style="background:#c0392b;color:#fff;border-color:#c0392b" onclick="docsDescargarPDF()">⬇ Descargar PDF</button>
+    <span class="sp"></span>
+    <span id="docsEstado" style="font-size:12.5px;color:var(--mut)"></span>
+  </div>
+  <p class="help" style="margin-bottom:0">Los datos del acta (jornada, órgano, número, texto y firmas) se configuran en el módulo <b>Actas</b>; aquí solo se visualiza y se descarga.</p>
+ </div>
+ <div id="docsActaWrap" class="hide"><div class="acta-page" id="docsActaOut"></div></div>
+</section>
+
 <section id="vSoporte" class="hide">
  <div class="top"><h1>Registro de Soporte</h1><p>Gestiona los casos, PQRS y solicitudes de soporte técnico o electoral.</p></div>
  <div class="kpis" id="sopKpis"></div>
@@ -1255,7 +1275,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const EMAILJS_CONFIG = {
   publicKey: 'bKplucMMXJM3iUbfk',
   serviceId: 'service_2uume1n',
-  templateId: 'template_x4yewx3'
+  templateId: 'template_sy5xcrg'
 };
 
 const CONFIG = {
@@ -1324,13 +1344,13 @@ let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDi
 
 let publicSignaturePad = null;
 
-const MODULOS = [{key:'vCron',label:'Cronograma'},{key:'vSeg',label:'Seguimiento candidatos'},{key:'vVotantes',label:'Censo Votantes'},{key:'vAnal',label:'Analítica'},{key:'vVac',label:'Cargos / Vacantes'},{key:'vCargaVotos',label:'Cargar Votos'},{key:'vAct',label:'Actas'},{key:'vGanadores',label:'Directorio Ganadores'},{key:'vSoporte',label:'Registro Soporte'}];
+const MODULOS = [{key:'vCron',label:'Cronograma'},{key:'vSeg',label:'Seguimiento candidatos'},{key:'vVotantes',label:'Censo Votantes'},{key:'vAnal',label:'Analítica'},{key:'vVac',label:'Cargos / Vacantes'},{key:'vCargaVotos',label:'Cargar Votos'},{key:'vAct',label:'Actas'},{key:'vGanadores',label:'Directorio Ganadores'},{key:'vSoporte',label:'Registro Soporte'},{key:'vDocs',label:'Actas, Anexos, Informes'}];
 const ROLES = {
   administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
   editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
   lectura:       {label:'Lectura',       mods:[],  puedeEditar:[],       color:'t'},
   agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
-  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
+  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal','vDocs'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
   auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'}
 };
 
@@ -1355,7 +1375,20 @@ async function registrarLog(accion, modulo, detalle){
   }
 }
 
+// Enter en usuario/contraseña = Ingresar (se registra de inmediato, sin esperar a la red)
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const t = e.target;
+  if(!t || !['loginUser','loginPass'].includes(t.id)) return;
+  const ls = document.getElementById('loginScreen');
+  if(!ls || ls.classList.contains('hide')) return;
+  e.preventDefault();
+  if(t.id === 'loginUser' && !document.getElementById('loginPass').value){ document.getElementById('loginPass').focus(); return; }
+  doLogin();
+});
+
 async function doLogin(){
+  if($('loginBtn').disabled) return;
   const u = $('loginUser').value.trim();
   const p = $('loginPass').value;
   $('loginErr').textContent = '';
@@ -1466,9 +1499,12 @@ function aplicarSesion(){
   aplicarPermisosUI();
   actualizarBannerCierre();
   iniciarTimerSesion();
+  const orden = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vDocs'];
   const mods = getModulosPermitidos();
   if(mods.length){
-    const idx = ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].indexOf(mods[0]) + 1;
+    let idx = 0;
+    try{ const g = parseInt(localStorage.getItem('ultima_tab_v1') || '0', 10); if(g > 0 && puedeVer(orden[g-1])) idx = g; }catch(e){}
+    if(!idx) idx = orden.indexOf(mods[0]) + 1;
     if(idx > 0) tab(idx);
   }
 }
@@ -1497,7 +1533,7 @@ function puedeEditar(modulo){
 }
 
 function aplicarPermisosUI(){
-  const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9'};
+  const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9',vDocs:'n10'};
   const permitidos = getModulosPermitidos();
   MODULOS.forEach(m => { const btn = $(mapa[m.key]); if(btn) btn.style.display = permitidos.includes(m.key) ? '' : 'none'; });
   const esAdmin = SESSION?.rol === 'administrador';
@@ -1522,7 +1558,7 @@ function limpiarPantalla(){
   if(!confirm('¿Limpiar la pantalla? Se borrarán búsquedas y filtros. Los datos NO se borran.')) return;
   ['q','fo','fr','fe','fnov','sopBuscar','sopFiltroEstado','sopFiltroCanal','logBuscar','gOrgFilter','gFacFilter'].forEach(id => { const el = $(id); if(el) el.value = ''; });
   const mods = getModulosPermitidos();
-  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9};
+  const mapa = {vCron:1,vSeg:2,vVotantes:3,vAnal:4,vVac:5,vCargaVotos:6,vAct:7,vGanadores:8,vSoporte:9,vDocs:10};
   if(mods.length) tab(mapa[mods[0]] || 1);
   try{ draw(); }catch(e){}
   try{ renderSoportes(); }catch(e){}
@@ -1904,10 +1940,11 @@ function updateOrgActivos() {
 }
 
 function tab(n){
-  const mapa = {1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',9:'vSoporte'};
+  const mapa = {1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',9:'vSoporte',10:'vDocs'};
   const modKey = mapa[n];
   if(SESSION && modKey && !puedeVer(modKey)){ toast('⛔ No tienes permiso para este módulo'); return; }
-  ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte'].forEach((id,i)=>{ $(id).classList.toggle('hide', i+1 !== n); $('n'+(i+1)).classList.toggle('on', i+1 === n); });
+  try{ if(SESSION) localStorage.setItem('ultima_tab_v1', String(n)); }catch(e){}
+  ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vDocs'].forEach((id,i)=>{ $(id).classList.toggle('hide', i+1 !== n); $('n'+(i+1)).classList.toggle('on', i+1 === n); });
   if(n===2) { draw(); }
   if(n===3) { renderCensoData(); }
   if(n===4) { renderAnalitica(); }
@@ -1915,6 +1952,7 @@ function tab(n){
   if(n===7) { updateJornada(); inicializarFirmasOficiales(); renderFirmas(); $('ad').value = new Date().toISOString().slice(0,10); ajustarTamanoLetra($('fontSizeSlider').value); cargarFirmasSupabase(); }
   if(n===8) { renderDirectorio(); }
   if(n===9) { renderSoportes(); }
+  if(n===10) { docsResumen(); }
   deshabilitarBotonesEdicion();
 }
 
@@ -2080,7 +2118,9 @@ function rowP(c,w,lab,p,first,n,duplaColor){
  ${first?`<td class="rs" rowspan="${n}"><button class="ic" onclick="openForm('${c.id}')" title="Editar">✎</button><button class="ic" onclick="del('${c.id}')" title="Eliminar">🗑</button></td>`:''}</tr>`;
 }
 function draw(){
- const LD = D.filter(c => ORG_ACTIVOS.includes(c.org));
+ const LDall = D.filter(c => ORG_ACTIVOS.includes(c.org));
+ const _esBl = c => String(c.pri.nombre||'').replace(/\s+/g,' ').trim().toUpperCase() === 'VOTO EN BLANCO';
+ const LD = LDall.filter(c => !_esBl(c));   // los 'Voto en Blanco' no son candidatos: no cuentan en los KPIs
  const L=filtered().filter(c => ORG_ACTIVOS.includes(c.org)),T=LD.flatMap(c=>ppl(c).map(([,p])=>estado(c,p)[0])),n=T.length||1;
  const cnt=x=>T.filter(t=>t===x).length,h=cnt('Habilitado'),rv=cnt('En revisión'),nh=cnt('No habilitado'),rn=cnt('Renunció');
  const formulasAprobadas = LD.filter(c=>{ const P=ppl(c); return P.every(([,p])=>estado(c,p)[0]==='Habilitado'); }).length;
@@ -2097,7 +2137,7 @@ function draw(){
  $('kpisNovedad').innerHTML = '<div class="nov-title">Novedades registradas</div>' + Object.keys(NOV).filter(k=>k).map(k=>{ const col = novColors[k] || ['#34495e','#e8edf1']; const total = novCnt[k]||0; return `<div class="nov-card ${total?'':'zero'}" style="--acc:${col[0]};--soft:${col[1]}"><div class="n">${total}</div><div class="t">${k}</div></div>`; }).join('');
  $('seg').innerHTML=[[h,'var(--oscuro)'],[rv,'var(--naranja)'],[nh,'var(--no)'],[rn,'#9aa1b5']].map(s=>`<i style="width:${s[0]/n*100}%;background:${s[1]}"></i>`).join('');
  $('pct').textContent=T.length?Math.round(h/n*100)+'% habilitado':'';
- $('vacio').classList.toggle('hide',LD.length>0);
+ $('vacio').classList.toggle('hide',LDall.length>0);
  [...$('tbl').tBodies].forEach(b=>b.remove());
  $('tbl').insertAdjacentHTML('beforeend',L.map((c,i)=>{ const P=ppl(c); const duplaColor = ['#70BE33','#F7941D','#3498db','#9b59b6','#e74c3c','#1abc9c','#f39c12','#34495e'][i % 8]; return `<tbody class="grp">${P.map(([lab,p],j)=>rowP(c,lab==='Principal'?'pri':'sup',lab,p,j===0,P.length,duplaColor)).join('')}</tbody>`; }).join(''));
  deshabilitarBotonesEdicion();
@@ -2212,12 +2252,12 @@ function renderFirmas(){
       
       <label>Cargo / Rol</label>
       ${f.esDelegado ? `
-        <select class="in" onchange="updateFirma(${i},'cargo',this.value)">
+        <select class="in" title="${esc(f.cargo||'')}" onchange="this.title=this.value;updateFirma(${i},'cargo',this.value)">
           <option value="">Seleccione el cargo...</option>
           ${CARGOS_DELEGADO.map(c => `<option value="${c}" ${f.cargo === c ? 'selected':''}>${c}</option>`).join('')}
         </select>
       ` : `
-        <select class="in" onchange="updateFirma(${i},'cargo',this.value)">
+        <select class="in" title="${esc(f.cargo||'')}" onchange="this.title=this.value;updateFirma(${i},'cargo',this.value)">
           <option value="">Seleccione de la lista...</option>
           ${CARGOS_TITULAR.map(c => `<option value="${c}" ${f.cargo === c ? 'selected':''}>${c}</option>`).join('')}
         </select>
@@ -2767,6 +2807,92 @@ async function enviarFirmaPublica() {
   }
 }
 
+
+/* ==========================================
+   MÓDULO: ACTAS, ANEXOS, INFORMES (solo lectura)
+   Ver el acta y descargarla en PDF. No modifica el módulo Actas:
+   solo lee sus datos y renderiza en su propio contenedor.
+   ========================================== */
+function docsResumen(){
+  const el = $('docsResumen'); if(!el) return;
+  try {
+    const v = datosActa().vars;
+    el.innerHTML = `<b>Acta N.º ${esc(v.numero)}</b> · ${esc(v.jornada)} · Órgano: ${esc(v.consejo)} · Facultad: ${esc(v.facultad)}`;
+  } catch(e) { el.textContent = ''; }
+}
+
+async function docsConstruirActa(){
+  const d = datosActa();
+  const bloques = bloquesActa($('at').value, d);
+  const partes = bloques.map(b=>{
+    if(b.t==='blank') return '<div style="height:0.9em"></div>';
+    if(b.t==='tabla') return tablaActaHTML(d);
+    if(b.t==='h'){ const isC = norm(b.txt).includes('considerandos'); const st = isC ? 'text-align:center; font-weight:bold; font-size:14px; margin:10px 0;' : 'text-align:center; font-weight:bold; font-size:13px; margin:2px 0;'; return `<div data-keep="1" style="${st}">${inlineHTML(b.txt)}</div>`; }
+    if(b.txt.includes('<table')) return `<div style="text-align:justify;">${b.txt}</div>`;
+    const al = /^\s*•/.test(b.txt) ? 'left' : 'justify';
+    return `<div style="white-space:pre-wrap;text-align:${al};">${inlineHTML(b.txt)}</div>`;
+  });
+
+  let firmasDB = [];
+  if (supabaseClient) {
+    try { const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', getActaId()); if (data) firmasDB = data; } catch(e) { console.warn(e); }
+  }
+  const item = (img, nombre, cargo) => `<div class="acta-firma-item"><div class="firma-img-wrap">${img ? `<img src="${img}" alt="Firma">` : ''}</div><div class="firma-linea"></div><div class="firma-nombre">${esc(nombre || '')}</div><div class="firma-cargo">${esc(cargo || '')}</div></div>`;
+  const ord = firmasOrdenadas(firmasDB);
+  let firmasHTML = '<div class="acta-firmas">' + ord.map(f => item(f.imgBase64, f.nombre, f.cargo)).join('');
+  if (!ord.length) firmasHTML += item(null, 'Nombre', 'Cargo') + item(null, 'Nombre', 'Cargo');
+  firmasHTML += '</div>';
+  const chk = $('chkFirmada') && $('chkFirmada').checked ? '<div style="text-align:center;"><div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div></div>' : '';
+
+  const nodes = [];
+  partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
+  nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${firmasHTML}${chk}</div>`));
+
+  $('docsActaWrap').classList.remove('hide');     // debe estar visible para poder medir y paginar
+  return paginarDoc($('docsActaOut'), {nodes, landscape:false});
+}
+
+async function docsVerActa(){
+  if(SESSION && !puedeVer('vDocs')){ toast('⛔ No tienes permiso para este módulo'); return false; }
+  const btn = $('btnDocsVer'); btn.disabled = true; $('docsEstado').textContent = 'Generando acta…';
+  try {
+    docsResumen();
+    const total = await docsConstruirActa();
+    $('docsEstado').textContent = `${total} página(s)`;
+    return true;
+  } catch(e) {
+    console.error(e); $('docsEstado').textContent = ''; toast('❌ No se pudo generar el acta: ' + (e.message || e)); return false;
+  } finally { btn.disabled = false; }
+}
+
+async function docsDescargarPDF(){
+  if(SESSION && !puedeVer('vDocs')){ toast('⛔ No tienes permiso para este módulo'); return; }
+  const btn = $('btnDocsPDF'); btn.disabled = true;
+  try {
+    if(!(await docsVerActa())) return;
+    const pgs = [...$('docsActaOut').querySelectorAll('.pg')];
+    if(!pgs.length){ toast('No hay páginas para descargar'); return; }
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation:'portrait', unit:'pt', format:'letter' });
+    const W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
+    for(let i = 0; i < pgs.length; i++){
+      $('docsEstado').textContent = `Creando PDF… página ${i+1} de ${pgs.length}`;
+      const canvas = await html2canvas(pgs[i], { scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, scrollX:0, scrollY:-window.scrollY });
+      if(i > 0) pdf.addPage('letter', 'portrait');
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, W, H);
+    }
+    const v = datosActa().vars;
+    const nombre = `Acta_${String(v.numero||'SN').replace(/[^\w-]+/g,'_')}_${v.jornada.replace(/\s+/g,'_')}.pdf`;
+    pdf.save(nombre);
+    $('docsEstado').textContent = `✅ ${nombre}`;
+    try { registrarLog('Descarga de acta en PDF', '-', nombre); } catch(e){}
+  } catch(e) {
+    console.error(e);
+    $('docsEstado').textContent = '';
+    toast('❌ No se pudo crear el PDF. Si abriste el archivo desde tu computador, publícalo en un servidor (el logo local bloquea la captura).');
+  } finally { btn.disabled = false; }
+}
+
 /* ==========================================
    EXPORTACIÓN Y PAGINACIÓN
    ========================================== */
@@ -3253,16 +3379,31 @@ renderVacantes();
 renderSoportes();
 
 (async function initAuth(){
-  if(SESSION && supabaseClient){
-    try {
-      const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', SESSION.id).eq(CONFIG.col_activo, true).maybeSingle();
-      if(!data){ SESSION = null; localStorage.removeItem(K_SESSION); }
-      else { await cargarEstadoElecciones(); }
-    } catch(e) { SESSION = null; localStorage.removeItem(K_SESSION); }
+  if(SESSION){
+    // Se muestra la sesión guardada de inmediato: recargar la página NO cierra la sesión
+    document.body.classList.add('logged-in'); document.body.classList.remove('logged-out');
+    aplicarSesion();
+    if(supabaseClient){
+      try {
+        const { data, error } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', SESSION.id).eq(CONFIG.col_activo, true).maybeSingle();
+        if(error) throw error;   // fallo de red o permisos: se conserva la sesión
+        if(!data){
+          // Solo se cierra si el usuario ya no existe o fue desactivado
+          detenerTimerSesion();
+          SESSION = null;
+          try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
+          location.reload();
+          return;
+        }
+        SESSION = {...SESSION, nombre: data[CONFIG.col_nombre] || data[CONFIG.col_user], rol: data[CONFIG.col_rol], modulos: Array.isArray(data[CONFIG.col_modulos]) ? data[CONFIG.col_modulos] : []};
+        saveSession();
+        await cargarEstadoElecciones();
+        actualizarUserCard(); aplicarPermisosUI(); actualizarBannerCierre();
+      } catch(e) { console.warn('No se pudo validar la sesión; se conserva la guardada:', e.message || e); }
+    }
+  } else {
+    document.body.classList.add('logged-out'); $('loginScreen').classList.remove('hide'); setTimeout(()=>$('loginUser')?.focus(), 100);
   }
-  if(SESSION){ document.body.classList.add('logged-in'); document.body.classList.remove('logged-out'); aplicarSesion(); }
-  else { document.body.classList.add('logged-out'); $('loginScreen').classList.remove('hide'); setTimeout(()=>$('loginUser')?.focus(), 100); }
-  document.addEventListener('keydown', e => { if($('loginScreen') && !$('loginScreen').classList.contains('hide') && e.key === 'Enter'){ if(document.activeElement && ['loginUser','loginPass'].includes(document.activeElement.id)) doLogin(); } });
 })();
 
 setInterval(async () => { if(SESSION && supabaseClient){ await cargarEstadoElecciones(); actualizarBannerCierre(); } }, 60000);
