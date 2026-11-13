@@ -637,6 +637,19 @@ body.logged-in #topbar { display: flex; }
   text-align: center;
 }
 .qr-box small { margin-top: 8px; word-break: break-all; }
+.qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:12px;text-align:center}
+.qr-card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px 10px;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.qr-card .qr-num{position:absolute;top:8px;left:8px;background:var(--oscuro);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.qr-card .qr-img{margin:6px 0 4px;display:flex;justify-content:center}
+.qr-card b{font-size:13px;color:var(--oscuro);line-height:1.25}
+.qr-card small{font-size:11.5px;color:var(--mut);font-weight:600;line-height:1.25}
+.qr-estado{margin-top:6px;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:20px;background:#fff4e0;color:#9a5b00}
+.qr-estado.ok{background:#e3f6ea;color:#14744a}
+.qr-orden{list-style:none;margin:14px auto 0;padding:0;max-width:460px;text-align:left}
+.qr-orden li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px}
+.qr-orden li .n{background:var(--oscuro);color:#fff;min-width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800}
+.qr-orden li .t{flex:1;line-height:1.25}
+.qr-orden li .t small{display:block;color:var(--mut);font-weight:600}
 </style>
 </head>
 <body class="logged-out">
@@ -879,8 +892,8 @@ body.logged-in #topbar { display: flex; }
      <p class="help" style="margin-top:0">El acta ya está generada. Ahora puedes recolectar las firmas mediante los códigos QR.</p>
      
      <div class="bar" style="margin-bottom: 20px;">
-       <button class="btn" onclick="generarEnlaceFirma()">🔗 QR Individual</button>
-       <button class="btn" onclick="generarQRGrupal()">👥 QR Grupal (Mesa)</button>
+       <button class="btn" id="btnQRInd" onclick="generarEnlaceFirma()">🔗 QR Individual</button>
+       <button class="btn" id="btnQRGrp" onclick="generarQRGrupal()">👥 QR Grupal (Mesa)</button>
        <button class="btn" style="background:#0B7A4B;color:white;border-color:#0B7A4B" onclick="enviarEnlacePorCorreo()">📧 Enviar link por correo</button>
        <span class="sp"></span>
        <button class="btn p" onclick="cargarFirmasSupabase()">🔄 Actualizar Firmas</button>
@@ -888,7 +901,7 @@ body.logged-in #topbar { display: flex; }
 
      <div id="qrContainer" class="hide" style="text-align: center; margin-bottom: 20px;"></div>
      
-     <div class="firmas-grid" id="firmasGrid"></div>
+     <div class="firmas-grid" id="firmasGridDigital"></div>
    </div>
  </div>
 
@@ -2212,6 +2225,7 @@ function renderFirmas(){
     </div>
   `).join('');
   $('firmaCount').textContent = FIRMAS.length + ' firma(s) configurada(s)';
+  if (typeof actualizarBotonesQR === 'function') actualizarBotonesQR();
 }
 
 function toggleDelegado(i, isChecked) { FIRMAS[i].esDelegado = isChecked; FIRMAS[i].cargo = ''; saveFirmas(); renderFirmas(); }
@@ -2223,6 +2237,23 @@ function inicializarFirmasOficiales() { if (!FIRMAS.some(f => f.esDelegado)) { F
 /* ==========================================
    FIRMAS DIGITALES, QR Y GESTIÓN (POST-ACTA)
    ========================================== */
+
+/* Devuelve las firmas en el orden configurado, cruzadas con las firmas digitales guardadas */
+function firmasOrdenadas(firmasDB) {
+  const key = s => (s || '').toLowerCase().trim();
+  const usados = new Set();
+  const out = [];
+  FIRMAS.filter(f => (f.nombre || '').trim()).forEach(f => {
+    const m = firmasDB.filter(d => key(d.firmante) === key(f.nombre));
+    m.forEach(d => usados.add(d));
+    const d = m.length ? m[m.length - 1] : null;
+    out.push({ nombre: f.nombre, cargo: f.cargo || (d ? d.cargo : '') || '', imgBase64: d ? d.firma_base64 : null });
+  });
+  firmasDB.filter(d => !usados.has(d))
+    .sort((x, y) => new Date(x.fecha) - new Date(y.fecha))
+    .forEach(d => out.push({ nombre: d.firmante, cargo: d.cargo, imgBase64: d.firma_base64 }));
+  return out;
+}
 
 async function genActa(){
   const d=datosActa();
@@ -2257,23 +2288,13 @@ async function genActa(){
 
   let firmasHTML = '<div class="acta-firmas">';
 
-  // 1. Firmas digitales (desde Supabase)
-  firmasDB.forEach(f => {
-    firmasHTML += firmaItemHTML(f.firma_base64, f.firmante, f.cargo);
-  });
+  // Firmas en el MISMO ORDEN en que fueron configuradas (firmadas digitalmente o en blanco);
+  // al final, cualquier firma digital de alguien que no estaba en la lista.
+  const _ordenadas = firmasOrdenadas(firmasDB);
+  _ordenadas.forEach(f => { firmasHTML += firmaItemHTML(f.imgBase64, f.nombre, f.cargo); });
 
-  // 2. Firmas manuales (texto de respaldo) que no hayan firmado digitalmente
-  FIRMAS.filter(f => f.nombre.trim()).forEach(f => {
-    const yaFirmoDigital = firmasDB.some(d =>
-      d.firmante.toLowerCase().trim() === f.nombre.toLowerCase().trim()
-    );
-    if (!yaFirmoDigital) {
-      firmasHTML += firmaItemHTML(null, f.nombre, f.cargo || '');
-    }
-  });
-
-  // 3. Si no hay ninguna firma configurada, mostrar placeholders vacíos
-  if (firmasDB.length === 0 && FIRMAS.filter(f=>f.nombre.trim()).length === 0) {
+  // Si no hay ninguna firma, mostrar placeholders vacíos
+  if (_ordenadas.length === 0) {
     firmasHTML += firmaItemHTML(null, 'Nombre', 'Cargo');
     firmasHTML += firmaItemHTML(null, 'Nombre', 'Cargo');
   }
@@ -2299,36 +2320,134 @@ function getActaId() {
   return `ACTA-${$('an').value || 'SN'}-${$('aJornada').value}`;
 }
 
-function generarEnlaceFirma() {
-  const actaId = getActaId();
-  const token = Math.random().toString(36).substring(2, 10);
-  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&tipo=individual&token=${token}`;
-  
-  $('qrContainer').classList.remove('hide');
-  $('qrContainer').innerHTML = `
-    <div class="qr-box">
-      <div id="qrcode"></div>
-      <small>${url}</small>
-    </div>
-    <p class="help" style="margin-top:12px;">Comparte este QR. Cada persona que lo escanee firmará una vez y el sistema registrará su nombre y cargo.</p>
-  `;
-  new QRCode($('qrcode'), { text: url, width: 180, height: 180 });
+/* --- Firmantes configurados (nombre obligatorio), en el orden en que se configuraron --- */
+function firmasConfiguradas() {
+  return FIRMAS
+    .filter(f => (f.nombre || '').trim())
+    .map((f, i) => ({ nombre: f.nombre.trim(), cargo: (f.cargo || '').trim(), orden: i + 1 }));
+}
+const _kFirmante = s => (s || '').toLowerCase().trim();
+const _attr = s => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+function actualizarBotonesQR() {
+  const n = firmasConfiguradas().length;
+  const bi = $('btnQRInd'), bg = $('btnQRGrp');
+  if (bi) bi.textContent = n ? `🔗 QR Individual (${n})` : '🔗 QR Individual';
+  if (bg) bg.textContent = n ? `👥 QR Grupal (Mesa · ${n})` : '👥 QR Grupal (Mesa)';
 }
 
-function generarQRGrupal() {
-  const actaId = getActaId();
-  const url = `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(actaId)}&tipo=grupal`;
-  
-  $('qrContainer').classList.remove('hide');
-  $('qrContainer').innerHTML = `
-    <div class="qr-box">
-      <div id="qrcode"></div>
-      <small>${url}</small>
-    </div>
-    <p class="help" style="margin-top:12px;"><b>Modo Mesa:</b> Todos los asistentes pueden usar este mismo código. El sistema pedirá seleccionar su nombre de la lista y luego firmar.</p>
-  `;
-  new QRCode($('qrcode'), { text: url, width: 200, height: 200 });
+function _crearQR(el, text, size) {
+  // Intenta con corrección de error baja (más capacidad) y sube si la librería falla
+  const niveles = [QRCode.CorrectLevel.L, QRCode.CorrectLevel.M, QRCode.CorrectLevel.Q];
+  for (const lvl of niveles) {
+    try {
+      el.innerHTML = '';
+      new QRCode(el, { text, width: size, height: size, correctLevel: lvl });
+      return true;
+    } catch (e) { console.warn('QR nivel', lvl, e); }
+  }
+  el.textContent = '⚠️ No se pudo generar el QR';
+  return false;
 }
+
+function _baseUrlFirma() {
+  return `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(getActaId())}`;
+}
+
+function _avisoSinNombre() {
+  const sinNombre = FIRMAS.length - firmasConfiguradas().length;
+  return sinNombre > 0
+    ? `<p class="help" style="margin-top:10px;color:var(--alert-line)">⚠️ ${sinNombre} firma(s) sin nombre no se incluyeron. Escribe el nombre en la configuración de firmas para generarles QR.</p>`
+    : '';
+}
+
+/* QR INDIVIDUAL: 1 QR por cada firma configurada, en el mismo orden */
+function generarEnlaceFirma() {
+  const lista = firmasConfiguradas();
+  const cont = $('qrContainer');
+  cont.classList.remove('hide');
+
+  if (!lista.length) {
+    // Sin firmas configuradas: QR genérico (el firmante escribe sus datos)
+    const url = `${_baseUrlFirma()}&tipo=individual`;
+    cont.innerHTML = `
+      <div class="qr-box"><div id="qrcode"></div><small>${esc(url)}</small></div>
+      <p class="help" style="margin-top:12px;">No hay firmas con nombre configuradas, así que se generó un QR genérico. Cada persona que lo escanee escribirá su nombre y cargo.</p>`;
+    _crearQR($('qrcode'), url, 180);
+    return;
+  }
+
+  cont.innerHTML = `
+    <p class="help" style="margin:0 0 4px;"><b>${lista.length} QR individual(es)</b>, uno por firmante y en el mismo orden en que aparecen en el acta. Cada QR ya trae el nombre y el cargo de su titular.</p>
+    ${_avisoSinNombre()}
+    <div class="qr-grid">
+      ${lista.map((f, i) => `
+        <div class="qr-card">
+          <div class="qr-num">${f.orden}</div>
+          <div class="qr-img" id="qrInd_${i}"></div>
+          <b>${esc(f.nombre)}</b>
+          <small>${esc(f.cargo || 'Sin cargo')}</small>
+          <span class="qr-estado" data-key="${_attr(_kFirmante(f.nombre))}">⏳ Pendiente</span>
+        </div>`).join('')}
+    </div>`;
+
+  lista.forEach((f, i) => {
+    const url = `${_baseUrlFirma()}&tipo=individual&orden=${f.orden}&n=${encodeURIComponent(f.nombre)}&c=${encodeURIComponent(f.cargo)}`;
+    _crearQR($('qrInd_' + i), url, 150);
+  });
+  cargarFirmasSupabase();
+}
+
+/* QR GRUPAL: 1 solo QR; las firmas se piden en el orden en que se configuraron */
+function generarQRGrupal() {
+  const lista = firmasConfiguradas();
+  const cont = $('qrContainer');
+  cont.classList.remove('hide');
+
+  if (!lista.length) {
+    const url = `${_baseUrlFirma()}&tipo=grupal`;
+    cont.innerHTML = `
+      <div class="qr-box"><div id="qrcode"></div><small>${esc(url)}</small></div>
+      <p class="help" style="margin-top:12px;">No hay firmas con nombre configuradas, así que el QR grupal no traerá lista de firmantes.</p>`;
+    _crearQR($('qrcode'), url, 200);
+    return;
+  }
+
+  const limpio = s => String(s || '').replace(/[|~]/g, ' ').trim();
+  const lst = lista.map(f => `${limpio(f.nombre)}~${limpio(f.cargo)}`).join('|');
+  const url = `${_baseUrlFirma()}&tipo=grupal&lista=${encodeURIComponent(lst)}`;
+  const size = url.length > 900 ? 340 : url.length > 500 ? 300 : 260;
+
+  cont.innerHTML = `
+    <div class="qr-box"><div id="qrcode"></div></div>
+    <p class="help" style="margin-top:12px;"><b>Modo Mesa (1 solo QR):</b> los asistentes firman uno tras otro en este orden. Al escanear, el sistema le muestra el turno de la siguiente persona pendiente.</p>
+    ${_avisoSinNombre()}
+    <ol class="qr-orden">
+      ${lista.map(f => `
+        <li>
+          <span class="n">${f.orden}</span>
+          <span class="t">${esc(f.nombre)}<small>${esc(f.cargo || 'Sin cargo')}</small></span>
+          <span class="qr-estado" data-key="${_attr(_kFirmante(f.nombre))}">⏳ Pendiente</span>
+        </li>`).join('')}
+    </ol>`;
+  _crearQR($('qrcode'), url, size);
+  cargarFirmasSupabase();
+}
+
+function actualizarEstadoQR(data) {
+  const firmadas = new Set((data || []).map(d => _kFirmante(d.firmante)));
+  document.querySelectorAll('.qr-estado').forEach(el => {
+    const ok = firmadas.has(el.dataset.key);
+    el.textContent = ok ? '✅ Firmada' : '⏳ Pendiente';
+    el.classList.toggle('ok', ok);
+  });
+}
+
+// Refresco automático del estado de las firmas mientras el panel de QR está abierto
+setInterval(() => {
+  const qc = document.getElementById('qrContainer');
+  if (qc && !qc.classList.contains('hide') && !document.hidden) cargarFirmasSupabase();
+}, 8000);
 
 function enviarEnlacePorCorreo() {
   if (!emailjsReady) { toast('EmailJS no configurado'); return; }
@@ -2365,7 +2484,10 @@ async function cargarFirmasSupabase() {
   
   if(error) { console.warn(error); return; }
   
-  const grid = $('firmasGrid');
+  actualizarEstadoQR(data);
+
+  const grid = $('firmasGridDigital');
+  if (!grid) return;
   if (data.length === 0) {
     grid.innerHTML = '<p class="empty" style="grid-column:1/-1">Aún no hay firmas registradas.</p>';
     return;
@@ -2397,6 +2519,61 @@ async function eliminarFirma(id) {
 /* ==========================================
    VISTA PÚBLICA PARA FIRMAR
    ========================================== */
+// true  = el QR grupal solo deja firmar a la siguiente persona pendiente (orden estricto)
+// false = muestra el orden y preselecciona el turno, pero permite elegir a cualquiera pendiente
+const FIRMA_GRUPAL_ORDEN_ESTRICTO = true;
+
+let _listaGrupal = null;        // [{nombre, cargo}] en orden (viene en la URL del QR grupal)
+let _firmanteIndividual = null; // {nombre, cargo, orden} (viene en la URL del QR individual)
+
+async function _firmasYaGuardadas(actaId) {
+  if (!supabaseClient) return [];
+  try {
+    const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('firmante').eq('acta_id', actaId);
+    return data || [];
+  } catch (e) { return []; }
+}
+
+function _mostrarPad(visible) {
+  const cont = document.querySelector('#publicSignView .signature-pad-container');
+  const bar = document.querySelector('#publicSignView .bar');
+  const btn = document.getElementById('btnEnviarFirmaPublica');
+  [cont, bar, btn].forEach(el => { if (el) el.style.display = visible ? '' : 'none'; });
+}
+
+function _numActa(actaId) { return esc((actaId || '').split('-')[1] || ''); }
+
+async function renderGrupalPublico(actaId) {
+  const firmadas = (await _firmasYaGuardadas(actaId)).map(d => _kFirmante(d.firmante));
+  const total = _listaGrupal.length;
+  const sig = _listaGrupal.findIndex(f => !firmadas.includes(_kFirmante(f.nombre)));
+  const info = document.getElementById('publicSignInfo');
+
+  info.innerHTML = `
+    Acta N.º <b>${_numActa(actaId)}</b><br>
+    <b>Modo Mesa:</b> las firmas se registran en orden.<br>
+    ${sig === -1
+      ? '<div style="margin:12px 0;color:#14744a;font-weight:800;">✅ Ya se registraron todas las firmas.</div>'
+      : `<div style="margin:12px 0;padding:10px 12px;border-left:4px solid var(--oscuro);background:#f0f7f2;border-radius:8px;">
+           Turno <b>${sig + 1}</b> de ${total}:<br><b>${esc(_listaGrupal[sig].nombre)}</b><br>
+           <span style="color:var(--mut)">${esc(_listaGrupal[sig].cargo || 'Sin cargo')}</span>
+         </div>`}`;
+
+  if (sig === -1) { _mostrarPad(false); return; }
+
+  const select = document.createElement('select');
+  select.id = 'selectFirmanteGrupal';
+  select.className = 'in';
+  select.style.marginBottom = '16px';
+  select.innerHTML = _listaGrupal.map((f, i) => {
+    const firmada = firmadas.includes(_kFirmante(f.nombre));
+    const bloqueada = !firmada && FIRMA_GRUPAL_ORDEN_ESTRICTO && i !== sig;
+    const etiqueta = `${i + 1}. ${f.nombre} — ${f.cargo || 'Sin cargo'}${firmada ? ' ✅' : ''}${bloqueada ? ' 🔒' : ''}`;
+    return `<option value="${i}" ${firmada || bloqueada ? 'disabled' : ''} ${i === sig ? 'selected' : ''}>${esc(etiqueta)}</option>`;
+  }).join('');
+  info.appendChild(select);
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('firmar') === '1') {
@@ -2406,47 +2583,69 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     const actaId = params.get('acta') || 'ACTA-SN';
     const tipo = params.get('tipo') || 'individual';
-    
-    document.getElementById('publicSignInfo').innerHTML = `
-      Acta N.º <b>${actaId.split('-')[1]}</b><br>
-      ${tipo === 'grupal' ? '<b>Modo Mesa:</b> Selecciona tu nombre de la lista.' : 'Por favor, ingresa tus datos y firma.'}
-    `;
+    const info = document.getElementById('publicSignInfo');
 
-    if (tipo === 'grupal') {
-      const select = document.createElement('select');
-      select.id = 'selectFirmanteGrupal';
-      select.className = 'in';
-      select.style.marginBottom = '16px';
-      
-      const listaFirmantes = JSON.parse(localStorage.getItem('firmas_acta_v1') || '[]');
-      const opciones = listaFirmantes.map(f => `<option value="${f.nombre}|${f.cargo || 'Sin cargo'}">${f.nombre} - ${f.cargo || 'Sin cargo'}</option>`).join('');
-      
-      if (opciones) {
-        select.innerHTML = `<option value="">-- Selecciona tu nombre --</option>` + opciones;
-        document.getElementById('publicSignInfo').appendChild(select);
-      } else {
-        select.innerHTML = `<option value="manual">Otro (Ingresar manualmente)</option>`;
-        document.getElementById('publicSignInfo').appendChild(select);
-      }
-    } else {
-       const div = document.createElement('div');
-       div.innerHTML = `
-         <input class="in" id="pubNombre" placeholder="Tu nombre completo" style="width:100%; margin-bottom:8px;">
-         <input class="in" id="pubCargo" placeholder="Tu rol o cargo" style="width:100%; margin-bottom:16px;">
-       `;
-       document.getElementById('publicSignInfo').appendChild(div);
-    }
-
+    // El canvas se inicializa antes de ocultar nada (si no, mediría 0 px)
     const canvas = document.getElementById('publicSignatureCanvas');
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     canvas.width = canvas.offsetWidth * ratio;
     canvas.height = canvas.offsetHeight * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
-    
     publicSignaturePad = new SignaturePad(canvas, {
       backgroundColor: 'rgba(255, 255, 255, 0)',
       penColor: 'rgb(11, 59, 44)'
     });
+
+    const rawLista = params.get('lista');
+    const nombreQR = (params.get('n') || '').trim();
+
+    if (tipo === 'grupal' && rawLista) {
+      // QR GRUPAL con lista ordenada
+      _listaGrupal = rawLista.split('|').map(s => {
+        const [n, ...r] = s.split('~');
+        return { nombre: (n || '').trim(), cargo: r.join('~').trim() };
+      }).filter(f => f.nombre);
+      await renderGrupalPublico(actaId);
+
+    } else if (tipo === 'grupal') {
+      // Respaldo: QR grupal antiguo (sin lista en la URL)
+      info.innerHTML = `Acta N.º <b>${_numActa(actaId)}</b><br><b>Modo Mesa:</b> Selecciona tu nombre de la lista.`;
+      const select = document.createElement('select');
+      select.id = 'selectFirmanteGrupal';
+      select.className = 'in';
+      select.style.marginBottom = '16px';
+      const listaFirmantes = JSON.parse(localStorage.getItem('firmas_acta_v1') || '[]');
+      const opciones = listaFirmantes.map(f => `<option value="${esc(f.nombre)}|${esc(f.cargo || 'Sin cargo')}">${esc(f.nombre)} - ${esc(f.cargo || 'Sin cargo')}</option>`).join('');
+      select.innerHTML = opciones
+        ? `<option value="">-- Selecciona tu nombre --</option>` + opciones
+        : `<option value="manual">Otro (Ingresar manualmente)</option>`;
+      info.appendChild(select);
+
+    } else if (nombreQR) {
+      // QR INDIVIDUAL de un firmante configurado: nombre y cargo ya vienen definidos
+      _firmanteIndividual = { nombre: nombreQR, cargo: (params.get('c') || '').trim(), orden: params.get('orden') || '' };
+      info.innerHTML = `
+        Acta N.º <b>${_numActa(actaId)}</b><br>
+        Firma de${_firmanteIndividual.orden ? ` (#${esc(_firmanteIndividual.orden)})` : ''}:
+        <div style="margin:10px 0 4px;padding:10px 12px;border-left:4px solid var(--oscuro);background:#f0f7f2;border-radius:8px;">
+          <b>${esc(_firmanteIndividual.nombre)}</b><br>
+          <span style="color:var(--mut)">${esc(_firmanteIndividual.cargo || 'Sin cargo')}</span>
+        </div>`;
+      const ya = (await _firmasYaGuardadas(actaId)).some(d => _kFirmante(d.firmante) === _kFirmante(nombreQR));
+      if (ya) {
+        info.innerHTML += '<div style="margin:12px 0;color:#14744a;font-weight:800;">✅ Esta firma ya fue registrada.</div>';
+        _mostrarPad(false);
+      }
+
+    } else {
+      // QR individual genérico (sin firmante asignado)
+      info.innerHTML = `Acta N.º <b>${_numActa(actaId)}</b><br>Por favor, ingresa tus datos y firma.`;
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <input class="in" id="pubNombre" placeholder="Tu nombre completo" style="width:100%; margin-bottom:8px;">
+        <input class="in" id="pubCargo" placeholder="Tu rol o cargo" style="width:100%; margin-bottom:16px;">`;
+      info.appendChild(div);
+    }
   }
 });
 
@@ -2467,7 +2666,31 @@ async function enviarFirmaPublica() {
   let nombre = '';
   let cargo = '';
 
-  if (tipo === 'grupal') {
+  if (tipo === 'grupal' && _listaGrupal) {
+    const select = document.getElementById('selectFirmanteGrupal');
+    if (!select || select.value === '') { toast('⚠️ Selecciona tu nombre de la lista'); return; }
+    const idx = parseInt(select.value, 10);
+    const f = _listaGrupal[idx];
+    if (!f) { toast('⚠️ Selección no válida'); return; }
+
+    // Se revalida contra la base (otro celular pudo firmar justo antes)
+    const firmadas = (await _firmasYaGuardadas(actaId)).map(d => _kFirmante(d.firmante));
+    if (firmadas.includes(_kFirmante(f.nombre))) {
+      toast('⚠️ Esta firma ya fue registrada');
+      await renderGrupalPublico(actaId);
+      return;
+    }
+    if (FIRMA_GRUPAL_ORDEN_ESTRICTO) {
+      const sig = _listaGrupal.findIndex(x => !firmadas.includes(_kFirmante(x.nombre)));
+      if (sig !== idx) {
+        toast(`⚠️ Aún no es tu turno. Sigue: ${_listaGrupal[sig].nombre}`);
+        await renderGrupalPublico(actaId);
+        return;
+      }
+    }
+    nombre = f.nombre; cargo = f.cargo;
+
+  } else if (tipo === 'grupal') {
     const select = document.getElementById('selectFirmanteGrupal');
     if (!select || !select.value) {
       toast('⚠️ Selecciona tu nombre de la lista');
@@ -2481,6 +2704,13 @@ async function enviarFirmaPublica() {
     } else {
       [nombre, cargo] = select.value.split('|');
     }
+
+  } else if (_firmanteIndividual) {
+    nombre = _firmanteIndividual.nombre;
+    cargo = _firmanteIndividual.cargo;
+    const ya = (await _firmasYaGuardadas(actaId)).some(d => _kFirmante(d.firmante) === _kFirmante(nombre));
+    if (ya) { toast('⚠️ Esta firma ya fue registrada'); _mostrarPad(false); return; }
+
   } else {
     nombre = document.getElementById('pubNombre').value.trim();
     cargo = document.getElementById('pubCargo').value.trim();
@@ -2515,12 +2745,16 @@ async function enviarFirmaPublica() {
     document.getElementById('publicSignMsg').style.color = '#14744a';
     
     if (tipo === 'grupal') {
-      setTimeout(() => {
+      setTimeout(async () => {
         publicSignaturePad.clear();
         document.getElementById('publicSignMsg').textContent = '';
         btn.disabled = false;
         btn.textContent = '✅ Enviar firma';
-        if(document.getElementById('selectFirmanteGrupal')) document.getElementById('selectFirmanteGrupal').value = '';
+        if (_listaGrupal) {
+          await renderGrupalPublico(actaId);   // pasa al siguiente turno
+        } else if (document.getElementById('selectFirmanteGrupal')) {
+          document.getElementById('selectFirmanteGrupal').value = '';
+        }
       }, 2000);
     } else {
       publicSignaturePad.off();
@@ -2637,17 +2871,7 @@ async function exportarDOCX() {
       if (data) firmasDB = data;
     }
 
-    let todasLasFirmas = [];
-    firmasDB.forEach(f => {
-      todasLasFirmas.push({ nombre: f.firmante, cargo: f.cargo, imgBase64: f.firma_base64 });
-    });
-
-    FIRMAS.filter(f=>f.nombre.trim()).forEach(f => {
-      const yaFirmoDigital = firmasDB.some(d => d.firmante.toLowerCase().trim() === f.nombre.toLowerCase().trim());
-      if (!yaFirmoDigital) {
-        todasLasFirmas.push({ nombre: f.nombre, cargo: f.cargo, imgBase64: null });
-      }
-    });
+    const todasLasFirmas = firmasOrdenadas(firmasDB);
 
     // === DISEÑO DE FIRMAS EN WORD (ESTILO IMAGEN) ===
     if (todasLasFirmas.length > 0) {
