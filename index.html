@@ -1071,13 +1071,11 @@ body.logged-in #topbar { display: flex; }
         <div><label>Nombre completo</label><input class="in" id="u_new_nombre"></div>
         <div><label>Correo electrónico</label><input class="in" id="u_new_email" type="email"></div>
         <div><label>Contraseña</label><input class="in" id="u_new_pass" type="password"></div>
-        <div><label>Rol</label>
+        <div><label>Rol Base</label>
           <select class="in" id="u_new_rol">
             <option value="administrador">Administrador</option>
-            <option value="editor">Editor</option>
-            <option value="lectura">Lectura</option>
-            <option value="agente_mesa">Agente Mesa de Servicio</option>
             <option value="coordinador">Coordinador Electoral</option>
+            <option value="agente_mesa">Agente Mesa de Servicio</option>
             <option value="auditor">Auditor</option>
             <option value="th">Talento Humano</option>
             <option value="egresados">Egresados</option>
@@ -1085,11 +1083,23 @@ body.logged-in #topbar { display: flex; }
             <option value="fac_prog">Facultad / Programa</option>
           </select>
         </div>
+        <div><label>Cronograma que verá</label>
+          <select class="in" id="u_new_cron">
+            <option value="ambos">Público e Interno</option>
+            <option value="publico">Solo Público</option>
+            <option value="interno">Solo Interno</option>
+          </select>
+        </div>
       </div>
-      <div style="margin-top:10px;">
-        <label style="font-weight:700">Módulos permitidos (para Editor/Lectura)</label>
+      
+      <div style="margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
+        <label style="font-weight:700">Permisos Personalizados (Módulos Permitidos)</label>
         <div id="u_new_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
+        
+        <label style="font-weight:700; margin-top:12px; display:block;">Permisos de Edición (¿Puede escribir/cargar?)</label>
+        <div id="u_new_edit" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
       </div>
+
       <div style="margin-top:12px; display:flex; align-items:center; gap:8px;">
         <input type="checkbox" id="u_new_enviar_correo" style="width:16px; height:16px; accent-color:var(--oscuro);" checked>
         <label for="u_new_enviar_correo" style="margin:0; font-weight:600; font-size:13px; cursor:pointer;">Enviar credenciales por correo al crear</label>
@@ -1097,7 +1107,7 @@ body.logged-in #topbar { display: flex; }
       <div style="margin-top:12px;"><button class="btn p" onclick="crearUsuario()">➕ Crear usuario</button></div>
     </div>
     <div class="wrap"><table class="tbl-pro" style="min-width:100%">
-      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Módulos</th><th>Estado</th><th class="c">Acción</th></tr></thead>
+      <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol / Cronograma</th><th>Módulos</th><th>Estado</th><th class="c">Acción</th></tr></thead>
       <tbody id="tablaUsuarios"></tbody>
     </table></div>
   </div>
@@ -1112,13 +1122,11 @@ body.logged-in #topbar { display: flex; }
       <div><label>Usuario</label><input class="in" id="u_edit_user" disabled style="background:#f5f5f5;"></div>
       <div><label>Nombre completo</label><input class="in" id="u_edit_nombre"></div>
       <div><label>Correo electrónico</label><input class="in" id="u_edit_email" type="email"></div>
-      <div><label>Rol</label>
+      <div><label>Rol Base</label>
         <select class="in" id="u_edit_rol">
           <option value="administrador">Administrador</option>
-          <option value="editor">Editor</option>
-          <option value="lectura">Lectura</option>
-          <option value="agente_mesa">Agente Mesa de Servicio</option>
           <option value="coordinador">Coordinador Electoral</option>
+          <option value="agente_mesa">Agente Mesa de Servicio</option>
           <option value="auditor">Auditor</option>
           <option value="th">Talento Humano</option>
           <option value="egresados">Egresados</option>
@@ -1126,11 +1134,23 @@ body.logged-in #topbar { display: flex; }
           <option value="fac_prog">Facultad / Programa</option>
         </select>
       </div>
+      <div><label>Cronograma que verá</label>
+        <select class="in" id="u_edit_cron">
+          <option value="ambos">Público e Interno</option>
+          <option value="publico">Solo Público</option>
+          <option value="interno">Solo Interno</option>
+        </select>
+      </div>
     </div>
-    <div style="margin-top:10px;">
-      <label style="font-weight:700">Módulos permitidos (para Editor/Lectura)</label>
+    
+    <div style="margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
+      <label style="font-weight:700">Permisos Personalizados (Módulos Permitidos)</label>
       <div id="u_edit_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
+      
+      <label style="font-weight:700; margin-top:12px; display:block;">Permisos de Edición (¿Puede escribir/cargar?)</label>
+      <div id="u_edit_edit" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
     </div>
+
     <div style="margin-top:16px;"><label style="font-weight:700">Estado</label>
       <select class="in" id="u_edit_activo" style="width:100%"><option value="true">Activo</option><option value="false">Inactivo</option></select>
     </div>
@@ -1264,19 +1284,28 @@ let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDi
 
 let publicSignaturePad = null;
 
-const MODULOS = [{key:'vCron',label:'Cronograma'},{key:'vSeg',label:'Seguimiento candidatos'},{key:'vVotantes',label:'Censo Votantes'},{key:'vAnal',label:'Analítica'},{key:'vVac',label:'Cargos / Vacantes'},{key:'vCargaVotos',label:'Cargar Votos'},{key:'vAct',label:'Actas'},{key:'vGanadores',label:'Directorio Ganadores'},{key:'vSoporte',label:'Registro Soporte'},{key:'vDocs',label:'Actas, Anexos, Informes'}];
+const MODULOS = [
+  {key:'vCron',label:'Cronograma'},
+  {key:'vSeg',label:'Seguimiento candidatos'},
+  {key:'vVotantes',label:'Censo Votantes'},
+  {key:'vAnal',label:'Analítica'},
+  {key:'vVac',label:'Cargos / Vacantes'},
+  {key:'vCargaVotos',label:'Cargar Votos'},
+  {key:'vAct',label:'Actas'},
+  {key:'vGanadores',label:'Directorio Ganadores'},
+  {key:'vSoporte',label:'Registro Soporte'},
+  {key:'vDocs',label:'Actas, Anexos, Informes'}
+];
 
 const ROLES = {
-  administrador: {label:'Administrador', mods:'*', puedeEditar:'*', color:'r'},
-  editor:        {label:'Editor',        mods:[],  puedeEditar:null,     color:'b'},
-  lectura:       {label:'Lectura',       mods:[],  puedeEditar:[],       color:'t'},
-  agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte','vGanadores','vVotantes'], puedeEditar:['vSoporte'], color:'o'},
-  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal','vDocs'], puedeEditar:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
-  auditor:       {label:'Auditor',       mods:'*', puedeEditar:[], color:'g'},
-  th:            {label:'Talento Humano',       mods:['vSeg','vCron'], puedeEditar:[], validador:['th'], cronVista:'interno', color:'o'},
-  egresados:     {label:'Egresados',            mods:['vSeg','vCron'], puedeEditar:[], validador:['eg'], cronVista:'publico', color:'t'},
-  sec_general:   {label:'Secretaría General',   mods:['vSeg','vCron'], puedeEditar:[], validador:['sg'], cronVista:'ambos',   color:'b'},
-  fac_prog:      {label:'Facultad / Programa',  mods:['vSeg','vCron'], puedeEditar:[], validador:['fp'], cronVista:'interno', color:'p'},
+  administrador: {label:'Administrador', mods:'*', edit:'*', color:'r'},
+  coordinador:   {label:'Coordinador Electoral',   mods:['vCron','vSeg','vCargaVotos','vAct','vVac','vGanadores','vAnal','vDocs'], edit:['vCron','vSeg','vCargaVotos','vAct'], color:'p'},
+  agente_mesa:   {label:'Agente Mesa de Servicio', mods:['vSoporte'], edit:['vSoporte'], color:'o'},
+  auditor:       {label:'Auditor',       mods:'*', edit:[], color:'g'},
+  th:            {label:'Talento Humano',       mods:['vSeg','vCron'], edit:[], validador:['th'], color:'o'},
+  egresados:     {label:'Egresados',            mods:['vSeg','vCron'], edit:[], validador:['eg'], color:'t'},
+  sec_general:   {label:'Secretaría General',   mods:['vSeg','vCron'], edit:[], validador:['sg'], color:'b'},
+  fac_prog:      {label:'Facultad / Programa',  mods:['vSeg','vCron'], edit:[], validador:['fp'], color:'p'},
 };
 
 let SESSION = null;
@@ -1486,48 +1515,63 @@ function aplicarSesion(){
   }
 }
 
+// Obtener módulos permitidos combinando el rol base con los personalizados guardados
 function getModulosPermitidos(){
   if(!SESSION) return [];
+  if(SESSION.rol === 'administrador' || SESSION.rol === 'auditor') return MODULOS.map(m=>m.key);
+  if(SESSION.rol === 'agente_mesa') return ['vSoporte']; // Restricción explícita
+  
+  // Si tiene permisos personalizados guardados, los usamos
+  if (Array.isArray(SESSION.modulos)) {
+    return SESSION.modulos;
+  }
+  
   const rol = ROLES[SESSION.rol];
   if(!rol) return [];
-  if(rol.mods === '*') return MODULOS.map(m=>m.key);
-  if(SESSION.rol === 'editor' || SESSION.rol === 'lectura'){ return SESSION.modulos && SESSION.modulos.length ? SESSION.modulos : []; }
-  return rol.mods;
+  if(Array.isArray(rol.mods)) return rol.mods;
+  return [];
 }
-function puedeVer(modulo){ if(!SESSION) return false; return getModulosPermitidos().includes(modulo); }
+
+// Verificar si puede editar un módulo
 function puedeEditar(modulo){
   if(!SESSION) return false;
+  if(ELECCIONES_CERRADAS && SESSION.rol !== 'administrador') return false;
   if(SESSION.rol === 'administrador') return true;
-  if(ELECCIONES_CERRADAS) return false;
+  
+  // Si tiene permisos personalizados de edición, los usamos
+  if (Array.isArray(SESSION.modulosEdit)) {
+    return SESSION.modulosEdit.includes(modulo);
+  }
+
   const rol = ROLES[SESSION.rol];
   if(!rol) return false;
-  if(rol.validador) return false;
-  if(rol.puedeEditar === '*') return true;
-  if(Array.isArray(rol.puedeEditar)){
-    if(SESSION.rol === 'editor') return (SESSION.modulos||[]).includes(modulo);
-    return rol.puedeEditar.includes(modulo);
-  }
+  if(rol.edit === '*') return true;
+  if(Array.isArray(rol.edit)) return rol.edit.includes(modulo);
   return false;
 }
+
+function puedeVer(modulo){ if(!SESSION) return false; return getModulosPermitidos().includes(modulo); }
 
 function puedeValidar(campoCheck){
   if(!SESSION) return false;
   if(SESSION.rol === 'administrador') return true;
   if(ELECCIONES_CERRADAS) return false;
+  
+  // Si es validador, solo puede su campo
   const rol = ROLES[SESSION.rol];
-  if(!rol) return false;
-  if(!rol.validador) {
-    if(rol.puedeEditar === '*' || (Array.isArray(rol.puedeEditar) && rol.puedeEditar.includes('vSeg'))) return true;
-    if(SESSION.rol === 'editor' && (SESSION.modulos||[]).includes('vSeg')) return true;
-    return false;
+  if(rol && rol.validador) {
+    return rol.validador.includes(campoCheck) || rol.validador.includes('nov');
   }
-  return rol.validador.includes(campoCheck) || rol.validador.includes('nov');
+  
+  // Si es coordinador o tiene permiso de edición en vSeg, puede validar todo
+  return puedeEditar('vSeg');
 }
 
 function aplicarPermisosUI(){
   const mapa = {vCron:'n1',vSeg:'n2',vVotantes:'n3',vAnal:'n4',vVac:'n5',vCargaVotos:'n6',vAct:'n7',vGanadores:'n8',vSoporte:'n9',vDocs:'n10'};
   const permitidos = getModulosPermitidos();
   MODULOS.forEach(m => { const btn = $(mapa[m.key]); if(btn) btn.style.display = permitidos.includes(m.key) ? '' : 'none'; });
+  
   const esAdmin = SESSION?.rol === 'administrador';
   const esAuditor = SESSION?.rol === 'auditor';
   if($('btnCerrarElec')) $('btnCerrarElec').style.display = esAdmin ? '' : 'none';
@@ -1550,12 +1594,12 @@ function aplicarPermisosUI(){
 
   const esValidador = !!rol?.validador;
   const botones = {
-    btnOpenForm: esValidador,
-    btnCargarExcel: esValidador,
-    btnPlantilla: esValidador,
-    btnAprobarTodos: esValidador,
-    btnExpXL: esValidador,
-    btnExpPDF: esValidador
+    btnOpenForm: !puedeEditar('vSeg'),
+    btnCargarExcel: !puedeEditar('vSeg'),
+    btnPlantilla: !puedeEditar('vSeg'),
+    btnAprobarTodos: !puedeEditar('vSeg'),
+    btnExpXL: !puedeEditar('vSeg'),
+    btnExpPDF: !puedeEditar('vSeg')
   };
   Object.entries(botones).forEach(([id, bloquear]) => {
     const b = $(id);
@@ -1563,7 +1607,7 @@ function aplicarPermisosUI(){
     if(bloquear) { b.disabled = true; b.style.opacity = 0.45; b.style.cursor = 'not-allowed'; b.title = 'Tu rol no permite esta acción'; }
     else { b.disabled = false; b.style.opacity = ''; b.style.cursor = ''; b.title = ''; }
   });
-  const xlInput = $('xl'); if(xlInput && esValidador) xlInput.disabled = true;
+  const xlInput = $('xl'); if(xlInput && !puedeEditar('vSeg')) xlInput.disabled = true;
 
   deshabilitarBotonesEdicion();
 }
@@ -1573,10 +1617,24 @@ function deshabilitarBotonesEdicion(){
   const rol = ROLES[SESSION?.rol];
   const esValidador = !!(rol && rol.validador);
   const noEditable = ELECCIONES_CERRADAS || SESSION?.rol === 'lectura' || SESSION?.rol === 'auditor' || esValidador;
-  if(!noEditable) return;
-  const selectores = ['button[onclick="openForm()"]','button[onclick="saveForm()"]','button[onclick="aprobarTodos()"]','button[onclick="addActividad()"]','button[onclick="saveActividad()"]','button[onclick="guardarVotantes()"]','button[onclick="guardarSoporte()"]','button[onclick="genActa()"]','button[onclick="crearUsuario()"]','button[onclick="guardarTextoActa()"]'];
-  selectores.forEach(s => { document.querySelectorAll(s).forEach(b => { b.disabled = true; b.style.opacity = 0.5; b.style.cursor = 'not-allowed'; }); });
-  document.querySelectorAll('#gb input, .nv, .ck').forEach(el => { el.disabled = true; });
+  
+  // Actualizar lógica para botones basada en puedeEditar
+  document.querySelectorAll('button[onclick^="addActividad"], button[onclick^="saveActividad"]').forEach(b => {
+      if(!puedeEditar('vCron')) { b.disabled = true; b.style.opacity = 0.5; }
+  });
+  document.querySelectorAll('button[onclick^="guardarVotantes"]').forEach(b => {
+      if(!puedeEditar('vVotantes')) { b.disabled = true; b.style.opacity = 0.5; }
+  });
+  document.querySelectorAll('button[onclick^="guardarSoporte"]').forEach(b => {
+      if(!puedeEditar('vSoporte') && SESSION?.rol !== 'agente_mesa') { b.disabled = true; b.style.opacity = 0.5; }
+  });
+  document.querySelectorAll('button[onclick^="genActa"]').forEach(b => {
+      if(!puedeEditar('vAct')) { b.disabled = true; b.style.opacity = 0.5; }
+  });
+
+  if(!puedeEditar('vSeg')) {
+      document.querySelectorAll('#gb input, .nv, .ck').forEach(el => { el.disabled = true; });
+  }
 }
 
 function limpiarPantalla(){
@@ -1616,6 +1674,7 @@ function actualizarBannerCierre(){
 async function abrirUsuarios(){
   if(SESSION?.rol !== 'administrador'){ toast('Solo administrador'); return; }
   $('u_new_mods').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_mod"><span>${m.label}</span></label>`).join('');
+  $('u_new_edit').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_edit_mod"><span>${m.label}</span></label>`).join('');
   await cargarUsuariosDeSupabase();
   renderTablaUsuarios();
   dlgUsuarios.showModal();
@@ -1638,10 +1697,15 @@ function renderTablaUsuarios(){
     const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
     const rolDef = ROLES[rol];
     let modsLabel = '—';
-    if(rolDef && rolDef.mods === '*') modsLabel = 'Todos';
-    else if(Array.isArray(rolDef?.mods) && rolDef.mods.length) modsLabel = rolDef.mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ');
+    
+    if(rol === 'administrador' || rol === 'auditor') modsLabel = 'Todos';
+    else if(rol === 'agente_mesa') modsLabel = 'Soporte';
+    else if(Array.isArray(rolDef?.mods) && mods.length === 0) modsLabel = rolDef.mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ');
     else if(mods.length) modsLabel = mods.map(k=>MODULOS.find(m=>m.key===k)?.label||k).join(', ');
-    const cronBadge = rolDef?.cronVista ? `<span class="rol-validador-badge">Cron: ${rolDef.cronVista}</span>` : '';
+    
+    const cronVista = u.cron_vista || 'ambos';
+    const cronBadge = `<span class="rol-validador-badge">Cron: ${cronVista}</span>`;
+    
     return `<tr>
       <td><b>${esc(u[CONFIG.col_user])}</b></td>
       <td>${esc(u[CONFIG.col_nombre]||'')}</td>
@@ -1666,11 +1730,15 @@ function abrirEditarUsuario(id) {
   $('u_edit_user').value = u[CONFIG.col_user];
   $('u_edit_nombre').value = u[CONFIG.col_nombre] || '';
   $('u_edit_email').value = u.email || '';
-  $('u_edit_rol').value = u[CONFIG.col_rol] || 'lectura';
+  $('u_edit_rol').value = u[CONFIG.col_rol] || 'th';
+  $('u_edit_cron').value = u.cron_vista || 'ambos';
   $('u_edit_activo').value = u[CONFIG.col_activo] ? 'true' : 'false';
   
   const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
   $('u_edit_mods').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_edit_mod" ${mods.includes(m.key)?'checked':''}><span>${m.label}</span></label>`).join('');
+  
+  const edits = Array.isArray(u.modulos_edit) ? u.modulos_edit : [];
+  $('u_edit_edit').innerHTML = MODULOS.map(m => `<label class="chip-t"><input type="checkbox" value="${m.key}" class="u_edit_can_edit" ${edits.includes(m.key)?'checked':''}><span>${m.label}</span></label>`).join('');
   
   dlgEditarUsuario.showModal();
 }
@@ -1680,8 +1748,10 @@ async function guardarEdicionUsuario() {
   const nombre = $('u_edit_nombre').value.trim();
   const email = $('u_edit_email').value.trim();
   const rol = $('u_edit_rol').value;
+  const cron = $('u_edit_cron').value;
   const activo = $('u_edit_activo').value === 'true';
   const mods = [...document.querySelectorAll('.u_edit_mod:checked')].map(i=>i.value);
+  const edits = [...document.querySelectorAll('.u_edit_can_edit:checked')].map(i=>i.value);
 
   if(!supabaseClient) return;
   try {
@@ -1689,6 +1759,8 @@ async function guardarEdicionUsuario() {
       [CONFIG.col_nombre]: nombre,
       [CONFIG.col_rol]: rol,
       [CONFIG.col_modulos]: mods,
+      modulos_edit: edits,
+      cron_vista: cron,
       [CONFIG.col_activo]: activo
     };
     if(email) updateData.email = email;
@@ -1711,17 +1783,15 @@ async function crearUsuario(){
   const email = $('u_new_email').value.trim();
   const pass = $('u_new_pass').value;
   const rol = $('u_new_rol').value;
+  const cron = $('u_new_cron').value;
   const enviarCorreo = $('u_new_enviar_correo').checked;
   
   if(!username || !pass || !email){ toast('Usuario, correo y contraseña son obligatorios'); return; }
   if(pass.length < 6){ toast('La contraseña debe tener al menos 6 caracteres'); return; }
   if(!supabaseClient){ toast('Sin conexión a la base de datos'); return; }
   
-  const rolDef = ROLES[rol];
   let mods = [...document.querySelectorAll('.u_mod:checked')].map(i=>i.value);
-  if(rolDef && Array.isArray(rolDef.mods) && rolDef.mods.length){
-    mods = rolDef.mods;
-  }
+  let edits = [...document.querySelectorAll('.u_edit_mod:checked')].map(i=>i.value);
   
   try {
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -1740,6 +1810,8 @@ async function crearUsuario(){
       [CONFIG.col_pass]: pass,
       [CONFIG.col_rol]: rol,
       [CONFIG.col_modulos]: mods,
+      modulos_edit: edits,
+      cron_vista: cron,
       [CONFIG.col_activo]: true,
       email: email
     };
@@ -2077,12 +2149,11 @@ function tab(n){
   ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vDocs'].forEach((id,i)=>{ $(id).classList.toggle('hide', i+1 !== n); $('n'+(i+1)).classList.toggle('on', i+1 === n); });
 
   if(n===1){
-    const rolDef = ROLES[SESSION?.rol];
-    const vista = rolDef?.cronVista || 'ambos';
+    const usuarioCron = USERS_CACHE.find(u => u.id === SESSION?.id)?.cron_vista || 'ambos';
     const panelPub = $('panelCronPub'), panelInt = $('panelCronInt');
     if(panelPub && panelInt){
-      if(vista === 'publico'){ panelPub.style.display=''; panelInt.style.display='none'; }
-      else if(vista === 'interno'){ panelPub.style.display='none'; panelInt.style.display=''; }
+      if(usuarioCron === 'publico'){ panelPub.style.display=''; panelInt.style.display='none'; }
+      else if(usuarioCron === 'interno'){ panelPub.style.display='none'; panelInt.style.display=''; }
       else { panelPub.style.display=''; panelInt.style.display=''; }
     }
   }
@@ -2244,7 +2315,24 @@ function generarInformeVotacion() {
 }
 function imprimirInforme() { if(!$('informeOut').innerHTML.trim()) { toast('Primero genera el informe'); return; } let st = document.getElementById('pgInforme'); if(!st){ st = document.createElement('style'); st.id = 'pgInforme'; document.head.appendChild(st); } st.textContent = '@page { size: letter landscape; margin: 0; }'; document.body.classList.add('printing-informe'); const limpiar = () => { document.body.classList.remove('printing-informe'); const x = document.getElementById('pgInforme'); if(x) x.remove(); window.removeEventListener('afterprint', limpiar); }; window.addEventListener('afterprint', limpiar); window.print(); }
 
-function filtered(){ const q=norm($('q').value),o=$('fo').value,r=$('fr').value,e=$('fe').value,n=$('fnov').value; return D.filter(c=>{const P=ppl(c);return(!q||P.some(([,p])=>norm(p.nombre).includes(q)||norm(p.doc).includes(q)))&&(!o||c.org===o)&&(!r||c.rol===r)&&(!e||P.some(([,p])=>estado(c,p)[0]===e))&&(!n||P.some(([,p])=>(p.nov||'')===n))}); }
+function filtered(){ 
+  const q=norm($('q').value),o=$('fo').value,r=$('fr').value,e=$('fe').value,n=$('fnov').value; 
+  
+  return D.filter(c => {
+    // FILTRO DE VALIDADORES: Solo ven los que les corresponde
+    if (SESSION.rol === 'th' && c.rol !== 'Docente') return false;
+    if (SESSION.rol === 'egresados' && c.rol !== 'Egresado') return false;
+    if (SESSION.rol === 'sec_general' && c.rol !== 'Estudiante') return false;
+    if (SESSION.rol === 'fac_prog' && c.rol !== 'Estudiante') return false;
+
+    const P=ppl(c);
+    return (!q||P.some(([,p])=>norm(p.nombre).includes(q)||norm(p.doc).includes(q)))&&
+           (!o||c.org===o)&&
+           (!r||c.rol===r)&&
+           (!e||P.some(([,p])=>estado(c,p)[0]===e))&&
+           (!n||P.some(([,p])=>(p.nov||'')===n));
+  }); 
+}
 
 function rowP(c,w,lab,p,first,n,duplaColor){
  const [e,m]=estado(c,p),act=CH[c.rol]||[];
@@ -3642,7 +3730,7 @@ renderSoportes();
         let rolFinal = perfil[CONFIG.col_rol];
         if (rolFinal === 'leer') rolFinal = 'lectura';
         
-        SESSION = {...SESSION, nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user], rol: rolFinal, modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []};
+        SESSION = {...SESSION, nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user], rol: rolFinal, modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : [], modulosEdit: Array.isArray(perfil.modulos_edit) ? perfil.modulos_edit : []};
         saveSession();
         await cargarEstadoElecciones();
         actualizarUserCard(); aplicarPermisosUI(); actualizarBannerCierre();
