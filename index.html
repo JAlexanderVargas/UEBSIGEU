@@ -665,6 +665,9 @@ body.logged-in #topbar { display: flex; }
 .rol-validador-badge { display:inline-block; padding:2px 8px; border-radius:99px; background:#fff3cd; color:#856404; font-size:10.5px; font-weight:700; margin-left:4px; }
 .validador-info-box { background:#eaf3fd; border:1px solid #b3d4f5; border-radius:10px; padding:8px 12px; font-size:12.5px; color:#1b5fae; margin-bottom:12px; animation:fadeUp .3s ease both }
 
+#tblBody:empty { display: none; }
+#vacio { padding: 40px 20px; text-align: center; }
+
 @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 @keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-3deg)} 75%{transform:rotate(3deg)} }
 @keyframes glowPulse { 0%,100%{box-shadow:0 0 0 0 rgba(247,148,29,.4)} 50%{box-shadow:0 0 0 8px rgba(247,148,29,0)} }
@@ -825,8 +828,13 @@ body.logged-in #topbar { display: flex; }
   <button class="btn" id="btnExpXL" onclick="expXL()">Descargar Excel</button>
   <button class="btn" id="btnExpPDF" onclick="expPDF()">Descargar PDF</button>
  </div>
- <div class="wrap"><table id="tbl"><thead><tr><th>Cargo</th><th>Candidato / Contacto</th><th>Rol y órgano</th><th>Facultad y programa</th><th class="c">Sem.</th><th class="c">TH</th><th class="c">Egresados</th><th class="c">Sec. General</th><th class="c">Fac./Prog.</th><th>Novedad</th><th>Estado</th><th></th></tr></thead></table>
- <div id="vacio" class="empty hide">Aún no hay candidatos.<br>Puedes agregar uno a mano o cargar un Excel con el botón <b>Cargar Excel</b>.</div></div>
+ <div class="wrap">
+   <table id="tbl">
+     <thead><tr><th>Cargo</th><th>Candidato / Contacto</th><th>Rol y órgano</th><th>Facultad y programa</th><th class="c">Sem.</th><th class="c">TH</th><th class="c">Egresados</th><th class="c">Sec. General</th><th class="c">Fac./Prog.</th><th>Novedad</th><th>Estado</th><th></th></tr></thead>
+     <tbody id="tblBody"></tbody>
+   </table>
+   <div id="vacio" class="empty hide" style="border-top:1px solid var(--line)">Aún no hay candidatos.<br>Puedes agregar uno a mano o cargar un Excel con el botón <b>Cargar Excel</b>.</div>
+ </div>
  <p class="help">Toca una casilla para cambiarla: vacío (pendiente), ✔ (cumple) o ✕ (tiene llamado de atención).</p>
 </section>
 
@@ -1977,7 +1985,6 @@ function clavesValidador() {
   return Array.isArray(v) ? v.filter(k => KEYS.includes(k)) : null;
 }
 
-/* 🔑 FIX 1: Admin ve TODOS, solo validadores tienen alcance limitado */
 function enAlcance(c) {
   if (!c) return false;
   if (!SESSION) return true;
@@ -2875,12 +2882,11 @@ function draw() {
   $('seg').innerHTML = [[h, 'var(--oscuro)'], [rv, 'var(--naranja)'], [nh, 'var(--no)'], [rn, '#9aa1b5']].map(s => `<i style="width:${s[0] / n * 100}%;background:${s[1]}"></i>`).join('');
   $('pct').textContent = T.length ? Math.round(h / n * 100) + '% habilitado' : '';
   $('vacio').classList.toggle('hide', LDall.length > 0);
-  [...$('tbl').tBodies].forEach(b => b.remove());
-  $('tbl').insertAdjacentHTML('beforeend', L.map((c, i) => {
+  $('tblBody').innerHTML = L.map((c, i) => {
     const P = ppl(c);
     const duplaColor = ['#70BE33', '#F7941D', '#3498db', '#9b59b6', '#e74c3c', '#1abc9c', '#f39c12', '#34495e'][i % 8];
-    return `<tbody class="grp">${P.map(([lab, p], j) => rowP(c, lab === 'Principal' ? 'pri' : 'sup', lab, p, j === 0, P.length, duplaColor)).join('')}</tbody>`;
-  }).join(''));
+    return P.map(([lab, p], j) => rowP(c, lab === 'Principal' ? 'pri' : 'sup', lab, p, j === 0, P.length, duplaColor)).join('');
+  }).join('');
   deshabilitarBotonesEdicion();
   try {
     const kv = clavesValidador(), pe = $('validadorPend');
@@ -5020,7 +5026,7 @@ renderVacantes();
 renderSoportes();
 
 /* =====================================================================
-   INIT AUTH — restauración de sesión desde sessionStorage (F5 mantiene sesión)
+   INIT AUTH
    ===================================================================== */
 (async function initAuth() {
   if (!SESSION) {
@@ -5074,7 +5080,6 @@ setInterval(() => { if (!document.hidden) pullYRefrescar(true); }, 8000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pullYRefrescar(true); });
 window.addEventListener('focus', () => pullYRefrescar());
 
-/* Guardas de permisos para acciones sensibles */
 function _guardar(nombre, modulo) {
   const orig = window[nombre];
   if (typeof orig !== 'function') return;
