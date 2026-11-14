@@ -2591,19 +2591,23 @@ function tab(n) {
    ===================================================================== */
 function _setH(id, h) { const e = document.getElementById(id); if (e) e.innerHTML = h; }
 function fillSel() {
-  const o = ORG_ACTIVOS;
+  const o = (ORG_ACTIVOS && ORG_ACTIVOS.length > 0) ? ORG_ACTIVOS : Object.keys(ORG);
   const _prevAo = $('ao').value;
-  _setH('fo', '<option value="">Todos los órganos</option>' + o.map(x => `<option>${x}</option>`).join(''));
-  _setH('f_org', o.map(x => `<option>${x}</option>`).join(''));
-  _setH('ao', '<option value="">Todos (acta general)</option>' + o.map(x => `<option>${x}</option>`).join(''));
+  const opcionesOrg = o.map(x => `<option value="${x}">${x}</option>`).join('');
+  
+  _setH('fo', '<option value="">Todos los órganos</option>' + opcionesOrg);
+  _setH('f_org', opcionesOrg);
+  _setH('ao', '<option value="">Todos (acta general)</option>' + opcionesOrg);
+  
   _setH('fnov', optNov(true)); _setH('p_nov', optNov()); _setH('s_nov', optNov());
   _setH('p_err', optErr()); _setH('s_err', optErr());
-  _setH('f_fac', '<option value="">Seleccione...</option>' + FACULTADES.map(x => `<option>${x}</option>`).join(''));
-  _setH('vOrgFilter', '<option value="">Todos los órganos</option>' + o.map(x => `<option>${x}</option>`).join(''));
-  _setH('vFacFilter', '<option value="">Todas las facultades</option>' + FACULTADES.map(x => `<option>${x}</option>`).join(''));
-  _setH('gOrgFilter', '<option value="">Todos los órganos</option>' + o.map(x => `<option>${x}</option>`).join(''));
-  _setH('gFacFilter', '<option value="">Todas las facultades</option>' + FACULTADES.map(x => `<option>${x}</option>`).join(''));
-  _setH('cargaOrgano', '<option value="">Detectar automáticamente</option>' + o.map(x => `<option>${x}</option>`).join(''));
+  _setH('f_fac', '<option value="">Seleccione...</option>' + FACULTADES.map(x => `<option value="${x}">${x}</option>`).join(''));
+  _setH('vOrgFilter', '<option value="">Todos los órganos</option>' + opcionesOrg);
+  _setH('vFacFilter', '<option value="">Todas las facultades</option>' + FACULTADES.map(x => `<option value="${x}">${x}</option>`).join(''));
+  _setH('gOrgFilter', '<option value="">Todos los órganos</option>' + opcionesOrg);
+  _setH('gFacFilter', '<option value="">Todas las facultades</option>' + FACULTADES.map(x => `<option value="${x}">${x}</option>`).join(''));
+  _setH('cargaOrgano', '<option value="">Detectar automáticamente</option>' + opcionesOrg);
+  
   if (_prevAo && o.includes(_prevAo)) $('ao').value = _prevAo;
   cargarTextoActa();
   if (!$('ad').value) $('ad').value = new Date().toISOString().slice(0, 10);
@@ -2786,8 +2790,13 @@ function updateOrgActivos() {
     document.querySelectorAll('.ck-org').forEach(chk => { chk.checked = ORG_ACTIVOS.includes(chk.value); });
     return;
   }
-  ORG_ACTIVOS = [];
-  document.querySelectorAll('.ck-org').forEach(chk => { if (chk.checked) ORG_ACTIVOS.push(chk.value); });
+  const seleccionados = [...document.querySelectorAll('.ck-org:checked')].map(x => x.value);
+  if (seleccionados.length === 0) {
+    toast('⚠️ Debes seleccionar al menos un órgano activo para la jornada', 'warn');
+    document.querySelectorAll('.ck-org').forEach(chk => { chk.checked = ORG_ACTIVOS.includes(chk.value); });
+    return;
+  }
+  ORG_ACTIVOS = seleccionados;
   saveOrgActivos();
   inyectarVotosEnBlanco();
   limpiarVotosEnBlancoInvalidos();
@@ -3007,11 +3016,18 @@ function readP(pre, old) {
 function openForm(id) {
   if (SESSION && !puedeEditar('vSeg')) { toast('⛔ Sin permiso'); return; }
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
+  
   editId = id || null;
   const c = id ? D.find(x => x.id === id) : {};
   $('dt').textContent = id ? 'Editar candidato' : 'Agregar candidato';
+  
+  fillSel(); // Forzar recarga de opciones
+  
+  const orgsDisponibles = (ORG_ACTIVOS && ORG_ACTIVOS.length > 0) ? ORG_ACTIVOS : Object.keys(ORG);
+  const orgSeleccionado = c.org || orgsDisponibles[0]; 
+  
   $('f_rol').value = c.rol || 'Estudiante';
-  $('f_org').value = c.org || (ORG_ACTIVOS[0] || 'Consejo de Facultad');
+  $('f_org').value = orgSeleccionado; 
   $('f_fac').value = c.fac || '';
   $('f_prog').value = c.prog || '';
   fillP('p', c.pri); fillP('s', c.sup); toggleSem(); $('dlg').showModal();
