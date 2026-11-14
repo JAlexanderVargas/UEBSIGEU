@@ -32,18 +32,23 @@ button,input,select,textarea{font:inherit;color:inherit}
 small{display:block;color:var(--mut);font-size:12px;line-height:1.3}
 .hide{display:none!important}
 
-aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+/* ================= SIDEBAR ================= */
+aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;overflow-y:auto;transition:box-shadow .3s}
 .brand{display:flex;flex-direction:column;align-items:center;margin:0 6px 14px;color:var(--blanco);text-align:center}
-.brand img{height:70px;width:auto;margin-bottom:12px;filter: brightness(0) invert(1);}
+.brand img{height:70px;width:auto;margin-bottom:12px;filter: brightness(0) invert(1);transition:transform .4s ease}
+.brand img:hover{transform:scale(1.06) rotate(-2deg)}
 .brand b{display:block;font-size:16px;font-weight:800;letter-spacing:-.2px;line-height:1.2}
 .brand span{font-size:12px;color:#9ac0b0}
-.nav{display:flex;gap:12px;align-items:center;border:0;background:none;color:#c0d6cc;padding:11px 12px;border-radius:10px;cursor:pointer;font-weight:600;text-align:left;width:100%}
-.nav:hover{background:#14523e}
-.nav.on{background:#14523e;color:var(--blanco);box-shadow:inset 3px 0 0 var(--naranja)}
+.nav{display:flex;gap:12px;align-items:center;border:0;background:none;color:#c0d6cc;padding:11px 12px;border-radius:10px;cursor:pointer;font-weight:600;text-align:left;width:100%;transition:background .18s ease,color .18s ease,transform .12s ease}
+.nav:hover{background:#14523e;transform:translateX(2px)}
+.nav.on{background:#14523e;color:var(--blanco);box-shadow:inset 3px 0 0 var(--naranja);animation:slideRight .3s ease both}
+.nav svg{transition:transform .2s}
+.nav:hover svg{transform:scale(1.1)}
 .note{margin-top:auto;font-size:12px;color:#9ac0b0;padding:12px;border:1px dashed #2a5e4d;border-radius:10px}
 .backup-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-.btn-backup { background: var(--naranja); color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s; }
-.btn-backup:hover { background: #e67e22; }
+.btn-backup { background: var(--naranja); color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: all .2s cubic-bezier(.2,.8,.2,1); }
+.btn-backup:hover { background: #e67e22; transform: translateY(-1px); box-shadow: 0 6px 14px -8px rgba(0,0,0,.5); }
+.btn-backup:active { transform: scale(.98); }
 .btn-backup.import { background: #3498db; }
 .btn-backup.import:hover { background: #2980b9; }
 
@@ -51,20 +56,30 @@ aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:st
 #sideActions .nav svg { flex: none; }
 body.logged-in aside { padding-top: 20px; overflow-y: auto; }
 
+/* ================= MAIN ================= */
 main{padding:28px 32px 60px;min-width:0}
-.top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--oscuro)}
-.top p{margin:2px 0 20px;color:var(--oscuro);opacity:0.8}
+.top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--oscuro);animation:fadeUp .4s ease both}
+.top p{margin:2px 0 20px;color:var(--oscuro);opacity:0.8;animation:fadeUp .45s ease .05s both}
+main > section:not(.hide){animation:fadeUp .35s cubic-bezier(.2,.8,.2,1) both}
 
+/* ================= KPIS ================= */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:18px}
 .kpi-card{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:20px 22px 18px;border-radius:22px;
   background:linear-gradient(150deg,#ffffff 0%,var(--soft,#f1f7f3) 160%);border:1px solid rgba(11,59,44,.07);
-  box-shadow:0 1px 2px rgba(11,59,44,.04),0 14px 30px -18px rgba(11,59,44,.28);transition:transform .22s ease,box-shadow .22s ease}
-.kpi-card::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 4px 4px 0;background:var(--acc,#0B3B2C)}
-.kpi-card::after{content:"";position:absolute;right:-38px;top:-38px;width:128px;height:128px;border-radius:50%;background:var(--soft,#e6f4ec);opacity:.75;pointer-events:none}
+  box-shadow:0 1px 2px rgba(11,59,44,.04),0 14px 30px -18px rgba(11,59,44,.28);transition:transform .22s ease,box-shadow .22s ease;
+  animation:fadeUp .4s cubic-bezier(.2,.8,.2,1) both}
+.kpi-card::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 4px 4px 0;background:var(--acc,#0B3B2C);transition:width .3s}
+.kpi-card::after{content:"";position:absolute;right:-38px;top:-38px;width:128px;height:128px;border-radius:50%;background:var(--soft,#e6f4ec);opacity:.75;pointer-events:none;transition:transform .4s}
 .kpi-card:hover{transform:translateY(-3px);box-shadow:0 1px 2px rgba(11,59,44,.05),0 20px 38px -18px rgba(11,59,44,.35)}
+.kpi-card:hover::before{width:6px}
+.kpi-card:hover::after{transform:scale(1.15) translate(-4px,4px)}
+.kpi-card:nth-child(1){animation-delay:.02s}.kpi-card:nth-child(2){animation-delay:.06s}
+.kpi-card:nth-child(3){animation-delay:.10s}.kpi-card:nth-child(4){animation-delay:.14s}
+.kpi-card:nth-child(5){animation-delay:.18s}.kpi-card:nth-child(6){animation-delay:.22s}
 .kpi-top{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1}
 .kpi-label{font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:#6b8378}
-.kpi-ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--soft,#e6f4ec);color:var(--acc,#0B3B2C);border:1px solid rgba(255,255,255,.7)}
+.kpi-ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--soft,#e6f4ec);color:var(--acc,#0B3B2C);border:1px solid rgba(255,255,255,.7);transition:transform .3s}
+.kpi-card:hover .kpi-ico{transform:scale(1.1) rotate(-6deg)}
 .kpi-ico svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .kpi-num{position:relative;z-index:1;font-size:38px;line-height:1;font-weight:800;letter-spacing:-1.5px;color:var(--oscuro);display:flex;align-items:baseline;gap:8px}
 .kpi-num small{font-size:15px;font-weight:600;letter-spacing:0;color:#93a69c}
@@ -76,19 +91,24 @@ main{padding:28px 32px 60px;min-width:0}
 .kpis.novedad{grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:10px;margin-bottom:16px}
 .nov-title{grid-column:1/-1;font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:#6b8378;margin:2px 0 -2px}
 .nov-card{display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border-radius:16px;background:#fff;border:1px solid rgba(11,59,44,.08);
-  box-shadow:0 8px 18px -14px rgba(11,59,44,.35);transition:transform .2s,box-shadow .2s}
+  box-shadow:0 8px 18px -14px rgba(11,59,44,.35);transition:transform .2s,box-shadow .2s;animation:scaleIn .35s cubic-bezier(.2,.8,.2,1) both}
 .nov-card:hover{transform:translateY(-2px);box-shadow:0 12px 22px -14px rgba(11,59,44,.4)}
-.nov-card .n{min-width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:18px;background:var(--soft);color:var(--acc)}
+.nov-card:nth-child(2){animation-delay:.04s}.nov-card:nth-child(3){animation-delay:.08s}
+.nov-card:nth-child(4){animation-delay:.12s}.nov-card:nth-child(5){animation-delay:.16s}
+.nov-card:nth-child(6){animation-delay:.20s}
+.nov-card .n{min-width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:18px;background:var(--soft);color:var(--acc);transition:transform .25s}
+.nov-card:hover .n{transform:scale(1.1)}
 .nov-card .t{font-size:12.5px;font-weight:600;color:var(--oscuro);line-height:1.2}
 .nov-card.zero{opacity:.55;box-shadow:none}
 .nov-card.zero .n{background:#eef2ef;color:#93a69c}
 
 .kpi{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:18px;background:#fff;border:1px solid rgba(11,59,44,.07);border-left:4px solid var(--c,#0B3B2C);
-  box-shadow:0 12px 26px -20px rgba(11,59,44,.35)}
+  box-shadow:0 12px 26px -20px rgba(11,59,44,.35);animation:fadeUp .35s ease both;transition:transform .2s}
+.kpi:hover{transform:translateY(-2px)}
 .kpi b{font-size:28px;line-height:1.05;font-weight:800;letter-spacing:-.8px;color:var(--c,#0B3B2C)}
 .kpi span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6b8378}
 
-.prog{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.prog{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px;animation:fadeUp .4s ease both}
 .prog .t{display:flex;justify-content:space-between;font-weight:600;margin-bottom:8px;color:var(--oscuro)}
 .seg{display:flex;height:12px;border-radius:8px;overflow:hidden;background:#e8ebf4}
 .seg i{display:block;height:100%;transition:width .5s}
@@ -97,22 +117,25 @@ main{padding:28px 32px 60px;min-width:0}
 
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
 .sp{flex:1}
-.in{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--blanco);min-width:0;color:var(--oscuro)}
-.in:focus,.nv:focus,.ck:focus-visible{outline:2px solid var(--naranja);outline-offset:1px}
+.in{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--blanco);min-width:0;color:var(--oscuro);transition:border-color .18s,box-shadow .18s}
+.in:hover{border-color:#b8d4c2}
+.in:focus,.nv:focus,.ck:focus-visible{outline:2px solid var(--naranja);outline-offset:1px;border-color:var(--naranja)}
 
-.btn{border:1px solid var(--line);background:var(--blanco);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:600;color:var(--oscuro);transition:all .2s}
-.btn:hover{border-color:var(--naranja);background:#f9fbf9}
+.btn{border:1px solid var(--line);background:var(--blanco);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:600;color:var(--oscuro);transition:all .2s cubic-bezier(.2,.8,.2,1)}
+.btn:hover:not(:disabled){border-color:var(--naranja);background:#f9fbf9;transform:translateY(-1px);box-shadow:0 6px 14px -8px rgba(11,59,44,.5)}
+.btn:active:not(:disabled){transform:translateY(0) scale(.98)}
 .btn.p{background:var(--oscuro);color:var(--blanco);border-color:var(--oscuro)}
 .btn.p:hover{background:#14523e}
 .btn.sm{padding:5px 10px;font-size:12px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 
-.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;animation:fadeUp .4s ease both}
 table{border-collapse:collapse;width:100%;min-width:1180px}
 th{background:#f0f7f2;color:var(--oscuro);font-weight:600;font-size:13px;text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--oscuro)}
 tbody.grp:hover td{background:#f8fcf9}
 tbody.grp td.rs{border-left:1px solid var(--line);background:#fcfcfe}
+tbody.grp{animation:fadeIn .3s ease both;transition:background .2s}
 
 tr.alert-row td { background: var(--alert-bg) !important; }
 tr.alert-row td:first-child { border-left: 5px solid var(--alert-line) !important; }
@@ -124,39 +147,42 @@ tr.alert-row td:first-child { border-left: 5px solid var(--alert-line) !importan
 .cg.sup{background:var(--blanco);color:var(--oscuro);border:1px solid var(--oscuro)}
 
 .pn{display:flex;gap:10px;align-items:center;min-width:190px}
-.av{font-style:normal;width:34px;height:34px;border-radius:50%;background:#e5f0e8;color:var(--oscuro);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.av{font-style:normal;width:34px;height:34px;border-radius:50%;background:#e5f0e8;color:var(--oscuro);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none;transition:transform .2s}
+.pn:hover .av{transform:scale(1.1) rotate(-5deg)}
 .pn b{font-weight:600}
 
-.chip{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:3px}
+.chip{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:3px;transition:transform .15s}
+.chip:hover{transform:translateY(-1px)}
 .chip.Estudiante{background:#e2ecff;color:#2750b5}
 .chip.Docente{background:#efe6fb;color:#6a37b0}
 .chip.Egresado{background:#dcf3ef;color:#166a5a}
 
-.ck{width:34px;height:30px;border:1.5px solid var(--line);border-radius:9px;background:var(--blanco);cursor:pointer;font-weight:700;font-size:14px;transition:transform .1s;color:var(--oscuro)}
-.ck:hover:not(:disabled){transform:scale(1.08);border-color:var(--oscuro)}
-.ck.ok{background:var(--okb);color:var(--ok);border-color:var(--ok)}
-.ck.x{background:var(--nob);color:var(--no);border-color:var(--no)}
+.ck{width:34px;height:30px;border:1.5px solid var(--line);border-radius:9px;background:var(--blanco);cursor:pointer;font-weight:700;font-size:14px;transition:transform .12s ease,background .15s,border-color .15s,box-shadow .15s;color:var(--oscuro)}
+.ck:hover:not(:disabled){transform:scale(1.12);border-color:var(--oscuro);box-shadow:0 4px 10px -4px rgba(11,59,44,.4)}
+.ck.ok{background:var(--okb);color:var(--ok);border-color:var(--ok);animation:popIn .3s cubic-bezier(.2,.8,.2,1)}
+.ck.x{background:var(--nob);color:var(--no);border-color:var(--no);animation:popIn .3s cubic-bezier(.2,.8,.2,1)}
 .ck:disabled{background:#f2f3f7;color:#c5c9d8;cursor:not-allowed;border-style:dashed}
 
-.nv{width:100%;min-width:170px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--blanco);font-size:13px;color:var(--oscuro)}
+.nv{width:100%;min-width:170px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--blanco);font-size:13px;color:var(--oscuro);transition:border-color .18s,background .18s}
 .nv.has{background:var(--revb);border-color:#e8c872;font-weight:600}
 .nv.Renuncia{background:var(--goneb);border-color:#b9bfcf}
 
-.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-weight:700;font-size:12.5px;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-weight:700;font-size:12.5px;white-space:nowrap;transition:transform .15s}
+.pill:hover{transform:translateY(-1px)}
 .pill:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 .pill.ok{background:var(--okb);color:var(--ok)}
 .pill.rev{background:var(--revb);color:var(--rev)}
 .pill.no{background:var(--nob);color:var(--no)}
 .pill.gone{background:var(--goneb);color:var(--gone)}
 
-.ic{border:0;background:none;cursor:pointer;width:32px;height:32px;border-radius:8px;font-size:15px;color:var(--oscuro)}
-.ic:hover{background:#e8f0eb}
+.ic{border:0;background:none;cursor:pointer;width:32px;height:32px;border-radius:8px;font-size:15px;color:var(--oscuro);transition:background .15s,transform .15s}
+.ic:hover{background:#e8f0eb;transform:scale(1.15)}
 
-.empty{padding:50px 20px;text-align:center;color:var(--oscuro)}
+.empty{padding:50px 20px;text-align:center;color:var(--oscuro);animation:fadeIn .4s ease both}
 .empty a{color:var(--naranja);font-weight:700;text-decoration:none}
 .help{color:var(--oscuro);font-size:12.5px;margin-top:10px;opacity:0.8}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;animation:fadeUp .4s ease both}
 .card h3{margin:0 0 12px;font-size:16px;font-weight:700;color:var(--oscuro)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .grid label,.lb{font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin-bottom:3px}
@@ -164,7 +190,7 @@ tr.alert-row td:first-child { border-left: 5px solid var(--alert-line) !importan
 textarea.in{min-height:110px;resize:vertical}
 
 #actaOutContainer, #informeOutContainer, #docsActaWrap { background: #d9d9d9; padding: 20px; border-radius: 14px; margin-top: 20px; overflow-x: auto; }
-.acta-page { background: #fff; width: 21.59cm; min-height: 27.94cm; margin: 0 auto; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; position: relative; font-family: var(--font-acta); color: #000; }
+.acta-page { background: #fff; width: 21.59cm; min-height: 27.94cm; margin: 0 auto; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; position: relative; font-family: var(--font-acta); color: #000; animation:fadeUp .4s ease both; }
 .acta-header { background: #007a3d !important; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
 .acta-logo { display: flex; align-items: center; gap: 8px; font-family: sans-serif; }
 .acta-logo img { height: 50px; width: auto; }
@@ -200,21 +226,31 @@ tr.posible-ganador td:first-child { border-left: 4px solid #FFC107 !important; }
 .acta-page-num { position: absolute; left: 50%; transform: translateX(-50%); background: #fff; color: #00201A; width: 60px; height: 30px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; bottom: 10px; box-shadow: 0 0 0 3px #00201A; }
 
 .firmas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-top:12px}
-.firma-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcfb;position:relative;min-width:0}
+.firma-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcfb;position:relative;min-width:0;animation:fadeUp .3s ease both;transition:box-shadow .2s,transform .2s}
+.firma-item:hover{transform:translateY(-2px);box-shadow:0 10px 22px -14px rgba(11,59,44,.4)}
 .firma-item label{font-size:11.5px;margin:6px 0 2px;display:block}
 .firma-item .in{width:100%;max-width:100%;box-sizing:border-box;text-overflow:ellipsis}
 .firma-item select.in{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:26px;cursor:pointer}
-.firma-item .del-firma{position:absolute;top:6px;right:6px;background:none;border:0;color:var(--alert-line);cursor:pointer;font-size:14px;font-weight:700; z-index:10;}
-.firma-item .del-firma:hover{transform:scale(1.2)}
+.firma-item .del-firma{position:absolute;top:6px;right:6px;background:none;border:0;color:var(--alert-line);cursor:pointer;font-size:14px;font-weight:700; z-index:10;transition:transform .2s}
+.firma-item .del-firma:hover{transform:scale(1.2) rotate(90deg)}
 
 dialog{border:0;border-radius:18px;padding:0;width:min(820px,95vw);max-height:92vh;box-shadow:0 30px 80px #0B3B2C66}
 dialog::backdrop{background:#0B3B2C99;backdrop-filter:blur(2px)}
-dialog[open]{animation:pop .18s ease-out}
-@keyframes pop{from{transform:translateY(10px) scale(.98);opacity:0}}
+dialog[open]{animation:popIn .22s cubic-bezier(.2,.8,.2,1)}
+dialog[open] .db{animation:fadeIn .25s ease both}
+dialog[open] .dh{animation:slideRight .3s ease both}
+@keyframes popIn{0%{opacity:0;transform:scale(.94) translateY(10px)}70%{transform:scale(1.01) translateY(0)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(247,148,29,.5)}70%{box-shadow:0 0 0 12px rgba(247,148,29,0)}100%{box-shadow:0 0 0 0 rgba(247,148,29,0)}}
 
 .dh{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:var(--oscuro);color:var(--blanco)}
 .dh h3{margin:0;font-size:18px}
-.dh button{background:none;border:0;color:var(--blanco);font-size:18px;cursor:pointer}
+.dh button{background:none;border:0;color:var(--blanco);font-size:18px;cursor:pointer;transition:transform .2s}
+.dh button:hover{transform:rotate(90deg)}
 
 .db{padding:20px 24px;overflow:auto;max-height:68vh}
 .df{display:flex;gap:8px;justify-content:flex-end;padding:14px 24px;border-top:1px solid var(--line);background:#f7fbf8}
@@ -226,19 +262,19 @@ dialog[open]{animation:pop .18s ease-out}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dlg{margin:0}
 
-/* Aviso (toast) en la CAPA SUPERIOR: queda por encima de los diálogos modales */
+/* Toast */
 #toast{position:fixed;inset:auto auto 24px 50%;margin:0;border:0;padding:0;background:transparent;overflow:visible;width:max-content;max-width:min(580px,92vw);height:auto;transform:translate(-50%,30px);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:2147483647;color:#fff}
 #toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 #toast::backdrop{background:transparent}
-#toast .t-in{display:flex;align-items:flex-start;gap:12px;padding:13px 12px 13px 18px;border-radius:14px;background:var(--oscuro);border-left:5px solid var(--naranja);box-shadow:0 18px 44px -10px rgba(0,0,0,.55);font-weight:600;line-height:1.4}
+#toast .t-in{display:flex;align-items:flex-start;gap:12px;padding:13px 12px 13px 18px;border-radius:14px;background:var(--oscuro);border-left:5px solid var(--naranja);box-shadow:0 18px 44px -10px rgba(0,0,0,.55);font-weight:600;line-height:1.4;animation:popIn .25s cubic-bezier(.2,.8,.2,1) both}
 #toast.err .t-in{background:#8f1f16;border-left-color:#ff9a8d}
 #toast.warn .t-in{background:#7a4a05;border-left-color:#ffc861}
 #toast .t-msg{flex:1;white-space:pre-line;word-break:break-word;font-size:14px}
-#toast .t-x{border:0;background:rgba(255,255,255,.18);color:#fff;width:26px;height:26px;border-radius:8px;cursor:pointer;font-weight:800;flex:none;line-height:1}
-#toast .t-x:hover{background:rgba(255,255,255,.32)}
+#toast .t-x{border:0;background:rgba(255,255,255,.18);color:#fff;width:26px;height:26px;border-radius:8px;cursor:pointer;font-weight:800;flex:none;line-height:1;transition:background .2s,transform .2s}
+#toast .t-x:hover{background:rgba(255,255,255,.32);transform:rotate(90deg)}
 
-/* ===== Modo solo lectura / permisos ===== */
-.ro-banner{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:#fff7e0;border:1px solid #f0d58a;color:#7a5a06;font-weight:700;font-size:13px}
+/* Permisos / solo lectura */
+.ro-banner{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:#fff7e0;border:1px solid #f0d58a;color:#7a5a06;font-weight:700;font-size:13px;animation:fadeUp .3s ease both}
 .ro-banner[hidden]{display:none!important}
 section.ro .wo,
 section.ro input[type=file],
@@ -288,38 +324,42 @@ details.matriz>summary{cursor:pointer;font-weight:800}
 .cron-panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; position: relative; }
 .cron-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
 .cron-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--oscuro); }
-.cron-panel{border-radius:22px;padding:22px 22px 18px;background:linear-gradient(180deg,#ffffff 0%,#f9fcfa 100%);border:1px solid rgba(11,59,44,.07);box-shadow:0 22px 44px -30px rgba(11,59,44,.45)}
+.cron-panel{border-radius:22px;padding:22px 22px 18px;background:linear-gradient(180deg,#ffffff 0%,#f9fcfa 100%);border:1px solid rgba(11,59,44,.07);box-shadow:0 22px 44px -30px rgba(11,59,44,.45);animation:fadeUp .4s ease both}
 .cron-header{border-bottom:0;padding-bottom:0;margin-bottom:10px}
 .cron-header h3{font-size:19px;font-weight:800;letter-spacing:-.3px}
 .progress-bar-bg{height:14px;background:#e6eee9;border-radius:99px;box-shadow:inset 0 1px 2px rgba(11,59,44,.12)}
-.progress-bar-fill{border-radius:99px;font-size:10px;min-width:34px;background:linear-gradient(90deg,#0B7A4B,#6CBE28)}
+.progress-bar-fill{border-radius:99px;font-size:10px;min-width:34px;background:linear-gradient(90deg,#0B7A4B,#6CBE28);transition:width .8s cubic-bezier(.2,.8,.2,1)}
 .cr-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:2px 0 14px}
-.cr-stat{border-radius:14px;padding:9px 12px;background:var(--soft);display:flex;flex-direction:column;line-height:1.1}
+.cr-stat{border-radius:14px;padding:9px 12px;background:var(--soft);display:flex;flex-direction:column;line-height:1.1;animation:scaleIn .35s cubic-bezier(.2,.8,.2,1) both;transition:transform .2s}
+.cr-stat:nth-child(2){animation-delay:.06s}.cr-stat:nth-child(3){animation-delay:.12s}.cr-stat:nth-child(4){animation-delay:.18s}
+.cr-stat:hover{transform:translateY(-2px)}
 .cr-stat b{font-size:22px;font-weight:800;letter-spacing:-.6px;color:var(--acc)}
 .cr-stat span{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#6b8378;margin-top:3px}
-.cr-next{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:16px;color:#fff;background:linear-gradient(120deg,#0B3B2C 0%,#0B7A4B 60%,#6CBE28 140%);box-shadow:0 14px 26px -18px rgba(11,59,44,.7)}
+.cr-next{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:16px;color:#fff;background:linear-gradient(120deg,#0B3B2C 0%,#0B7A4B 60%,#6CBE28 140%);box-shadow:0 14px 26px -18px rgba(11,59,44,.7);transition:transform .2s}
+.cr-next:hover{transform:translateY(-2px)}
 .cr-next .ic2{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:18px;flex:none}
 .cr-next small{display:block;font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;opacity:.8}
 .cr-next b{display:block;font-size:14px;font-weight:700;line-height:1.25}
 .cr-next em{display:block;font-style:normal;font-size:12px;opacity:.9;margin-top:1px}
 .cr-filtros{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
-.cr-filtros button{border:1px solid rgba(11,59,44,.12);background:#fff;border-radius:99px;padding:4px 12px;font-size:12px;font-weight:700;color:#40594d;cursor:pointer;transition:.15s}
-.cr-filtros button:hover{border-color:var(--naranja)}
+.cr-filtros button{border:1px solid rgba(11,59,44,.12);background:#fff;border-radius:99px;padding:4px 12px;font-size:12px;font-weight:700;color:#40594d;cursor:pointer;transition:all .15s}
+.cr-filtros button:hover{border-color:var(--naranja);transform:translateY(-1px)}
 .cr-filtros button.on{background:var(--oscuro);color:#fff;border-color:var(--oscuro)}
-.cr-stage[data-e="Preelectoral"]{--ec:#1f6fd1}.cr-stage[data-e="Electoral"]{--ec:#0B7A4B}.cr-stage[data-e="Postelectoral"]{--ec:#7d3c98}.cr-stage[data-e="Segunda Vuelta"]{--ec:#d9730d}.cr-stage[data-e="Posesión"]{--ec:#8e44ad}
-.cr-stage{display:flex;align-items:center;gap:10px;margin:18px 0 8px;font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--oscuro)}
+.cr-stage{display:flex;align-items:center;gap:10px;margin:18px 0 8px;font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--oscuro);animation:slideRight .4s ease both}
 .cr-stage span{background:var(--oscuro);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;letter-spacing:0}
 .cr-item{--acc:#9aa1b5;--soft:#eef0f5;position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;margin-bottom:10px;padding:12px 14px 12px 18px;
-  border-radius:16px;background:#fff;border:1px solid rgba(11,59,44,.08);box-shadow:0 10px 22px -18px rgba(11,59,44,.4);transition:transform .18s,box-shadow .18s}
-.cr-item::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0;background:var(--acc)}
+  border-radius:16px;background:#fff;border:1px solid rgba(11,59,44,.08);box-shadow:0 10px 22px -18px rgba(11,59,44,.4);transition:transform .18s,box-shadow .18s;animation:fadeUp .4s cubic-bezier(.2,.8,.2,1) both}
+.cr-item::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0;background:var(--acc);transition:width .2s}
 .cr-item:hover{transform:translateY(-2px);box-shadow:0 16px 26px -18px rgba(11,59,44,.5)}
+.cr-item:hover::before{width:6px}
 .cr-item.completed{--acc:#1e8e5a;--soft:#e3f4ea}
 .cr-item.pending{--acc:#d9730d;--soft:#fdebd9}
 .cr-item.in-progress{--acc:#1f6fd1;--soft:#e4f0fd}
 .cr-item.upcoming{--acc:#9aa1b5;--soft:#eef0f5}
 .cr-item.completed .cr-name{text-decoration:line-through;text-decoration-color:rgba(11,59,44,.35);color:#6b8378}
 .cr-dates{display:flex;align-items:center;gap:8px}
-.cr-d{min-width:58px;text-align:center;border-radius:12px;background:var(--soft);padding:5px 8px 6px;line-height:1.05}
+.cr-d{min-width:58px;text-align:center;border-radius:12px;background:var(--soft);padding:5px 8px 6px;line-height:1.05;transition:transform .2s}
+.cr-item:hover .cr-d{transform:translateY(-2px)}
 .cr-d small{display:block;font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--acc)}
 .cr-d b{display:block;font-size:21px;font-weight:800;color:var(--oscuro);letter-spacing:-.5px}
 .cr-d span{display:block;font-size:10px;font-weight:600;color:#6b8378;text-transform:capitalize}
@@ -335,22 +375,19 @@ details.matriz>summary{cursor:pointer;font-weight:800}
 .cr-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .cr-actions{display:flex;gap:2px}
 @media(max-width:700px){.cr-item{grid-template-columns:1fr}.cr-side{flex-direction:row;align-items:center;justify-content:space-between}}
-.tl-content { flex: 1; }
-.tl-content b { display: block; font-size: 14px; }
-.tl-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+
+.tl-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; transition:all .2s; }
 .tl-status.completed { background: var(--okb); color: var(--ok); }
 .tl-status.pending { background: var(--revb); color: var(--rev); }
 .tl-status.upcoming { background: var(--goneb); color: var(--gone); }
 .tl-status.in-progress { background: #e3f2fd; color: #1976d2; }
-.progress-container { margin-bottom: 20px; }
-.progress-bar-bg { background: #e0e6e2; border-radius: 20px; height: 24px; overflow: hidden; }
-.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--ok), var(--lima)); transition: width 0.6s ease; display: flex; align-items: center; justify-content: center; color: var(--blanco); font-weight: 700; font-size: 12px; }
 
 .chart-container { position: relative; width: 100%; height: 300px; margin-top: 12px; }
 .chart-container-sm { position: relative; width: 100%; height: 250px; margin-top: 12px; }
 
 .votos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px}
-.voto-item{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--card);border-left:4px solid var(--naranja)}
+.voto-item{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--card);border-left:4px solid var(--naranja);transition:transform .2s}
+.voto-item:hover{transform:translateY(-2px)}
 .voto-item.ganador{border-left-color:var(--ok);background:var(--okb)}
 .voto-item .cand-info{font-size:12.5px;margin-bottom:8px}
 .voto-item .cand-info b{font-size:14px}
@@ -358,7 +395,8 @@ details.matriz>summary{cursor:pointer;font-weight:800}
 .voto-item input[type=number]{width:90px}
 
 .vac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 12px; }
-.vac-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.vac-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); animation:fadeUp .35s cubic-bezier(.2,.8,.2,1) both; transition:transform .2s,box-shadow .2s }
+.vac-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px -14px rgba(11,59,44,.4)}
 .vac-card-header { border-bottom: 2px solid var(--line); padding-bottom: 8px; font-weight: 800; color: var(--oscuro); font-size: 15px; }
 .vac-role-box { background: #f8fcf9; border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: 12.5px; }
 .vac-role-title { font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
@@ -366,9 +404,10 @@ details.matriz>summary{cursor:pointer;font-weight:800}
 .vac-role-miss { border-left: 3px solid var(--alert-line); background: var(--alert-bg); }
 
 .upload-zone { border: 2px dashed var(--lima); border-radius: 12px; padding: 40px; text-align: center; background: #f7fbf8; cursor: pointer; transition: all 0.2s; }
-.upload-zone:hover { background: #f0f7f2; border-color: var(--oscuro); }
-.upload-zone.dragover { background: var(--okb); border-color: var(--oscuro); }
-.upload-icon { font-size: 40px; margin-bottom: 10px; }
+.upload-zone:hover { background: #f0f7f2; border-color: var(--oscuro); transform:scale(1.01) }
+.upload-zone.dragover { background: var(--okb); border-color: var(--oscuro); animation:pulseRing 1.2s infinite }
+.upload-icon { font-size: 40px; margin-bottom: 10px; transition:transform .3s }
+.upload-zone:hover .upload-icon{transform:scale(1.1) rotate(-4deg)}
 
 @media(max-width:1100px){ .cron-grid { grid-template-columns: 1fr; } }
 @media(max-width:860px){
@@ -380,7 +419,7 @@ details.matriz>summary{cursor:pointer;font-weight:800}
 
 .pgs{background:none !important;box-shadow:none !important;width:auto !important;min-height:0 !important;display:block !important;padding:0 !important}
 .pg{width:21.59cm;height:27.9cm;margin:0 auto 18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;flex-direction:column;position:relative;overflow:hidden;
-    font-family: var(--font-acta);color:#000;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid}
+    font-family: var(--font-acta);color:#000;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid;animation:fadeUp .4s ease both}
 .pg.land{width:27.9cm;height:21.55cm}
 .pg-head{flex:none;height:2.5cm;overflow:hidden}
 .pg-head .acta-header{height:100%;box-sizing:border-box}
@@ -416,11 +455,11 @@ td small{font-size:12.5px}
 .tbl-pro th{background:linear-gradient(180deg,#f3f9f5,#e8f2ec);text-transform:uppercase;letter-spacing:.4px;font-size:12px;color:#40594d;position:sticky;top:0;z-index:1}
 .tbl-pro td{padding:11px 12px}
 .tbl-pro tbody tr:nth-child(even) td{background:#fafdfb}
-.tbl-pro tbody tr:hover td{background:#eef7f1}
+.tbl-pro tbody tr:hover td{background:#eef7f1;transition:background .15s}
 .tbl-pro tfoot td{background:#e8f2ec;font-weight:800;border-top:2px solid var(--oscuro)}
 .bar-cell{min-width:150px}
 .bar-cell .bt{display:block;height:8px;border-radius:99px;background:rgba(11,59,44,.09);overflow:hidden;margin-top:5px}
-.bar-cell .bt i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc,#0B7A4B),var(--acc2,#6CBE28))}
+.bar-cell .bt i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc,#0B7A4B),var(--acc2,#6CBE28));transition:width .7s cubic-bezier(.2,.8,.2,1)}
 .rk{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-weight:800;font-size:12.5px;background:#eef2ef;color:#40594d}
 .rk.r1{background:linear-gradient(135deg,#f7d56a,#e9a91a);color:#5a3d00}
 .rk.r2{background:linear-gradient(135deg,#e6ebef,#b4bec6);color:#33414c}
@@ -432,7 +471,8 @@ td small{font-size:12.5px}
 .card h3 .sub{display:block;font-size:12px;font-weight:600;color:var(--mut);margin-top:2px}
 .chart-xl{position:relative;height:420px}
 .chart-md{position:relative;height:300px}
-.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:99px;font-size:12.5px;font-weight:700;background:#eef2ef;color:#40594d}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:99px;font-size:12.5px;font-weight:700;background:#eef2ef;color:#40594d;transition:transform .15s}
+.tag:hover{transform:translateY(-1px)}
 .tag.g{background:#e3f4ea;color:#14744a}.tag.b{background:#e4f0fd;color:#1b5fae}.tag.p{background:#f1e4f7;color:#6b2c85}.tag.o{background:#fdebd9;color:#b35a06}.tag.r{background:#fde7e5;color:#b0332b}.tag.t{background:#dcf3ef;color:#166a5a}
 
 .cron-panel{position:relative;overflow:hidden}
@@ -447,7 +487,8 @@ td small{font-size:12.5px}
 .cr-item{border-radius:18px;background:linear-gradient(100deg,var(--soft) 0%,#fff 40%)}
 .cr-d{background:#fff;border:1px solid rgba(11,59,44,.06);box-shadow:0 8px 16px -12px var(--acc)}
 .cr-d b{color:var(--acc)}
-.cr-ico{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:10px;margin-right:9px;font-size:15px;background:var(--tsoft,#eef2ef);vertical-align:middle}
+.cr-ico{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:10px;margin-right:9px;font-size:15px;background:var(--tsoft,#eef2ef);vertical-align:middle;transition:transform .2s}
+.cr-item:hover .cr-ico{transform:rotate(-8deg) scale(1.1)}
 .cr-chip.tipo{background:var(--tsoft);color:var(--tc);border-color:transparent;font-weight:700}
 .cr-name{font-size:15px}
 .tl-status{display:inline-block;padding:4px 12px;border-radius:99px;font-weight:800;font-size:12px;white-space:nowrap}
@@ -457,12 +498,13 @@ td small{font-size:12.5px}
 .tl-status.upcoming{background:#eceff5;color:#5b6475}
 .cr-save{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding:7px 12px;border-radius:12px;font-size:12.5px;font-weight:600;background:#eef7f1;color:#14744a}
 .cr-save.warn{background:#fde7e5;color:#b0332b}
-.cr-save button{border:0;border-radius:8px;padding:3px 10px;font-weight:700;cursor:pointer;background:#fff;color:inherit}
+.cr-save button{border:0;border-radius:8px;padding:3px 10px;font-weight:700;cursor:pointer;background:#fff;color:inherit;transition:all .15s}
+.cr-save button:hover{transform:translateY(-1px);box-shadow:0 4px 8px -4px rgba(0,0,0,.3)}
 
 .chip-t{cursor:pointer}
 .chip-t input{display:none}
 .chip-t span{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;font-size:13.5px;font-weight:700;background:#fff;border:1.5px solid var(--line);color:#40594d;transition:.15s}
-.chip-t:hover span{border-color:var(--oscuro)}
+.chip-t:hover span{border-color:var(--oscuro);transform:translateY(-1px)}
 .chip-t input:checked + span{background:var(--oscuro);border-color:var(--oscuro);color:#fff;box-shadow:0 8px 16px -10px var(--oscuro)}
 .sop-av{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:12px;font-weight:800;font-size:13px;color:#fff;flex:none}
 .sop-who{display:flex;align-items:center;gap:10px}
@@ -471,7 +513,8 @@ td small{font-size:12.5px}
 
 #fontSizeSlider { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 5px; background: var(--line); outline: none; opacity: 0.7; transition: opacity .2s; }
 #fontSizeSlider:hover { opacity: 1; }
-#fontSizeSlider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--oscuro); cursor: pointer; }
+#fontSizeSlider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--oscuro); cursor: pointer; transition:transform .15s }
+#fontSizeSlider::-webkit-slider-thumb:hover { transform:scale(1.2) }
 #fontSizeSlider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--oscuro); cursor: pointer; border: none; }
 
 @keyframes crIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
@@ -536,6 +579,7 @@ body.logged-in #topbar { display: flex; }
   flex-direction: column;
   gap: 8px;
   position: relative;
+  animation:fadeUp .35s ease both;
 }
 .user-card .user-name { font-size: 13.5px; font-weight: 800; color: #fff; line-height: 1.25; word-break: break-word; }
 .user-card .user-role { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #C6ED6E; }
@@ -544,33 +588,37 @@ body.logged-in #topbar { display: flex; }
   border-radius: 9px; padding: 8px 12px; font-size: 12.5px; font-weight: 700; cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .18s;
 }
-.user-card .btn-logout:hover { background: rgba(231,76,60,.85); border-color: #e74c3c; }
+.user-card .btn-logout:hover { background: rgba(231,76,60,.85); border-color: #e74c3c; transform:translateY(-1px); }
 .user-card .session-timer { font-size: 11px; color: #9ac0b0; text-align: center; font-weight: 600; letter-spacing: .3px; }
 
-.reset-link { background: none; border: none; color: var(--oscuro); font-size: 12.5px; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 6px 0; text-align: center; display: block; width: 100%; margin-top: 8px; }
+.reset-link { background: none; border: none; color: var(--oscuro); font-size: 12.5px; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 6px 0; text-align: center; display: block; width: 100%; margin-top: 8px; transition:color .18s }
 .reset-link:hover { color: var(--naranja); }
 
 #dlgReset .db .tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
-#dlgReset .db .tabs button { border: 0; background: none; padding: 10px 16px; font-weight: 700; cursor: pointer; color: var(--mut); border-bottom: 3px solid transparent; font-size: 13px; }
+#dlgReset .db .tabs button { border: 0; background: none; padding: 10px 16px; font-weight: 700; cursor: pointer; color: var(--mut); border-bottom: 3px solid transparent; font-size: 13px; transition:all .18s }
 #dlgReset .db .tabs button.on { color: var(--oscuro); border-bottom-color: var(--naranja); }
 
 .signature-pad-container { border: 2px dashed var(--line); border-radius: 12px; background: #fff; position: relative; overflow: hidden; touch-action: none; }
 .signature-pad-container canvas { width: 100%; height: 200px; display: block; }
 
 #publicSignView { position: fixed; inset: 0; z-index: 10000; background: linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
-#publicSignView .sign-card { background: #fff; border-radius: 20px; padding: 30px; width: min(500px, 100%); box-shadow: 0 30px 80px rgba(0,0,0,.35); }
+#publicSignView .sign-card { background: #fff; border-radius: 20px; padding: 30px; width: min(500px, 100%); box-shadow: 0 30px 80px rgba(0,0,0,.35); animation:popIn .35s cubic-bezier(.2,.8,.2,1) both }
 #publicSignView h2 { margin: 0 0 6px; color: var(--oscuro); font-size: 20px; }
 #publicSignView .sign-sub { color: var(--mut); font-size: 13px; margin-bottom: 20px; }
 
-.qr-box { background: #fff; padding: 16px; border-radius: 14px; border: 2px solid var(--line); display: inline-block; text-align: center; }
+.qr-box { background: #fff; padding: 16px; border-radius: 14px; border: 2px solid var(--line); display: inline-block; text-align: center; animation:scaleIn .35s ease both }
 .qr-box small { margin-top: 8px; word-break: break-all; }
 .qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:12px;text-align:center}
-.qr-card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px 10px;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.qr-card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px 10px;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;animation:scaleIn .35s cubic-bezier(.2,.8,.2,1) both;transition:transform .2s,box-shadow .2s}
+.qr-card:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 18px 30px -18px rgba(11,59,44,.5)}
+.qr-card:nth-child(1){animation-delay:.03s}.qr-card:nth-child(2){animation-delay:.06s}
+.qr-card:nth-child(3){animation-delay:.09s}.qr-card:nth-child(4){animation-delay:.12s}
+.qr-card:nth-child(5){animation-delay:.15s}.qr-card:nth-child(6){animation-delay:.18s}
 .qr-card .qr-num{position:absolute;top:8px;left:8px;background:var(--oscuro);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
 .qr-card .qr-img{margin:6px 0 4px;display:flex;justify-content:center}
 .qr-card b{font-size:13px;color:var(--oscuro);line-height:1.25}
 .qr-card small{font-size:11.5px;color:var(--mut);font-weight:600;line-height:1.25}
-.qr-estado{margin-top:6px;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:20px;background:#fff4e0;color:#9a5b00}
+.qr-estado{margin-top:6px;font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:20px;background:#fff4e0;color:#9a5b00;transition:all .3s}
 .qr-estado.ok{background:#e3f6ea;color:#14744a}
 .qr-orden{list-style:none;margin:14px auto 0;padding:0;max-width:460px;text-align:left}
 .qr-orden li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px}
@@ -581,16 +629,24 @@ body.logged-in #topbar { display: flex; }
 .ck-traza { font-size:9.5px; color:#6b8378; display:block; line-height:1.1; margin-top:3px; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .nv-traza { font-size:9.5px; color:#6b8378; display:block; line-height:1.1; margin-top:3px; font-style:italic; }
 .rol-validador-badge { display:inline-block; padding:2px 8px; border-radius:99px; background:#fff3cd; color:#856404; font-size:10.5px; font-weight:700; margin-left:4px; }
-.validador-info-box { background:#eaf3fd; border:1px solid #b3d4f5; border-radius:10px; padding:8px 12px; font-size:12.5px; color:#1b5fae; margin-bottom:12px; }
+.validador-info-box { background:#eaf3fd; border:1px solid #b3d4f5; border-radius:10px; padding:8px 12px; font-size:12.5px; color:#1b5fae; margin-bottom:12px; animation:fadeUp .3s ease both }
+
+/* ===== ANIMACIONES GLOBALES ===== */
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-3deg)} 75%{transform:rotate(3deg)} }
+@keyframes glowPulse { 0%,100%{box-shadow:0 0 0 0 rgba(247,148,29,.4)} 50%{box-shadow:0 0 0 8px rgba(247,148,29,0)} }
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
 </style>
 </head>
 <body class="logged-out">
 
 <!-- LOGIN -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%);display:flex;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#fff;border-radius:22px;padding:34px 30px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);">
+  <div style="background:#fff;border-radius:22px;padding:34px 30px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);animation:popIn .45s cubic-bezier(.2,.8,.2,1) both;">
     <div style="text-align:center;margin-bottom:20px;">
-      <img src="Logo_de_la_Universidad_El_Bosque.png" alt="Logo" style="height:70px;margin-bottom:12px;">
+      <img src="Logo_de_la_Universidad_El_Bosque.png" alt="Logo" style="height:70px;margin-bottom:12px;animation:float 4s ease-in-out infinite;">
       <h2 style="margin:0;font-size:22px;color:var(--oscuro);font-weight:800;">Elecciones · Sistema Integral</h2>
       <p style="margin:4px 0 0;color:var(--mut);font-size:13px;">Ingresa tus credenciales</p>
     </div>
@@ -605,7 +661,7 @@ body.logged-in #topbar { display: flex; }
   </div>
 </div>
 
-<!-- Vista pública de firma (por link) -->
+<!-- Vista pública de firma -->
 <div id="publicSignView" class="hide">
   <div class="sign-card">
     <h2>✍️ Firma del Acta</h2>
@@ -653,18 +709,19 @@ body.logged-in #topbar { display: flex; }
    <div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#9ac0b0;padding:0 12px 8px;">Acciones del sistema</div>
    <button class="nav" id="btnLimpiar" onclick="limpiarPantalla()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Limpiar pantalla</button>
    <button class="nav" id="btnCerrarElec" onclick="toggleCerrarElecciones()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span id="txtCerrarElec">Cerrar elecciones</span></button>
+   <button class="nav" id="btnSyncAhora" style="display:none" onclick="sincronizarAhora()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.78A6 6 0 1 0 5 15.5"/><path d="M12 12v8M9 17l3 3 3-3"/></svg><span>Sincronizar ahora</span></button>
    <button class="nav" id="btnVerLog" onclick="abrirLog()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></svg>Log de auditoría</button>
    <button class="nav" id="btnVerUsuarios" onclick="abrirUsuarios()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Usuarios</button>
  </div>
 
  <div class="note">
+   <div style="font-size:10px;opacity:.7;margin-bottom:6px">Versión 14-nov-2026 · sync v3</div>
    <div class="backup-btns">
      <button class="btn-backup" onclick="descargarRespaldo()">💾 Descargar respaldo</button>
      <button class="btn-backup" onclick="guardarYLimpiar()">🧹 Guardar y Limpiar</button>
      <button class="btn-backup import" onclick="document.getElementById('fileImport').click()">📂 Importar Respaldo</button>
      <input type="file" id="fileImport" class="hide" accept=".json" onchange="importarRespaldo(this)">
    </div>
-   <p style="margin-top:10px;margin-bottom:0;">Los datos se guardan en este navegador.</p>
  </div>
 </aside>
 <main>
@@ -695,6 +752,7 @@ body.logged-in #topbar { display: flex; }
        <button class="btn sm" onclick="cronFileInput.click()">📂 Cargar Excel</button>
        <input type="file" id="cronFileInput" accept=".xlsx,.xls,.csv" class="hide" onchange="importarCronograma(this)">
        <button class="btn sm" onclick="descargarPlantillaCronograma()">⬇️ Descargar Plantilla</button>
+       <button class="btn sm" id="btnExpCron" style="display:none" onclick="exportarCronogramaExcel()">📥 Descargar Cronograma (Excel)</button>
        <button class="btn sm" onclick="solicitarPermisoNotif()">🔔 Notificaciones</button>
        <button class="btn sm" onclick="testSound()">🔊 Probar Sonido</button>
      </div>
@@ -783,7 +841,6 @@ body.logged-in #topbar { display: flex; }
   <div style="margin-top:10px"><button class="btn sm" onclick="restaurarTextoActa()">↺ Restaurar texto predefinido</button></div>
  </div>
 
- <!-- FIRMAS DE RESPALDO (Manuales) -->
  <div class="card noprint">
   <h3>Firmas de los asistentes al escrutinio (Texto de respaldo)</h3>
   <p class="help" style="margin-top:0">Agrega los firmantes que irán al final del acta. Si marcas la casilla de "Delegado", podrás seleccionar su cargo oficial. (Si un firmante usa el QR para firmar digitalmente, el sistema reemplazará automáticamente este texto por su firma dibujada).</p>
@@ -820,7 +877,6 @@ body.logged-in #topbar { display: flex; }
  <div id="actaOutContainer" class="hide">
    <div class="acta-page" id="actaOut"></div>
    
-   <!-- PANEL DE FIRMAS POST-ACTA -->
    <div class="card noprint" style="margin-top: 20px; background: #fff;">
      <h3>✍️ Panel de Firmas (Acta Generada)</h3>
      <p class="help" style="margin-top:0">El acta ya está generada. Ahora puedes recolectar las firmas mediante los códigos QR.</p>
@@ -1294,7 +1350,7 @@ const CONFIG = {
 let supabaseClient = null;
 try {
   if(window.supabase && SUPABASE_URL && !SUPABASE_URL.includes('TU-PROYECTO')) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: true, detectSessionInUrl: false } });
   }
 } catch(e) { console.error('Supabase init error:', e); }
 
@@ -1328,7 +1384,7 @@ const esGlobal = (org) => ORG_GLOBALES.includes(org);
 let D=[],editId=null,CRON=[],FIRMAS=[];
 let VOTANTES = { totalCenso: 0, totalHabilitados: 0, fechaCorte: '', historial: [] };
 let CENSO_DATA = [], SOPORTES = [];
-let ORG_ACTIVOS = JSON.parse(localStorage.getItem(K_ORG_ACTIVOS) || '["Consejo de Facultad","Consejo Directivo","Consejo Académico","Comité de Posgrado"]');
+let ORG_ACTIVOS = ["Consejo de Facultad","Consejo Directivo","Consejo Académico","Comité de Posgrado"];
 let chartRolesInstance, chartOrganosInstance, chartFacInstance, chartHistInstance, chartCensoFacInstance, chartCensoRolInstance;
 let chartPartInstance, chartSopCanalInstance, chartSopEstadoInstance, chartSopDiaInstance;
 
@@ -1362,14 +1418,12 @@ const ROLES_DESC = {
   fac_prog:'Valida solo la columna de Facultad / Programa y únicamente de los candidatos Estudiantes.'
 };
 let SESSION = null;
-try { SESSION = JSON.parse(localStorage.getItem(K_SESSION) || 'null'); } catch(e) {}
 let LOG = [];
-try { LOG = JSON.parse(localStorage.getItem(K_LOG_LOCAL) || '[]'); } catch(e) {}
-let ELECCIONES_CERRADAS = localStorage.getItem(K_CERRADA) === '1';
+let ELECCIONES_CERRADAS = false;
 let USERS_CACHE = [];
 
-const saveSession = () => localStorage.setItem(K_SESSION, JSON.stringify(SESSION));
-const saveLogLocal = () => { if(LOG.length > 3000) LOG = LOG.slice(-3000); localStorage.setItem(K_LOG_LOCAL, JSON.stringify(LOG)); };
+const saveSession = () => {}; // la sesión solo vive en memoria
+const saveLogLocal = () => { if(LOG.length > 3000) LOG = LOG.slice(-3000); };
 
 async function registrarLog(accion, modulo, detalle){
   const entry = {usuario: SESSION?.username || 'sistema', rol: SESSION?.rol || '-', modulo: modulo || '-', accion: accion || '-', detalle: String(detalle ?? '').slice(0, 400), fecha: new Date().toISOString()};
@@ -1474,7 +1528,6 @@ function doLogout(){
   detenerTimerSesion();
   registrarLog('Cierre de sesión', '-', SESSION?.username || '');
   SESSION = null;
-  try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
   if(supabaseClient){
     supabaseClient.auth.signOut().finally(()=>location.reload());
   } else {
@@ -1489,7 +1542,6 @@ async function cargarEstadoElecciones(){
     if(data){
       const v = data[CONFIG.col_config_valor];
       ELECCIONES_CERRADAS = (v === true || v === 'true' || v === '1');
-      localStorage.setItem(K_CERRADA, ELECCIONES_CERRADAS ? '1' : '0');
     }
   } catch(e) { console.warn('Estado elecciones:', e.message); }
 }
@@ -1504,7 +1556,8 @@ async function guardarEstadoElecciones(cerrado){
 const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 let _sessionCheckInterval = null;
 
-function registrarActividad(){ if(!SESSION) return; try { localStorage.setItem(K_LAST_ACTIVITY, String(Date.now())); } catch(e){} }
+let _lastActivity = 0;
+function registrarActividad(){ if(!SESSION) return; _lastActivity = Date.now(); }
 
 ['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt => {
   document.addEventListener(evt, registrarActividad, { passive: true, capture: true });
@@ -1513,12 +1566,10 @@ function registrarActividad(){ if(!SESSION) return; try { localStorage.setItem(K
 function iniciarTimerSesion(){
   if(_sessionCheckInterval) clearInterval(_sessionCheckInterval);
   if(!SESSION) return;
-  const ultimo = Number(localStorage.getItem(K_LAST_ACTIVITY) || 0);
-  if(!ultimo || (Date.now() - ultimo) > SESSION_TIMEOUT_MS){ try { localStorage.setItem(K_LAST_ACTIVITY, String(Date.now())); } catch(e){} }
+  if(!_lastActivity || (Date.now() - _lastActivity) > SESSION_TIMEOUT_MS){ _lastActivity = Date.now(); }
   _sessionCheckInterval = setInterval(() => {
     if(!SESSION) return;
-    const ultimo = Number(localStorage.getItem(K_LAST_ACTIVITY) || 0);
-    const restante = SESSION_TIMEOUT_MS - (Date.now() - ultimo);
+    const restante = SESSION_TIMEOUT_MS - (Date.now() - _lastActivity);
     const el = $('sessionTimer');
     if(el){
       if(restante > 0){
@@ -1533,7 +1584,6 @@ function iniciarTimerSesion(){
       toast('⏱️ Sesión expirada por inactividad. Cerrando...');
       registrarLog('Cierre automático por inactividad', '-', '5 minutos sin actividad');
       SESSION = null;
-      try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
       if(supabaseClient) supabaseClient.auth.signOut().finally(()=>window.location.reload());
       else setTimeout(() => { window.location.reload(); }, 1800);
     }
@@ -1554,6 +1604,9 @@ function aplicarSesion(){
   document.body.classList.add('logged-in');
   $('loginScreen').classList.add('hide');
   $('sideActions').classList.remove('hide');
+  _syncEnabled = true;
+  // Pull inicial de datos compartidos
+  pullYRefrescar(true);
   actualizarUserCard();
   aplicarPermisosUI();
   actualizarBannerCierre();
@@ -1562,16 +1615,13 @@ function aplicarSesion(){
   const mods = getModulosPermitidos();
   if(mods.length){
     let idx = 0;
-    try{ const g = parseInt(localStorage.getItem('ultima_tab_v1') || '0', 10); if(g > 0 && puedeVer(orden[g-1])) idx = g; }catch(e){}
     if(!idx) idx = orden.indexOf(mods[0]) + 1;
     if(idx > 0) tab(idx);
   }
 }
 
 /* =====================================================================
-   PERMISOS (reorganizados)
-   - Los tokens 'cron:publico' / 'cron:interno' viajan dentro del arreglo
-     "modulos" (no requiere cambios en la base de datos).
+   PERMISOS
    ===================================================================== */
 const CRON_TOK = {publico:'cron:publico', interno:'cron:interno'};
 const _modKeys = () => MODULOS.map(m=>m.key);
@@ -1587,26 +1637,42 @@ function cronVistaDeLista(arr, rolKey){
 function getCronVista(){
   if(!SESSION) return 'ambos';
   if(SESSION.rol === 'administrador') return 'ambos';
-  return cronVistaDeLista(SESSION.modulos, SESSION.rol);
+  const tokens = (SESSION.modulos || []).filter(m => m === CRON_TOK.publico || m === CRON_TOK.interno);
+  if(tokens.length){
+    const p = tokens.includes(CRON_TOK.publico), i = tokens.includes(CRON_TOK.interno);
+    if(p && i) return 'ambos';
+    if(p) return 'publico';
+    if(i) return 'interno';
+  }
+  return ROLES[SESSION.rol]?.cronVista || 'ambos';
 }
 function getModulosPermitidos(){
   if(!SESSION) return [];
   const rol = ROLES[SESSION.rol];
   if(!rol) return [];
   if(rol.mods === '*') return MODULOS.map(m=>m.key);
-  if(SESSION.rol === 'editor' || SESSION.rol === 'lectura') return modulosDeLista(SESSION.modulos);
-  return rol.mods;
+  const guardados = modulosDeLista(SESSION.modulos);
+  if(SESSION.rol === 'editor' || SESSION.rol === 'lectura') return guardados;
+  if(Array.isArray(rol.mods) && rol.mods.length){
+    return [...new Set([...rol.mods, ...guardados])];
+  }
+  return guardados;
 }
 function puedeVer(modulo){ if(!SESSION) return false; return getModulosPermitidos().includes(modulo); }
 
-// ¿Es un rol validador (TH, Egresados, Sec. General, Facultad/Programa)?
 function esValidadorRol(){ return !!ROLES[SESSION?.rol]?.validador; }
-function clavesValidador(){ return esValidadorRol() ? ROLES[SESSION.rol].validador.filter(k=>KEYS.includes(k)) : null; }
-// Un validador solo ve / aprueba a los candidatos cuyo rol tiene SU columna de validación.
+function clavesValidador(){
+  if(!esValidadorRol()) return null;
+  const v = ROLES[SESSION.rol].validador;
+  return Array.isArray(v) ? v.filter(k=>KEYS.includes(k)) : null;
+}
 function enAlcance(c){
+  if(!c) return false;
   const kv = clavesValidador();
   if(!kv) return true;
-  return (CH[c.rol] || []).some(k => kv.includes(k));
+  const rolCand = String(c.rol || '').trim();
+  const cols = CH[rolCand] || [];
+  return cols.some(k => kv.includes(k));
 }
 
 function puedeEditar(modulo){
@@ -1615,15 +1681,14 @@ function puedeEditar(modulo){
   if(ELECCIONES_CERRADAS) return false;
   const rol = ROLES[SESSION.rol];
   if(!rol) return false;
-  if(rol.validador) return false;                                   // validadores nunca editan datos
-  if(SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;   // solo lectura
+  if(rol.validador) return false;
+  if(SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;
   if(!getModulosPermitidos().includes(modulo)) return false;
-  if(SESSION.rol === 'editor') return true;                          // editor: edita los módulos que tiene asignados
+  if(SESSION.rol === 'editor') return true;
   if(rol.puedeEditar === '*') return true;
   return Array.isArray(rol.puedeEditar) && rol.puedeEditar.includes(modulo);
 }
 
-// campoCheck: 'th' | 'eg' | 'sg' | 'fp' | 'nov'.  cand (opcional): candidato sobre el que se actúa.
 function puedeValidar(campoCheck, cand){
   if(!SESSION) return false;
   if(SESSION.rol === 'administrador') return true;
@@ -1631,9 +1696,9 @@ function puedeValidar(campoCheck, cand){
   const rol = ROLES[SESSION.rol];
   if(!rol) return false;
   if(rol.validador){
-    if(cand && !enAlcance(cand)) return false;                       // fuera de su alcance
-    if(campoCheck === 'nov') return true;                            // novedades: solo de su alcance
-    return rol.validador.includes(campoCheck);                       // solo SU columna
+    if(cand && !enAlcance(cand)) return false;
+    if(campoCheck === 'nov') return true;
+    return rol.validador.includes(campoCheck);
   }
   if(SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;
   if(rol.puedeEditar === '*' || (Array.isArray(rol.puedeEditar) && rol.puedeEditar.includes('vSeg'))) return true;
@@ -1649,6 +1714,8 @@ function aplicarPermisosUI(){
   const esAuditor = SESSION?.rol === 'auditor';
   if($('btnCerrarElec')) $('btnCerrarElec').style.display = esAdmin ? '' : 'none';
   if($('btnVerUsuarios')) $('btnVerUsuarios').style.display = esAdmin ? '' : 'none';
+  if($('btnSyncAhora')) $('btnSyncAhora').style.display = esAdmin ? '' : 'none';
+  if($('btnExpCron')) $('btnExpCron').style.display = esAdmin ? '' : 'none';
   if($('btnVerLog')) $('btnVerLog').style.display = (esAdmin || esAuditor) ? '' : 'none';
   if($('btnLimpiar')) $('btnLimpiar').style.display = '';
 
@@ -1719,7 +1786,6 @@ async function toggleCerrarElecciones(){
   const msg = nuevo ? '⚠️ ¿CERRAR LAS ELECCIONES? NADIE podrá editar información.' : '¿Reabrir las elecciones?';
   if(!confirm(msg)) return;
   ELECCIONES_CERRADAS = nuevo;
-  localStorage.setItem(K_CERRADA, nuevo ? '1' : '0');
   await guardarEstadoElecciones(nuevo);
   registrarLog(nuevo ? 'Cerrar elecciones' : 'Reabrir elecciones', '-', 'Estado cambiado');
   actualizarBannerCierre();
@@ -1732,6 +1798,7 @@ function actualizarBannerCierre(){
   if(b) b.classList.toggle('hide', !ELECCIONES_CERRADAS);
   const txt = $('txtCerrarElec');
   if(txt) txt.textContent = ELECCIONES_CERRADAS ? 'Reabrir elecciones' : 'Cerrar elecciones';
+  try{ aplicarModoLectura(); aplicarPermisosUI(); }catch(e){}
 }
 
 async function abrirUsuarios(){
@@ -2098,29 +2165,130 @@ function limpiarVotosEnBlancoInvalidos() {
   return cambios;
 }
 
-try{ const a=localStorage.getItem(K); if(a) D=JSON.parse(a); }catch(e){}
-try{ const c=localStorage.getItem(K_CRON); if(c) CRON=JSON.parse(c); else CRON = []; }catch(e){}
-try{ const f=localStorage.getItem(K_FIRMAS); if(f) FIRMAS=JSON.parse(f); else FIRMAS=[]; }catch(e){}
-try{ const v=localStorage.getItem(K_VOTANTES); if(v) { const parsed = JSON.parse(v); VOTANTES = { ...VOTANTES, ...parsed }; if(!VOTANTES.historial) VOTANTES.historial = []; } }catch(e){}
-try{ const cd = localStorage.getItem(K_CENSO); if(cd) CENSO_DATA = JSON.parse(cd); }catch(e){}
-try{ const s = localStorage.getItem(K_SOPORTE); if(s) SOPORTES = JSON.parse(s); }catch(e){}
-try{ const fs = localStorage.getItem(K_FONT_SIZE); if(fs) { $('fontSizeSlider').value = fs; ajustarTamanoLetra(fs); } else { ajustarTamanoLetra(12); } }catch(e){}
+try{ ajustarTamanoLetra(12); }catch(e){}
 
-const IDB_NAME='elecciones_db', IDB_STORE='kv';
-let _idbP=null;
-function idbOpen(){ if(_idbP) return _idbP; _idbP=new Promise((res,rej)=>{ try{ const rq=indexedDB.open(IDB_NAME,1); rq.onupgradeneeded=()=>rq.result.createObjectStore(IDB_STORE); rq.onsuccess=()=>res(rq.result); rq.onerror=()=>rej(rq.error); }catch(e){ rej(e); } }); return _idbP; }
-const idbSet=(k,v)=>idbOpen().then(db=>new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(v,k);tx.oncomplete=res;tx.onerror=()=>rej(tx.error);})).catch(()=>{});
-const idbClear=()=>idbOpen().then(db=>new Promise(res=>{const tx=db.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).clear();tx.oncomplete=res;tx.onerror=res;})).catch(()=>{});
-let _avisoAlm=false, _lsOK = true;
-function persistir(key,val){ const ts = Date.now(); idbSet(key+'__ts', ts); try{ localStorage.setItem(key,JSON.stringify(val)); localStorage.setItem(key+'__ts', String(ts)); _lsOK = true; } catch(e){ _lsOK = false; if(!_avisoAlm){ _avisoAlm=true; } } idbSet(key,val); }
-try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+let _lsOK = true; // sin almacenamiento local: los datos viven en memoria y se sincronizan con Supabase
 
-const save=()=>persistir(K,D);
-const saveCron=()=>{ persistir(K_CRON,CRON); try{ estadoGuardado(); }catch(e){} };
-const saveFirmas=()=>persistir(K_FIRMAS,FIRMAS);
-const saveVotantes=()=>persistir(K_VOTANTES,VOTANTES);
-const saveCenso=()=>persistir(K_CENSO,CENSO_DATA);
-const saveSoportes=()=>persistir(K_SOPORTE,SOPORTES);
+/* ===== SINCRONIZACIÓN COMPARTIDA (pull y push) ===== */
+const SYNC_KEYS = {
+  cand_v2: 'candidatos', cronograma_v2: 'cronograma', votantes_v2: 'votantes',
+  censo_data_v1: 'censo', org_activos_v1: 'org_activos', soporte_data_v1: 'soporte'
+};
+let _syncTimers = {};
+let _pulledOnce = false;
+const _dirty = new Set();      // claves con cambios locales aún no confirmados por el servidor
+const _pushFails = {}, _pushSeq = {};
+let _lastPull = 0;
+const _syncGet = {
+  cand_v2: () => D, cronograma_v2: () => CRON, votantes_v2: () => VOTANTES,
+  censo_data_v1: () => CENSO_DATA, org_activos_v1: () => ORG_ACTIVOS, soporte_data_v1: () => SOPORTES
+};
+let _syncEnabled = false;
+
+async function syncPullAll(){
+  if(!supabaseClient) return false;
+  try {
+    const claves = Object.values(SYNC_KEYS).map(k => 'sync_' + k);
+    const { data, error } = await supabaseClient.from(CONFIG.tabla_config).select('*').in(CONFIG.col_config_clave, claves);
+    if(error) throw error;
+    _pulledOnce = true;
+    if(!data || !data.length) return false;
+    const map = {};
+    data.forEach(row => { map[row[CONFIG.col_config_clave]] = row[CONFIG.col_config_valor]; });
+    let changed = false;
+    const apply = (localKey, setter) => {
+      if(_dirty.has(localKey)) return;   // hay un cambio local en camino al servidor
+      const raw = map['sync_' + SYNC_KEYS[localKey]];
+      if(raw === undefined || raw === null) return;
+      try {
+        const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if(JSON.stringify(val) !== JSON.stringify(_syncGet[localKey]())){
+          setter(val);
+          changed = true;
+        }
+      } catch(e) { console.warn('sync apply', localKey, e); }
+    };
+    apply('cand_v2', v => { if(Array.isArray(v)) D = v; });
+    apply('cronograma_v2', v => { if(Array.isArray(v)) CRON = v; });
+    apply('votantes_v2', v => { if(v && typeof v === 'object') VOTANTES = { ...VOTANTES, ...v }; });
+    apply('censo_data_v1', v => { if(Array.isArray(v)) CENSO_DATA = v; });
+    apply('org_activos_v1', v => { if(Array.isArray(v)) ORG_ACTIVOS = v; });
+    apply('soporte_data_v1', v => { if(Array.isArray(v)) SOPORTES = v; });
+    return changed;
+  } catch(e) { console.warn('syncPullAll:', e.message); return false; }
+}
+
+function _syncPush(localKey){
+  if(!_syncEnabled || !supabaseClient) return;
+  if(!SYNC_KEYS[localKey]) return;
+  _dirty.add(localKey);
+  const seq = _pushSeq[localKey] = (_pushSeq[localKey] || 0) + 1;
+  clearTimeout(_syncTimers[localKey]);
+  _syncTimers[localKey] = setTimeout(async () => {
+    // Si aún no se descargaron los datos del servidor, esperar para no pisarlos
+    if(!_pulledOnce){ _syncPush(localKey); return; }
+    const syncKey = SYNC_KEYS[localKey];
+    try {
+      const raw = JSON.stringify(_syncGet[localKey]());
+      const { error } = await supabaseClient.from(CONFIG.tabla_config).upsert({
+        [CONFIG.col_config_clave]: 'sync_' + syncKey,
+        [CONFIG.col_config_valor]: raw
+      }, { onConflict: CONFIG.col_config_clave });
+      if(error) throw error;
+      _pushFails[localKey] = 0;
+      if(_pushSeq[localKey] === seq) _dirty.delete(localKey);   // solo si no hubo más cambios mientras se enviaba
+    } catch(e) {
+      console.warn('syncPush', localKey, e);
+      const n = _pushFails[localKey] = (_pushFails[localKey] || 0) + 1;
+      toast('❌ No se pudo guardar en el servidor (' + syncKey + '): ' + (e.message || e) + (n <= 3 ? ' — reintentando…' : ''));
+      if(n <= 3) setTimeout(() => _syncPush(localKey), 3000 * n);
+    }
+  }, 800);
+}
+
+async function sincronizarAhora(){
+  if(SESSION?.rol !== 'administrador'){ toast('⛔ Solo el administrador'); return; }
+  if(!supabaseClient){ alert('No hay conexión con Supabase (supabaseClient no está inicializado). Revisa SUPABASE_URL y SUPABASE_ANON_KEY.'); return; }
+  if(!confirm('Esto envía al servidor los datos que tiene ESTE navegador (candidatos, cronograma, votantes, censo, soporte y órganos activos) y reemplaza lo que haya allí. ¿Continuar?')) return;
+  const res = [];
+  for(const k of Object.keys(SYNC_KEYS)){
+    try{
+      const { error } = await supabaseClient.from(CONFIG.tabla_config).upsert({ [CONFIG.col_config_clave]: 'sync_' + SYNC_KEYS[k], [CONFIG.col_config_valor]: JSON.stringify(_syncGet[k]()) }, { onConflict: CONFIG.col_config_clave });
+      res.push((error ? '❌ ' : '✅ ') + SYNC_KEYS[k] + (error ? ': ' + [error.code, error.message, error.details, error.hint].filter(Boolean).join(' | ') : ''));
+      if(!error) _dirty.delete(k);
+    }catch(e){ res.push('❌ ' + SYNC_KEYS[k] + ': ' + (e.message || e)); }
+  }
+  _pulledOnce = true;
+  const fallos = res.filter(r => r.startsWith('❌')).length;
+  alert((fallos ? 'Hubo ' + fallos + ' error(es) al guardar en el servidor:\n\n' : 'Todo se guardó correctamente en el servidor.\n\n') + res.join('\n') + (fallos ? '\n\nEnvía este mensaje para poder corregirlo.' : ''));
+  registrarLog('Sincronizar ahora', '-', fallos ? fallos + ' errores' : 'OK');
+}
+function refrescarVistas(){
+  try { normalizarFacultadesGlobal(); normalizarNombresGlobal(); } catch(e){}
+  try { fillSel(); } catch(e){}
+  try { if(document.querySelector('main > section:not(.hide)')?.id === 'vSeg') aplicarAlcanceSeguimiento(); } catch(e){}
+  try { draw(); } catch(e){}
+  try { renderCronograma(false); } catch(e){}
+  try { renderCensoData(); } catch(e){}
+  try { renderSoportes(); } catch(e){}
+  try { renderFirmas(); } catch(e){}
+  try { renderVacantes(); } catch(e){}
+  try { renderDirectorio(); } catch(e){}
+}
+async function pullYRefrescar(forzar){
+  if(!SESSION || !_syncEnabled) return false;
+  if(!forzar && Date.now() - _lastPull < 3000) return false;
+  _lastPull = Date.now();
+  const changed = await syncPullAll();
+  if(changed) refrescarVistas();
+  return changed;
+}
+const save=()=>{ _syncPush('cand_v2'); };
+const saveCron=()=>{ try{ estadoGuardado(); }catch(e){} _syncPush('cronograma_v2'); };
+const saveFirmas=()=>{}; // las firmas son de un solo uso: no se guardan
+const saveVotantes=()=>{ _syncPush('votantes_v2'); };
+const saveCenso=()=>{ _syncPush('censo_data_v1'); };
+const saveSoportes=()=>{ _syncPush('soporte_data_v1'); };
 
 const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
@@ -2146,7 +2314,7 @@ function toast(m, tipo){
   box.append(sp,x); t.appendChild(box);
   clearTimeout(tt); clearTimeout(_ttHide);
   try{
-    if(t.showPopover){ if(t.matches(':popover-open')) t.hidePopover(); t.showPopover(); }   // se re-apila ENCIMA de cualquier diálogo abierto
+    if(t.showPopover){ if(t.matches(':popover-open')) t.hidePopover(); t.showPopover(); }
   }catch(e){}
   requestAnimationFrame(()=>t.classList.add('on'));
   tt=setTimeout(_toastOcultar, esErr ? 7500 : esAv ? 5000 : 3200);
@@ -2157,7 +2325,6 @@ function _toastOcultar(){
   clearTimeout(_ttHide);
   _ttHide=setTimeout(()=>{ try{ if(t.matches && t.matches(':popover-open')) t.hidePopover(); }catch(e){} },300);
 }
-// Cualquier error inesperado ahora se muestra en pantalla (antes solo iba a la consola)
 let _lastErrMsg='', _lastErrAt=0;
 function _reportarErrorGlobal(msg){
   msg=String(msg||'').replace(/^Uncaught (\w+: )?/,'').slice(0,220);
@@ -2178,7 +2345,7 @@ function fechaALetras(fechaStr) { if(!fechaStr) return ''; const f = new Date(fe
 function horaALetras(h,m){ const h12=((h+11)%12)+1; const hs = h12===1 ? 'una' : numALetras(h12); const t = hs + (m===0 ? ' en punto' : ' y ' + numALetras(m)); return t + (h<12 ? ' de la mañana' : (h<19 ? ' de la tarde' : ' de la noche')); }
 function horaActualFmt(d){ const h=d.getHours(), m=d.getMinutes(), h12=((h+11)%12)+1; return `${h12}:${String(m).padStart(2,'0')} ${h<12?'a.m.':'p.m.'}`; }
 
-function ajustarTamanoLetra(size) { document.documentElement.style.setProperty('--font-size-acta', size + 'px'); try { localStorage.setItem(K_FONT_SIZE, size); } catch(e) {} const outDiv = $('actaOut'); if (outDiv) { outDiv.style.fontSize = size + 'px'; const bodyAct = outDiv.querySelector('.acta-body'); if(bodyAct) bodyAct.style.fontSize = size + 'px'; } }
+function ajustarTamanoLetra(size) { document.documentElement.style.setProperty('--font-size-acta', size + 'px'); const outDiv = $('actaOut'); if (outDiv) { outDiv.style.fontSize = size + 'px'; const bodyAct = outDiv.querySelector('.acta-body'); if(bodyAct) bodyAct.style.fontSize = size + 'px'; } }
 let audioCtx;
 function playSound(){ try{ if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.15); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4); osc.start(); osc.stop(audioCtx.currentTime + 0.4); }catch(e){} }
 function testSound(){ playSound(); toast('🔊 Sonido reproducido'); }
@@ -2231,7 +2398,7 @@ function updateOrgActivos() {
   }
   ORG_ACTIVOS = [];
   document.querySelectorAll('.ck-org').forEach(chk => { if(chk.checked) ORG_ACTIVOS.push(chk.value); });
-  localStorage.setItem(K_ORG_ACTIVOS, JSON.stringify(ORG_ACTIVOS));
+  _syncPush('org_activos_v1');
   inyectarVotosEnBlanco();
   limpiarVotosEnBlancoInvalidos();
   fillSel(); draw(); renderVacantes(); renderDirectorio();
@@ -2241,11 +2408,11 @@ function tab(n){
   const mapa = {1:'vCron',2:'vSeg',3:'vVotantes',4:'vAnal',5:'vVac',6:'vCargaVotos',7:'vAct',8:'vGanadores',9:'vSoporte',10:'vDocs'};
   const modKey = mapa[n];
   if(SESSION && modKey && !puedeVer(modKey)){ toast('⛔ No tienes permiso para este módulo'); return; }
-  try{ if(SESSION) localStorage.setItem('ultima_tab_v1', String(n)); }catch(e){}
+  pullYRefrescar();
   ['vCron','vSeg','vVotantes','vAnal','vVac','vCargaVotos','vAct','vGanadores','vSoporte','vDocs'].forEach((id,i)=>{ $(id).classList.toggle('hide', i+1 !== n); $('n'+(i+1)).classList.toggle('on', i+1 === n); });
 
   if(n===1){ aplicarVistaCron(); }
-  if(n===2) { draw(); }
+  if(n===2) { aplicarAlcanceSeguimiento(); draw(); }
   if(n===3) { renderCensoData(); }
   if(n===4) { renderAnalitica(); }
   if(n===5) renderVacantes();
@@ -2296,9 +2463,9 @@ const TEXTO_ACTA_DEFECTO = [
 'En constancia de lo anterior, se firma la presente acta en {{lugar}}, D.C., siendo las {{hora_actual}} ({{hora_actual_letras}}), a los {{fecha_firma_letras}}.'
 ].join('\n');
 
-function cargarTextoActa(forzar){ let t=null; if(!forzar){ try{ t=localStorage.getItem(K_TEXTO_ACTA); }catch(e){} } if(forzar || t!==null) $('at').value = (t!==null && !forzar) ? t : TEXTO_ACTA_DEFECTO; else if(!$('at').value) $('at').value = TEXTO_ACTA_DEFECTO; }
-function guardarTextoActa(){ try{ localStorage.setItem(K_TEXTO_ACTA,$('at').value); }catch(e){} }
-function restaurarTextoActa(){ if(!confirm('¿Restaurar el texto predefinido?')) return; try{ localStorage.removeItem(K_TEXTO_ACTA); }catch(e){} cargarTextoActa(true); toast('Texto restaurado'); }
+function cargarTextoActa(forzar){ if(forzar || !$('at').value) $('at').value = TEXTO_ACTA_DEFECTO; }
+function guardarTextoActa(){ /* el texto vive solo en el campo mientras la página está abierta */ }
+function restaurarTextoActa(){ if(!confirm('¿Restaurar el texto predefinido?')) return; cargarTextoActa(true); toast('Texto restaurado'); }
 
 function datosActa(){
   const o=$('ao').value, f=$('af').value, jornada=$('aJornada').value;
@@ -2465,6 +2632,17 @@ function draw(){
  $('tbl').insertAdjacentHTML('beforeend',L.map((c,i)=>{ const P=ppl(c); const duplaColor = ['#70BE33','#F7941D','#3498db','#9b59b6','#e74c3c','#1abc9c','#f39c12','#34495e'][i % 8]; return `<tbody class="grp">${P.map(([lab,p],j)=>rowP(c,lab==='Principal'?'pri':'sup',lab,p,j===0,P.length,duplaColor)).join('')}</tbody>`; }).join(''));
  deshabilitarBotonesEdicion();
  try{ const kv = clavesValidador(), pe = $('validadorPend'); if(kv && pe){ let pend = 0; LD.forEach(c => ppl(c).forEach(([,p]) => { if(kv.some(k => (CH[c.rol]||[]).includes(k) && !p.ck[k])) pend++; })); pe.textContent = pend ? `${pend} pendiente(s) por validar` : '✔ Todo validado'; } }catch(e){}
+ try{
+  const ib = $('validadorInfoBox'); if(!ib) return;
+  let ob = $('validadorOculto');
+  if(!ob){ ob = document.createElement('div'); ob.id = 'validadorOculto'; ob.className = 'validador-info-box'; ob.style.cssText = 'background:#fff8e6;border-color:#f3d28a;color:#8a5a00'; ib.insertAdjacentElement('afterend', ob); }
+  const kv2 = clavesValidador();
+  const fuera = kv2 ? D.filter(c => ORG_ACTIVOS.includes(c.org) && !enAlcance(c)) : [];
+  if(!fuera.length){ ob.classList.add('hide'); return; }
+  const porRol = {}; fuera.forEach(c => { const r = (c.rol || 'Sin rol') + 's'; porRol[r] = (porRol[r] || 0) + 1; });
+  ob.classList.remove('hide');
+  ob.innerHTML = 'ℹ️ Hay <b>' + fuera.length + '</b> candidato(s) que no ves porque no son de tu alcance (' + Object.entries(porRol).map(([r,n]) => n + ' ' + r).join(', ') + '). Tu perfil solo valida: <b>' + [...new Set(Object.keys(CH).filter(r => CH[r].some(k => kv2.includes(k))))].join(' / ') + '</b>.';
+ }catch(e){}
 }
 
 const per=(c,w)=>w==='pri'?c.pri:c.sup;
@@ -2984,7 +3162,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       select.id = 'selectFirmanteGrupal';
       select.className = 'in';
       select.style.marginBottom = '16px';
-      const listaFirmantes = JSON.parse(localStorage.getItem('firmas_acta_v1') || '[]');
+      const listaFirmantes = [];
       const opciones = listaFirmantes.map(f => `<option value="${esc(f.nombre)}|${esc(f.cargo || 'Sin cargo')}">${esc(f.nombre)} - ${esc(f.cargo || 'Sin cargo')}</option>`).join('');
       select.innerHTML = opciones
         ? `<option value="">-- Selecciona tu nombre --</option>` + opciones
@@ -3402,7 +3580,7 @@ function partesFecha(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d
 function diasEntre(a,b){ return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00'))/864e5)+1; }
 const TIPO_STYLE = {'Inscripción':['📝','#1f6fd1','#e4f0fd'],'Campaña':['📣','#e8590c','#ffe8d9'],'Votación':['🗳️','#0B9B5B','#dcf6e7'],'Escrutinio':['🧮','#7d3c98','#f1e4f7'],'Poselectoral':['🏛️','#c2255c','#fde4ee'],'Otro':['📌','#4a6572','#e6eef2']};
 
-function estadoGuardado(){ const el = $('cronGuardado'); if(!el) return; let kb = 0; try{ let n=0; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); n += k.length + (localStorage.getItem(k)||'').length; } kb = Math.round(n*2/1024); }catch(e){} const hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}); if(!_lsOK){ el.className='cr-save warn'; el.innerHTML = `⚠️ Almacenamiento lleno (${kb} KB). <button onclick="descargarRespaldo()">Descargar respaldo</button>`; } else { el.className='cr-save'; el.innerHTML = `💾 Guardado automáticamente · ${CRON.length} actividades · ${hora} · ${kb} KB <button onclick="descargarRespaldo()">Respaldo</button>`; } }
+function estadoGuardado(){ const el = $('cronGuardado'); if(!el) return; const hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}); el.className='cr-save'; el.innerHTML = `☁️ Sincronizado con el servidor · ${CRON.length} actividades · ${hora} <button onclick="descargarRespaldo()">Respaldo</button>`; }
 
 let _crI=0;
 function cronItemHTML(a, hoy, interno){ const fin = a.fechaFin || a.fecha; let cls='upcoming', label='○ Por iniciar'; if(a.completado){ cls='completed'; label='✔ Completado'; } else if(fin < hoy){ cls='pending'; label='⚠ Vencida'; } else if(a.motivo === 'En curso' || (a.fecha <= hoy && hoy <= fin)){ cls='in-progress'; label='⏳ En curso'; } const di = partesFecha(a.fecha), df = partesFecha(fin); const dias = (a.fecha && fin >= a.fecha) ? diasEntre(a.fecha, fin) : 1; const T = TIPO_STYLE[a.tipo] || TIPO_STYLE['Otro']; return `<div class="cr-item ${cls}" style="--tc:${T[1]};--tsoft:${T[2]};--i:${Math.min(_crI++,24)}"><div class="cr-dates"><div class="cr-d"><small>Inicio</small><b>${di.d}</b><span>${di.m}</span></div><div class="cr-arrow">→<i>${dias} ${dias===1?'día':'días'}</i></div><div class="cr-d"><small>Fin</small><b>${df.d}</b><span>${df.m}</span></div></div><div class="cr-body"><b class="cr-name"><span class="cr-ico">${T[0]}</span>${interno && a.publica?'🌐 ':''}${esc(a.nombre)}</b><div class="cr-meta"><span class="cr-chip tipo">${ICO_TAG}${esc(a.tipo||'Otro')}</span>${a.responsable ? `<span class="cr-chip resp">${ICO_USER}${esc(a.responsable)}</span>` : ''}</div>${a.desc ? `<span class="cr-obs">${esc(a.desc)}</span>` : ''}</div><div class="cr-side"><span class="tl-status ${cls}">${label}</span>${interno ? `<div class="cr-actions"><button class="ic" onclick="toggleAct('${a.id}')" title="${a.completado?'Marcar pendiente':'Marcar completada'}">${a.completado?'↩':'✔'}</button><button class="ic" onclick="editAct('${a.id}')" title="Editar">✎</button><button class="ic" onclick="delAct('${a.id}')" title="Eliminar">🗑</button></div>` : ''}</div></div>`; }
@@ -3452,7 +3630,6 @@ async function descargarCronImagen(elementId, nombreArchivo){
   if(node.offsetParent === null){ toast('⚠️ Este cronograma no está visible con tu perfil'); return; }
   if(typeof html2canvas !== 'function'){ toast('❌ No se cargó la librería de imágenes. Revisa tu conexión y recarga la página.'); return; }
   toast('⏳ Generando imagen…');
-  // html2canvas no entiende color-mix() ni animaciones: se neutralizan SOLO en la copia que se fotografía.
   const FIX = `*,*::before,*::after{animation:none!important;transition:none!important}
     .cr-item,.cr-stage,.cr-stat,.cr-next{opacity:1!important;transform:none!important;filter:none!important}
     .cr-item{background:linear-gradient(100deg,var(--tsoft,#eef2ef) 0%,#fff 48%)!important;border:1px solid var(--tsoft,#dfe6e2)!important;box-shadow:none!important}
@@ -3503,6 +3680,25 @@ function etapasDe(lista){ const extra = [...new Set(lista.map(a=>a.etapa))].filt
 const MESES_ES = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,setiembre:9,octubre:10,noviembre:11,diciembre:12};
 function parseFechaExcel(raw){ if(raw === null || raw === undefined || raw === '') return ''; if(raw instanceof Date && !isNaN(raw)) return raw.toISOString().slice(0,10); const pad = x => String(x).padStart(2,'0'); const ok = (y,m,d) => (y>1999 && m>=1 && m<=12 && d>=1 && d<=31) ? `${y}-${pad(m)}-${pad(d)}` : ''; if(typeof raw === 'number' || /^\d{5}(\.\d+)?$/.test(String(raw).trim())){ const num = Number(raw); if(num > 20000) return new Date(Math.round((num - 25569) * 864e5)).toISOString().slice(0,10); } const t = norm(String(raw)).replace(/\s+/g,' '); let m; if((m = t.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) return ok(+m[1],+m[2],+m[3]); if((m = t.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/))){ let y = +m[3]; if(y < 100) y += 2000; return ok(y,+m[2],+m[1]); } if((m = t.match(/^(\d{1,2})[ \-\/.]+(?:de )?([a-z]{3,})\.?[ \-\/.]+(?:de |del )?(\d{4})/))){ const mes = MESES_ES[m[2]] || Object.entries(MESES_ES).find(([k]) => k.startsWith(m[2].slice(0,3)))?.[1]; if(mes) return ok(+m[3],mes,+m[1]); } return ''; }
 function migrarCron(){ let cambio = false; CRON.forEach(a=>{ const e = normEtapa(a.etapa); if(a.etapa !== e){ a.etapa = e; cambio = true; } if(!TIPOS_CRON.includes(a.tipo)){ a.tipo = inferTipo(a.nombre); cambio = true; } if(!a.fecha){ a.fecha = new Date().toISOString().slice(0,10); cambio = true; } if(a.responsable === undefined){ const m = String(a.desc||'').match(/^Responsable:\s*(.*?)(?:\.\s*Obs:\s*(.*))?$/s); if(m){ a.responsable = (m[1]||'').trim(); a.desc = (m[2]||'').trim(); } else a.responsable = ''; cambio = true; } }); if(cambio) saveCron(); }
+function exportarCronogramaExcel(){
+  if(SESSION?.rol !== 'administrador'){ toast('⛔ Solo el administrador puede descargar el cronograma'); return; }
+  if(!CRON.length){ toast('No hay actividades en el cronograma para exportar'); return; }
+  const orden = etapasDe(CRON);
+  const lista = [...CRON].sort((a,b) => (orden.indexOf(a.etapa) - orden.indexOf(b.etapa)) || (a.fecha||'').localeCompare(b.fecha||'') || (a.fechaFin||'').localeCompare(b.fechaFin||''));
+  const filas = lista.map(a => {
+    const est = a.completado ? 'Completado' : (a.motivo === 'En curso' ? 'En curso' : '');
+    const d = String(a.desc || '').trim();
+    const obs = est ? (norm(d).includes(norm(est)) ? d : (d ? est + ' - ' + d : est)) : (d || 'Pendiente');
+    return [a.etapa || '', a.nombre || '', a.responsable || '', a.fecha || '', a.fechaFin || '', obs, a.publica ? 'SI' : 'NO'];
+  });
+  const ws = XLSX.utils.aoa_to_sheet([['Etapa','Actividad','Responsable','Fecha Inicio','Fecha Fin','Estado / Observación','Visible en Público (SI/NO)'], ...filas]);
+  ws['!cols'] = [{wch:16},{wch:48},{wch:26},{wch:13},{wch:13},{wch:40},{wch:14}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Cronograma');
+  XLSX.writeFile(wb, 'cronograma-' + new Date().toISOString().slice(0,10) + '.xlsx');
+  registrarLog('Descargar cronograma', 'Cronograma', filas.length + ' actividades');
+  toast('✅ Cronograma descargado (' + filas.length + ' actividades)');
+}
 function importarCronograma(input) { if(SESSION && !puedeEditar('vCron')){ toast('⛔ Sin permiso'); return; } const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' }); const clean = h => norm(h).replace(/[^a-z0-9]/g, ''); let arr = null, hdr = -1; for (const sn of workbook.SheetNames) { const a2 = XLSX.utils.sheet_to_json(workbook.Sheets[sn], { header: 1, defval: '', raw: true }); for (let i = 0; i < Math.min(a2.length, 15); i++) { const hs = (a2[i] || []).map(clean); if (hs.some(h => h.includes('actividad') || h === 'nombre') && hs.some(h => h.includes('fecha') || h.includes('inicio'))) { arr = a2; hdr = i; break; } } if (arr) break; } if (!arr) { toast('No encontré las columnas "Actividad" y "Fecha"'); input.value=''; return; } const H = arr[hdr].map(clean); const col = (...names) => { for (const n of names) { const i = H.findIndex(h => h.includes(n)); if (i !== -1) return i; } return -1; }; const iEtapa = col('etapa','fase'); const iNom = col('actividad','nombre'); const iResp = col('responsable'); const iIni = col('fechainicio','fechadeinicio','inicio','fecha'); const iFin = col('fechafin','fechadefin','fechafinal','fin','termina'); const iObs = col('estadoobservacion','estado','observacion'); const iPub = col('visibleenpublico','publico','visible'); const get = (r,i) => i === -1 || r[i] === undefined || r[i] === null ? '' : r[i]; const nuevoCron = []; for (let i = hdr + 1; i < arr.length; i++) { const r = arr[i]; if (!r || !r.some(c => String(c).trim() !== '')) continue; const nombre = String(get(r,iNom)).replace(/\s+/g,' ').trim(); if (!nombre) continue; const etapa = normEtapa(get(r,iEtapa)); const resp = String(get(r,iResp)).trim(); const obs = String(get(r,iObs)).trim(); const fecha = parseFechaExcel(get(r,iIni)) || new Date().toISOString().slice(0,10); let fechaFin = parseFechaExcel(get(r,iFin)); if (fechaFin && fechaFin < fecha) fechaFin = fecha; const nobs = norm(obs); const completado = nobs.includes('complet') || nobs.includes('finaliz') || nobs.includes('realizad') || nobs.includes('cerrad'); const publica = ['si','yes','true','1','x','publico'].includes(norm(get(r,iPub)).replace(/[^a-z0-9]/g,'')); nuevoCron.push({id: uid(),nombre,fecha,fechaFin: fechaFin || '',tipo: inferTipo(nombre),etapa,responsable: resp,desc: obs,completado,motivo: nobs.includes('en curso') ? 'En curso' : '',publica}); } if (nuevoCron.length === 0) { toast('No se encontraron actividades válidas'); input.value = ''; return; } const manuales = CRON.filter(a=>a.manual); CRON = nuevoCron.concat(manuales); saveCron(); renderCronograma(); toast(`✅ ${nuevoCron.length} actividades cargadas`); input.value = ''; } catch (error) { console.error(error); toast('Error al procesar el archivo'); } }; reader.readAsArrayBuffer(file); }
 setInterval(()=>{ const hoy = new Date().toISOString().slice(0,10); CRON.forEach(a=>{ if(!a.completado && a.fecha === hoy && !a._notificado){ a._notificado = true; lanzarNotificacion('Recordatorio: '+a.nombre, 'Actividad programada para hoy'); } }); }, 60000);
 
@@ -3778,8 +3974,8 @@ function expGanadoresXL() { const orgFil = $('gOrgFilter').value; const facFil =
 function demo(){ const p=(nombre,doc,email,tel,sem,tot,ck,nov)=>({nombre,doc,email,tel,sem,tot,ck:ck||{},nov:nov||'',obs:''}); D.push({id:uid(),votos:0,gan:false,rol:'Estudiante',org:'Consejo de Facultad',fac:'Facultad de Ingeniería',prog:'Sistemas',pri:p('Ana Pérez','1001','ana@unbosque.edu.co','3001234567','5','10',{sg:'ok',fp:'ok'}),sup:p('Luis Gómez','1002','luis@unbosque.edu.co','3007654321','1','10')},{id:uid(),votos:0,gan:false,rol:'Docente',org:'Consejo Académico',fac:'N/A',prog:'Biología',pri:p('Marta Ruiz','1003','marta@unbosque.edu.co','3101112222','','',{th:'ok'}),sup:p('Jorge León','1006','jorge@unbosque.edu.co','3153334444','','',{th:'ok'},'Renuncia')},{id:uid(),votos:0,gan:false,rol:'Egresado',org:'Comité de Posgrado',fac:'Facultad de Ciencias',prog:'Maestría en Química',pri:p('Carlos Díaz','1004','carlos@unbosque.edu.co','3205556666','','',{eg:'x'}),sup:p('Elena Rojas','1007','elena@unbosque.edu.co','3187778888','','',{eg:'ok'})}); save();draw(); }
 
 function descargarRespaldo() { const data = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, fecha: new Date().toISOString() }; const a = document.createElement('a'); a.setAttribute('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data))); a.setAttribute('download', 'respaldo_elecciones.json'); document.body.appendChild(a); a.click(); a.remove(); toast('Respaldo descargado'); }
-function guardarYLimpiar() { if(SESSION?.rol !== 'administrador'){ toast('Solo el administrador'); return; } if(!confirm('Esto descarga un respaldo y BORRA todos los datos. ¿Continuar?')) return; if(!confirm('¿Estás seguro?')) return; const backup = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, ORG_ACTIVOS }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup)); const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "respaldo_elecciones.json"); document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove(); localStorage.removeItem(K); localStorage.removeItem(K_CRON); localStorage.removeItem(K_FIRMAS); localStorage.removeItem(K_VOTANTES); localStorage.removeItem(K_CENSO); localStorage.removeItem(K_ORG_ACTIVOS); localStorage.removeItem(K_SOPORTE); idbClear(); toast('Respaldo descargado. Recargando...'); setTimeout(() => { window.location.reload(); }, 1500); }
-function importarRespaldo(input) { if(SESSION?.rol !== 'administrador'){ toast('Solo el administrador'); return; } const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if(data.D) D = data.D; if(data.CRON) CRON = data.CRON; if(data.FIRMAS) FIRMAS = data.FIRMAS; if(data.VOTANTES) VOTANTES = data.VOTANTES; if(data.CENSO_DATA) CENSO_DATA = data.CENSO_DATA; if(data.SOPORTES) SOPORTES = data.SOPORTES; if(data.ORG_ACTIVOS) ORG_ACTIVOS = data.ORG_ACTIVOS; save(); saveCron(); saveFirmas(); saveVotantes(); saveCenso(); saveSoportes(); localStorage.setItem(K_ORG_ACTIVOS, JSON.stringify(ORG_ACTIVOS)); toast('Datos importados. Recargando...'); setTimeout(() => { window.location.reload(); }, 1500); } catch (error) { console.error(error); toast('Error al importar el archivo.'); } input.value = ''; }; reader.readAsText(file); }
+function guardarYLimpiar() { if(SESSION?.rol !== 'administrador'){ toast('Solo el administrador'); return; } if(!confirm('Esto descarga un respaldo y BORRA todos los datos. ¿Continuar?')) return; if(!confirm('¿Estás seguro?')) return; const backup = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, ORG_ACTIVOS }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup)); const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "respaldo_elecciones.json"); document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove(); D = []; CRON = []; FIRMAS = []; VOTANTES = { totalCenso: 0, totalHabilitados: 0, fechaCorte: '', historial: [] }; CENSO_DATA = []; SOPORTES = []; toast('Respaldo descargado. Recargando...'); setTimeout(() => { window.location.reload(); }, 1500); }
+function importarRespaldo(input) { if(SESSION?.rol !== 'administrador'){ toast('Solo el administrador'); return; } const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if(data.D) D = data.D; if(data.CRON) CRON = data.CRON; if(data.FIRMAS) FIRMAS = data.FIRMAS; if(data.VOTANTES) VOTANTES = data.VOTANTES; if(data.CENSO_DATA) CENSO_DATA = data.CENSO_DATA; if(data.SOPORTES) SOPORTES = data.SOPORTES; if(data.ORG_ACTIVOS) ORG_ACTIVOS = data.ORG_ACTIVOS; save(); saveCron(); saveFirmas(); saveVotantes(); saveCenso(); saveSoportes(); toast('Datos importados. Recargando...'); setTimeout(() => { window.location.reload(); }, 3000); } catch (error) { console.error(error); toast('Error al importar el archivo.'); } input.value = ''; }; reader.readAsText(file); }
 
 (async function verificarTokenReset(){
   const params = new URLSearchParams(window.location.search);
@@ -3823,7 +4019,6 @@ renderCensoData();
 renderVacantes();
 renderSoportes();
 
-
 /* =====================================================================
    PERMISOS: UI de usuarios, vista de cronograma, alcance y solo-lectura
    ===================================================================== */
@@ -3845,18 +4040,25 @@ function actualizarPermisosUI(pre, cambioRol, init){
   const rolKey = $(pre+'_rol').value;
   const {def, fijo, puedeEd} = _capacidadesRol(rolKey);
   const cls = pre === 'u_new' ? 'u_mod' : 'u_edit_mod';
-  let sel = init?.mods ?? [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
-  if(cambioRol && !init && !(rolKey==='editor'||rolKey==='lectura')) sel = [];
+
+  let sel;
+  if(init && Array.isArray(init.mods)) sel = init.mods.slice();
+  else if(!cambioRol) sel = [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
+  else sel = [];
+
   const todos = def?.mods === '*';
+  let baseFijos = [];
+  if(fijo && !todos && Array.isArray(def.mods)) baseFijos = def.mods.slice();
+  const seleccionFinal = todos ? MODULOS.map(m=>m.key) : [...new Set([...baseFijos, ...sel])];
+
   const chips = MODULOS.map(m => {
-    const marcado = todos ? true : (fijo ? def.mods.includes(m.key) : sel.includes(m.key));
-    const edita = marcado && puedeEd(m.key, sel);
-    return `<label class="chip-t"><input type="checkbox" value="${m.key}" class="${cls}" ${marcado?'checked':''} ${fijo?'disabled':''} onchange="actualizarPermisosUI('${pre}',false)"><span>${esc(m.label)}${edita?' <em class="chip-edit">✎</em>':''}</span></label>`;
+    const marcado = seleccionFinal.includes(m.key);
+    const edita = marcado && puedeEd(m.key, seleccionFinal);
+    return `<label class="chip-t"><input type="checkbox" value="${m.key}" class="${cls}" ${marcado?'checked':''} ${todos?'disabled':''} onchange="actualizarPermisosUI('${pre}',false)"><span>${esc(m.label)}${edita?' <em class="chip-edit">✎</em>':''}</span></label>`;
   }).join('');
   $(pre+'_mods').innerHTML = chips;
-  $(pre+'_perm').innerHTML = `<b>${esc(def?.label || rolKey)}</b>: ${esc(ROLES_DESC[rolKey] || '')}`;
+  $(pre+'_perm').innerHTML = `<b>${esc(def?.label || rolKey)}</b>: ${esc(ROLES_DESC[rolKey] || '')}${fijo?' <span style="color:var(--naranja)">— Puedes ajustar los módulos marcados.</span>':''}`;
 
-  // Selector de cronograma (solo si el rol/usuario tiene el módulo Cronograma)
   const selFinal = [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
   const incCron = rolKey !== 'administrador' && (todos || selFinal.includes('vCron'));
   const box = $(pre+'_cronbox');
@@ -3874,10 +4076,8 @@ function leerPermisos(pre){
   const rolKey = $(pre+'_rol').value;
   const def = ROLES[rolKey];
   const cls = pre === 'u_new' ? 'u_mod' : 'u_edit_mod';
-  let mods = [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
-  if(def && Array.isArray(def.mods) && def.mods.length) mods = [...def.mods];
   const todos = def?.mods === '*';
-  if(todos) mods = [];
+  let mods = todos ? [] : [...document.querySelectorAll('.'+cls+':checked')].map(i=>i.value);
   const incCron = rolKey !== 'administrador' && (todos || mods.includes('vCron'));
   const cv = document.querySelector(`input[name="${pre}_cronv"]:checked`)?.value || (def?.cronVista || 'ambos');
   if(incCron){
@@ -3904,20 +4104,21 @@ function renderMatrizRoles(){
   $('matrizRoles').innerHTML = `<table class="matriz-roles"><thead><tr><th>Rol</th><th>Puede ver</th><th>Puede editar</th><th>Cronograma</th><th>Descripción</th></tr></thead><tbody>${filas}</tbody></table>`;
 }
 
-// Cronograma: muestra solo el/los panel(es) que corresponden
 function aplicarVistaCron(){
   const vista = getCronVista();
   const pub = $('panelCronPub'), int = $('panelCronInt');
   if(!pub || !int) return;
-  pub.style.display = (vista === 'interno') ? 'none' : '';
-  int.style.display = (vista === 'publico') ? 'none' : '';
+  const verPub = (vista === 'ambos' || vista === 'publico');
+  const verInt = (vista === 'ambos' || vista === 'interno');
+  pub.style.display = verPub ? '' : 'none';
+  int.style.display = verInt ? '' : 'none';
   const grid = pub.parentElement;
-  if(grid) grid.style.gridTemplateColumns = (vista === 'ambos') ? '' : '1fr';
+  if(grid) grid.style.gridTemplateColumns = (verPub && verInt) ? '' : '1fr';
   const org = $('cardOrgActivos');
-  if(org) org.style.display = (vista === 'publico') ? 'none' : '';
+  if(org) org.style.display = verInt ? '' : 'none';
+  try { renderCronograma(false); } catch(e) { console.warn('renderCronograma', e); }
 }
 
-// Seguimiento: el validador solo ve los roles que le corresponden en el filtro
 function aplicarAlcanceSeguimiento(){
   const fr = $('fr'); if(!fr) return;
   const kv = clavesValidador();
@@ -3929,7 +4130,6 @@ function aplicarAlcanceSeguimiento(){
   if(kv && fr.value && fr.selectedOptions[0]?.disabled) fr.value = '';
 }
 
-// Solo lectura: oculta / bloquea todo lo que modifica, elimina o carga
 const _LOCK_SEL = '.ck-org, #inpTotalCenso, #inpTotalHabilitados, #at, .firma-item input, .firma-item select, input[onchange*="toggleGanador"], input[onchange*="setV("], select[onchange*="setV("]';
 function aplicarModoLectura(){
   if(!SESSION) return;
@@ -3958,7 +4158,6 @@ function aplicarModoLectura(){
 }
 (function(){ let t=null; new MutationObserver(()=>{ if(!SESSION) return; clearTimeout(t); t=setTimeout(()=>{ try{ aplicarModoLectura(); }catch(e){} },60); }).observe(document.body,{childList:true,subtree:true}); })();
 
-// Defensa en profundidad: cualquier acción de escritura sin guarda propia queda bloqueada para lectores
 function _guardar(nombre, modulo){
   const orig = window[nombre]; if(typeof orig !== 'function') return;
   window[nombre] = function(...args){
@@ -3994,7 +4193,6 @@ function _guardar(nombre, modulo){
           await supabaseClient.auth.signOut();
           detenerTimerSesion();
           SESSION = null;
-          try { localStorage.removeItem(K_SESSION); localStorage.removeItem(K_LAST_ACTIVITY); } catch(e){}
           location.reload();
           return;
         }
@@ -4013,6 +4211,11 @@ function _guardar(nombre, modulo){
 })();
 
 setInterval(async () => { if(SESSION && supabaseClient){ await cargarEstadoElecciones(); actualizarBannerCierre(); } }, 60000);
+
+// Pull periódico para mantener datos sincronizados entre usuarios
+setInterval(() => { if(!document.hidden) pullYRefrescar(true); }, 10000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) pullYRefrescar(true); });
+window.addEventListener('focus', () => pullYRefrescar());
 </script>
 </body>
 </html>
