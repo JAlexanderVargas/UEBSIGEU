@@ -32,7 +32,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 small{display:block;color:var(--mut);font-size:12px;line-height:1.3}
 .hide{display:none!important}
 
-/* ================= SIDEBAR ================= */
 aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;overflow-y:auto;transition:box-shadow .3s}
 .brand{display:flex;flex-direction:column;align-items:center;margin:0 6px 14px;color:var(--blanco);text-align:center}
 .brand img{height:70px;width:auto;margin-bottom:12px;filter: brightness(0) invert(1);transition:transform .4s ease}
@@ -56,13 +55,11 @@ aside{background:var(--oscuro);color:var(--blanco);padding:24px 16px;position:st
 #sideActions .nav svg { flex: none; }
 body.logged-in aside { padding-top: 20px; overflow-y: auto; }
 
-/* ================= MAIN ================= */
 main{padding:28px 32px 60px;min-width:0}
 .top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--oscuro);animation:fadeUp .4s ease both}
 .top p{margin:2px 0 20px;color:var(--oscuro);opacity:0.8;animation:fadeUp .45s ease .05s both}
 main > section:not(.hide){animation:fadeUp .35s cubic-bezier(.2,.8,.2,1) both}
 
-/* ================= SYNC BADGE ================= */
 #syncBadge{position:fixed;top:12px;right:16px;z-index:9998;display:none;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 22px -12px rgba(11,59,44,.4);font-size:12.5px;font-weight:700;color:var(--oscuro);transition:all .3s}
 body.logged-in #syncBadge{display:flex}
 #syncBadge .dot{width:10px;height:10px;border-radius:50%;background:#9aa1b5;transition:background .3s}
@@ -71,7 +68,6 @@ body.logged-in #syncBadge{display:flex}
 #syncBadge.err .dot{background:#d1433a}
 #syncBadge .txt{max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* ================= KPIS ================= */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:18px}
 .kpi-card{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:20px 22px 18px;border-radius:22px;
   background:linear-gradient(150deg,#ffffff 0%,var(--soft,#f1f7f3) 160%);border:1px solid rgba(11,59,44,.07);
@@ -1358,7 +1354,7 @@ body.logged-in #topbar { display: flex; }
 
 <script>
 /* =====================================================================
-   CONFIGURACIÓN SUPABASE — tablas nuevas (sis_*)
+   CONFIGURACIÓN SUPABASE
    ===================================================================== */
 const SUPABASE_URL = 'https://doqoiporsulytaytuokc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvcW9pcG9yc3VseXRheXR1b2tjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0MTQ0NTMsImV4cCI6MjEwOTk5MDQ1M30.VBgRgNJChmzvfI4k7IXIPCZ9akbqShtP-VG-3jl7Gz4';
@@ -1416,7 +1412,6 @@ const KEYS = ['th', 'eg', 'sg', 'fp'];
 const NOV = { '': 'Sin novedad', 'Renuncia': 'Renuncia', 'Ubicación semestre': 'No cumple: ubicación semestre', 'Llamado de atención': 'Llamado de atención', 'Error postulación': 'Error postulación', 'Otra novedad': 'Otra novedad' };
 const ERRORS = { '': 'Seleccione error...', 'No quiero postularme': 'No quiero postularme', 'Me postulé como principal pero quería ser suplente': 'Me postulé como principal pero quería ser suplente', 'Me postulé como suplente pero quiero ser principal': 'Me postulé como suplente pero quiero ser principal', 'Nos postulamos por la facultad errada': 'Nos postulamos por la facultad errada', 'Nos postulamos con error equivocado': 'Nos postulamos con error equivocado', 'Me postulé pero me arrepentí': 'Me postulé pero me arrepentí' };
 
-const K_SESSION = 'session_v1';
 const CRON_TOK = { publico: 'cron:publico', interno: 'cron:interno' };
 const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -1487,19 +1482,12 @@ const TEXTO_ACTA_DEFECTO = [
 ].join('\n');
 
 /* =====================================================================
-   ESTADO — TODO VACÍO AL INICIAR (sin datos precargados)
+   ESTADO
    ===================================================================== */
-let D = [];              // candidatos
-let CRON = [];           // cronograma
-let FIRMAS = [];         // firmas configurables
+let D = []; CRON = []; FIRMAS = [];
 let VOTANTES = { totalCenso: 0, totalHabilitados: 0, fechaCorte: '', historial: [] };
-let CENSO_DATA = [];
-let SOPORTES = [];
-let ORG_ACTIVOS = [];
-let SESSION = null;
-let LOG = [];
-let ELECCIONES_CERRADAS = false;
-let USERS_CACHE = [];
+let CENSO_DATA = []; SOPORTES = []; ORG_ACTIVOS = [];
+let SESSION = null; LOG = []; ELECCIONES_CERRADAS = false; USERS_CACHE = [];
 
 let editId = null;
 let publicSignaturePad = null;
@@ -1548,7 +1536,6 @@ const normFacultad = (s) => {
   return 'Facultad de ' + raw;
 };
 
-/* Toast Premium */
 let tt, _ttHide;
 function toast(m, tipo) {
   const t = $('toast'); if (!t) return;
@@ -1556,41 +1543,29 @@ function toast(m, tipo) {
   const lim = txt.trim();
   const esErr = tipo === 'error' || /^(❌|⛔|🚫|Error|No se pudo|Sin permiso|Sin conexión|Solo (el )?admin)/i.test(lim);
   const esAv = !esErr && (tipo === 'warn' || /^(⚠|🔒|Primero|Debe |Selecciona|Completa)/i.test(lim));
-  
   const cls = esErr ? 'err' : esAv ? 'warn' : 'ok';
   t.classList.remove('err', 'warn', 'ok');
   t.classList.add(cls);
-  
   let icon = '✓';
   if (esErr) icon = '✕';
   else if (esAv) icon = '!';
   else if (/[🔔🔊]/u.test(lim)) icon = '🔔';
   else if (/[🧹📂💾📥]/u.test(lim)) icon = '🗂';
   else if (/[🏆🥇]/u.test(lim)) icon = '🏆';
-  
   t.textContent = '';
   const box = document.createElement('div'); box.className = 't-in';
-  
   const ic = document.createElement('div'); ic.className = 't-icon'; ic.textContent = icon;
   const content = document.createElement('div'); content.className = 't-content';
-  
   let title = 'Aviso';
   let msg = lim;
   const parts = lim.match(/^([^:]+):\s*(.*)$/);
-  if (parts && parts[1].length < 30) {
-    title = parts[1];
-    msg = parts[2];
-  }
-  
+  if (parts && parts[1].length < 30) { title = parts[1]; msg = parts[2]; }
   const titleEl = document.createElement('span'); titleEl.className = 't-title'; titleEl.textContent = title;
   const msgEl = document.createElement('span'); msgEl.className = 't-msg'; msgEl.textContent = msg;
   content.append(titleEl, msgEl);
-  
   const x = document.createElement('button'); x.className = 't-x'; x.type = 'button'; x.setAttribute('aria-label', 'Cerrar aviso'); x.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
   x.onclick = () => _toastOcultar();
-  
   box.append(ic, content, x); t.appendChild(box);
-  
   clearTimeout(tt); clearTimeout(_ttHide);
   try { if (t.showPopover) { if (t.matches(':popover-open')) t.hidePopover(); t.showPopover(); } } catch (e) { }
   requestAnimationFrame(() => t.classList.add('on'));
@@ -1616,23 +1591,15 @@ window.addEventListener('error', ev => _reportarErrorGlobal(ev.message || ev.err
 window.addEventListener('unhandledrejection', ev => _reportarErrorGlobal(ev.reason?.message || ev.reason));
 
 /* =====================================================================
-   ESTADO DE SINCRONIZACIÓN — bus único de datos (sis_config)
+   SINCRONIZACIÓN
    ===================================================================== */
 const SYNC_KEYS = {
-  cand_v2: 'candidatos',
-  cronograma_v2: 'cronograma',
-  votantes_v2: 'votantes',
-  censo_data_v1: 'censo',
-  org_activos_v1: 'org_activos',
-  soporte_data_v1: 'soporte'
+  cand_v2: 'candidatos', cronograma_v2: 'cronograma', votantes_v2: 'votantes',
+  censo_data_v1: 'censo', org_activos_v1: 'org_activos', soporte_data_v1: 'soporte'
 };
 const _syncGet = {
-  cand_v2: () => D,
-  cronograma_v2: () => CRON,
-  votantes_v2: () => VOTANTES,
-  censo_data_v1: () => CENSO_DATA,
-  org_activos_v1: () => ORG_ACTIVOS,
-  soporte_data_v1: () => SOPORTES
+  cand_v2: () => D, cronograma_v2: () => CRON, votantes_v2: () => VOTANTES,
+  censo_data_v1: () => CENSO_DATA, org_activos_v1: () => ORG_ACTIVOS, soporte_data_v1: () => SOPORTES
 };
 
 let _syncEnabled = false;
@@ -1698,10 +1665,7 @@ async function syncPullAll() {
       if (raw === undefined || raw === null) return;
       try {
         const val = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        if (JSON.stringify(val) !== JSON.stringify(_syncGet[localKey]())) {
-          setter(val);
-          changed = true;
-        }
+        if (JSON.stringify(val) !== JSON.stringify(_syncGet[localKey]())) { setter(val); changed = true; }
       } catch (e) { console.warn('sync apply', localKey, e); }
     };
     apply('cand_v2', v => { if (Array.isArray(v)) D = v; });
@@ -1755,15 +1719,12 @@ const saveSoportes = () => _syncPush('soporte_data_v1');
 const saveOrgActivos = () => _syncPush('org_activos_v1');
 
 /* =====================================================================
-   LOG / AUDITORÍA
+   LOG
    ===================================================================== */
 async function registrarLog(accion, modulo, detalle) {
   const entry = {
-    usuario: SESSION?.username || 'sistema',
-    rol: SESSION?.rol || '-',
-    modulo: modulo || '-',
-    accion: accion || '-',
-    detalle: String(detalle ?? '').slice(0, 400),
+    usuario: SESSION?.username || 'sistema', rol: SESSION?.rol || '-',
+    modulo: modulo || '-', accion: accion || '-', detalle: String(detalle ?? '').slice(0, 400),
     fecha: new Date().toISOString()
   };
   LOG.push(entry);
@@ -1782,12 +1743,48 @@ async function registrarLog(accion, modulo, detalle) {
 }
 
 /* =====================================================================
-   SESIÓN / LOGIN
+   SESIÓN — persistencia con sessionStorage (F5 mantiene sesión)
    ===================================================================== */
+const SESSION_KEY = 'unbosque_session_v1';
+const LAST_ACTIVITY_KEY = 'unbosque_last_activity_v1';
+
 let _sessionCheckInterval = null;
 let _lastActivity = 0;
 
-function registrarActividad() { if (!SESSION) return; _lastActivity = Date.now(); }
+function saveSession() {
+  try {
+    if (SESSION) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(SESSION));
+      sessionStorage.setItem(LAST_ACTIVITY_KEY, String(_lastActivity || Date.now()));
+    } else {
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(LAST_ACTIVITY_KEY);
+    }
+  } catch (e) { console.warn('saveSession:', e); }
+}
+
+function cargarSesionGuardada() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || !s.username) return null;
+    const lastAct = Number(sessionStorage.getItem(LAST_ACTIVITY_KEY)) || Date.now();
+    _lastActivity = lastAct;
+    if (Date.now() - lastAct > SESSION_TIMEOUT_MS) {
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(LAST_ACTIVITY_KEY);
+      return null;
+    }
+    return s;
+  } catch (e) { return null; }
+}
+
+function registrarActividad() {
+  if (!SESSION) return;
+  _lastActivity = Date.now();
+  try { sessionStorage.setItem(LAST_ACTIVITY_KEY, String(_lastActivity)); } catch (e) { }
+}
 ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(evt => {
   document.addEventListener(evt, registrarActividad, { passive: true, capture: true });
 });
@@ -1813,6 +1810,7 @@ function iniciarTimerSesion() {
       toast('⏱️ Sesión expirada por inactividad. Cerrando...');
       registrarLog('Cierre automático por inactividad', '-', '5 minutos sin actividad');
       SESSION = null;
+      saveSession();
       if (supabaseClient) supabaseClient.auth.signOut().finally(() => window.location.reload());
       else setTimeout(() => { window.location.reload(); }, 1800);
     }
@@ -1827,9 +1825,7 @@ document.addEventListener('keydown', e => {
   const ls = document.getElementById('loginScreen');
   if (!ls || ls.classList.contains('hide')) return;
   e.preventDefault();
-  if (t.id === 'loginUser' && !document.getElementById('loginPass').value) {
-    document.getElementById('loginPass').focus(); return;
-  }
+  if (t.id === 'loginUser' && !document.getElementById('loginPass').value) { document.getElementById('loginPass').focus(); return; }
   doLogin();
 });
 
@@ -1845,32 +1841,21 @@ async function doLogin() {
     if (!supabaseClient) { $('loginErr').textContent = '⚠️ No hay conexión configurada.'; return; }
     if (!u || !p) { $('loginErr').textContent = 'Usuario y contraseña son obligatorios.'; return; }
 
-    console.log('[login] intentando con:', u);
-
     const { data: rows, error: errPerfil } = await supabaseClient
-      .from(CONFIG.tabla_usuarios)
-      .select('*')
-      .or(`username.eq.${u},email.eq.${u}`)
-      .limit(1);
+      .from(CONFIG.tabla_usuarios).select('*')
+      .or(`username.eq.${u},email.eq.${u}`).limit(1);
 
-    console.log('[login] rows:', rows, 'error:', errPerfil);
-
-    if (errPerfil) {
-      $('loginErr').textContent = '❌ Error consultando usuarios: ' + errPerfil.message;
-      return;
-    }
+    if (errPerfil) { $('loginErr').textContent = '❌ Error consultando usuarios: ' + errPerfil.message; return; }
     const perfil = Array.isArray(rows) ? rows[0] : rows;
     if (!perfil) { $('loginErr').textContent = 'Usuario no encontrado.'; return; }
     if (perfil[CONFIG.col_activo] === false) { $('loginErr').textContent = 'Usuario inactivo.'; return; }
 
     const storedPass = String(perfil[CONFIG.col_pass] ?? '').trim();
-    if (storedPass !== p) {
-      $('loginErr').textContent = 'Usuario o contraseña incorrectos.';
-      return;
-    }
+    if (storedPass !== p) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
 
-    let rolFinal = perfil[CONFIG.col_rol];
-    if (rolFinal === 'leer') rolFinal = 'lectura';
+    let rolFinal = String(perfil[CONFIG.col_rol] || 'lectura').toLowerCase().trim();
+    if (rolFinal === 'leer' || rolFinal === 'readonly') rolFinal = 'lectura';
+    if (rolFinal === 'admin' || rolFinal === 'administrator') rolFinal = 'administrador';
 
     SESSION = {
       id: perfil.id,
@@ -1879,6 +1864,8 @@ async function doLogin() {
       rol: rolFinal,
       modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []
     };
+    _lastActivity = Date.now();
+    saveSession();
 
     await registrarLog('Inicio de sesión', '-', SESSION.username);
     await cargarEstadoElecciones();
@@ -1897,6 +1884,7 @@ function doLogout() {
   detenerTimerSesion();
   registrarLog('Cierre de sesión', '-', SESSION?.username || '');
   SESSION = null;
+  saveSession();
   if (supabaseClient) supabaseClient.auth.signOut().finally(() => location.reload());
   else location.reload();
 }
@@ -1959,9 +1947,7 @@ function modulosDeLista(arr) {
 function cronVistaDeLista(arr, rolKey) {
   const a = Array.isArray(arr) ? arr : [];
   const p = a.includes(CRON_TOK.publico), i = a.includes(CRON_TOK.interno);
-  if (p && i) return 'ambos';
-  if (p) return 'publico';
-  if (i) return 'interno';
+  if (p && i) return 'ambos'; if (p) return 'publico'; if (i) return 'interno';
   return ROLES[rolKey]?.cronVista || 'ambos';
 }
 function getCronVista() {
@@ -1970,16 +1956,13 @@ function getCronVista() {
   const tokens = (SESSION.modulos || []).filter(m => m === CRON_TOK.publico || m === CRON_TOK.interno);
   if (tokens.length) {
     const p = tokens.includes(CRON_TOK.publico), i = tokens.includes(CRON_TOK.interno);
-    if (p && i) return 'ambos';
-    if (p) return 'publico';
-    if (i) return 'interno';
+    if (p && i) return 'ambos'; if (p) return 'publico'; if (i) return 'interno';
   }
   return ROLES[SESSION.rol]?.cronVista || 'ambos';
 }
 function getModulosPermitidos() {
   if (!SESSION) return [];
-  const rol = ROLES[SESSION.rol];
-  if (!rol) return [];
+  const rol = ROLES[SESSION.rol]; if (!rol) return [];
   if (rol.mods === '*') return MODULOS.map(m => m.key);
   const guardados = modulosDeLista(SESSION.modulos);
   if (SESSION.rol === 'editor' || SESSION.rol === 'lectura') return guardados;
@@ -1993,20 +1976,28 @@ function clavesValidador() {
   const v = ROLES[SESSION.rol].validador;
   return Array.isArray(v) ? v.filter(k => KEYS.includes(k)) : null;
 }
+
+/* 🔑 FIX 1: Admin ve TODOS, solo validadores tienen alcance limitado */
 function enAlcance(c) {
   if (!c) return false;
+  if (!SESSION) return true;
+  if (SESSION.rol === 'administrador') return true;
+  if (SESSION.rol === 'auditor') return true;
+  if (SESSION.rol === 'coordinador') return true;
+  if (SESSION.rol === 'editor') return true;
+  if (SESSION.rol === 'lectura') return true;
   const kv = clavesValidador();
   if (!kv) return true;
   const rolCand = String(c.rol || '').trim();
   const cols = CH[rolCand] || [];
   return cols.some(k => kv.includes(k));
 }
+
 function puedeEditar(modulo) {
   if (!SESSION) return false;
   if (SESSION.rol === 'administrador') return true;
   if (ELECCIONES_CERRADAS) return false;
-  const rol = ROLES[SESSION.rol];
-  if (!rol) return false;
+  const rol = ROLES[SESSION.rol]; if (!rol) return false;
   if (rol.validador) return false;
   if (SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;
   if (!getModulosPermitidos().includes(modulo)) return false;
@@ -2018,8 +2009,7 @@ function puedeValidar(campoCheck, cand) {
   if (!SESSION) return false;
   if (SESSION.rol === 'administrador') return true;
   if (ELECCIONES_CERRADAS) return false;
-  const rol = ROLES[SESSION.rol];
-  if (!rol) return false;
+  const rol = ROLES[SESSION.rol]; if (!rol) return false;
   if (rol.validador) {
     if (cand && !enAlcance(cand)) return false;
     if (campoCheck === 'nov') return true;
@@ -2115,7 +2105,7 @@ function actualizarBannerCierre() {
 }
 
 /* =====================================================================
-   USUARIOS (CRUD)
+   USUARIOS
    ===================================================================== */
 async function abrirUsuarios() {
   if (SESSION?.rol !== 'administrador') { toast('Solo administrador'); return; }
@@ -2185,18 +2175,12 @@ async function guardarEdicionUsuario() {
   const rol = $('u_edit_rol').value;
   const activo = $('u_edit_activo').value === 'true';
   const { mods } = leerPermisos('u_edit');
-
   if (!supabaseClient) { toast('❌ Sin conexión a la base de datos'); return; }
   if (!nombre) { toast('Completa el nombre del usuario'); return; }
   if ((rol === 'editor' || rol === 'lectura') && !modulosDeLista(mods).length) { toast('Selecciona al menos un módulo para este rol'); return; }
   if (SESSION && id === SESSION.id && (rol !== 'administrador' || !activo)) { toast('❌ No puedes quitarte el rol de administrador ni desactivarte a ti mismo'); return; }
   try {
-    const updateData = {
-      [CONFIG.col_nombre]: nombre,
-      [CONFIG.col_rol]: rol,
-      [CONFIG.col_modulos]: mods,
-      [CONFIG.col_activo]: activo
-    };
+    const updateData = { [CONFIG.col_nombre]: nombre, [CONFIG.col_rol]: rol, [CONFIG.col_modulos]: mods, [CONFIG.col_activo]: activo };
     if (email) updateData.email = email;
     const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).update(updateData).eq('id', id);
     if (error) throw error;
@@ -2215,29 +2199,17 @@ async function crearUsuario() {
   const pass = $('u_new_pass').value;
   const rol = $('u_new_rol').value;
   const enviarCorreo = $('u_new_enviar_correo').checked;
-
   if (!username || !pass || !email) { toast('Usuario, correo y contraseña son obligatorios'); return; }
   if (pass.length < 6) { toast('La contraseña debe tener al menos 6 caracteres'); return; }
   if (!supabaseClient) { toast('Sin conexión a la base de datos'); return; }
-
   const { mods } = leerPermisos('u_new');
   if ((rol === 'editor' || rol === 'lectura') && !modulosDeLista(mods).length) { toast('Selecciona al menos un módulo para este rol'); return; }
-
   try {
-    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-      email: email, password: pass, options: { data: { nombre: nombre } }
-    });
-    if (authError && !authError.message.includes('already registered')) {
-      throw new Error('Error en Auth: ' + authError.message);
-    }
+    const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password: pass, options: { data: { nombre } } });
+    if (authError && !authError.message.includes('already registered')) throw new Error('Error en Auth: ' + authError.message);
     const insertData = {
-      [CONFIG.col_user]: username,
-      [CONFIG.col_nombre]: nombre,
-      [CONFIG.col_pass]: pass,
-      [CONFIG.col_rol]: rol,
-      [CONFIG.col_modulos]: mods,
-      [CONFIG.col_activo]: true,
-      email: email
+      [CONFIG.col_user]: username, [CONFIG.col_nombre]: nombre, [CONFIG.col_pass]: pass,
+      [CONFIG.col_rol]: rol, [CONFIG.col_modulos]: mods, [CONFIG.col_activo]: true, email
     };
     if (authData?.user?.id) insertData.id = authData.user.id;
     const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).insert([insertData]);
@@ -2249,19 +2221,13 @@ async function crearUsuario() {
           app_name: 'Sistema de Elecciones · Universidad El Bosque', current_year: new Date().getFullYear()
         });
         toast('✅ Usuario creado y correo enviado');
-      } catch (errEmail) {
-        console.warn('Error enviando correo:', errEmail);
-        toast('✅ Usuario creado, pero el correo falló');
-      }
+      } catch (errEmail) { toast('✅ Usuario creado, pero el correo falló'); }
     } else { toast('✅ Usuario creado'); }
     registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
     $('u_new_user').value = ''; $('u_new_nombre').value = ''; $('u_new_pass').value = ''; $('u_new_email').value = '';
     await cargarUsuariosDeSupabase();
     renderTablaUsuarios();
-  } catch (e) {
-    console.error(e);
-    toast('❌ Error: ' + (e.message || 'No se pudo crear'));
-  }
+  } catch (e) { console.error(e); toast('❌ Error: ' + (e.message || 'No se pudo crear')); }
 }
 
 async function toggleActivoUsuario(id) {
@@ -2350,9 +2316,7 @@ function expLogXL() {
 function abrirResetDesdeLogin() {
   _resetOrigenLogin = true;
   switchResetTab('correo');
-  $('resetEmail').value = '';
-  $('resetEmailMsg').textContent = '';
-  $('resetManualMsg').textContent = '';
+  $('resetEmail').value = ''; $('resetEmailMsg').textContent = ''; $('resetManualMsg').textContent = '';
   if (!SESSION || SESSION.rol !== 'administrador') { $('tabResetManual').style.display = 'none'; }
   else { $('tabResetManual').style.display = ''; }
   dlgReset.showModal();
@@ -2363,11 +2327,8 @@ function abrirResetParaUsuario(username, email) {
   _resetOrigenLogin = false;
   switchResetTab('manual');
   $('resetUser').value = username || '';
-  $('resetPass1').value = '';
-  $('resetPass2').value = '';
-  $('resetManualMsg').textContent = '';
-  $('resetEmail').value = email || '';
-  $('resetEmailMsg').textContent = '';
+  $('resetPass1').value = ''; $('resetPass2').value = ''; $('resetManualMsg').textContent = '';
+  $('resetEmail').value = email || ''; $('resetEmailMsg').textContent = '';
   $('tabResetManual').style.display = '';
   dlgReset.showModal();
 }
@@ -2382,8 +2343,7 @@ function switchResetTab(tab) {
 async function enviarResetCorreo() {
   const email = $('resetEmail').value.trim();
   const msg = $('resetEmailMsg');
-  msg.style.color = '#b03a2e';
-  msg.textContent = '';
+  msg.style.color = '#b03a2e'; msg.textContent = '';
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) { msg.textContent = 'Ingresa un correo válido.'; return; }
   if (!supabaseClient) { msg.textContent = 'No hay conexión con el servidor.'; return; }
   if (!emailjsReady) { msg.style.color = '#b35a06'; msg.textContent = '⚠️ El servicio de correo no está configurado.'; return; }
@@ -2426,8 +2386,7 @@ async function cambiarPassManual() {
   const p1 = $('resetPass1').value;
   const p2 = $('resetPass2').value;
   const msg = $('resetManualMsg');
-  msg.style.color = '#b03a2e';
-  msg.textContent = '';
+  msg.style.color = '#b03a2e'; msg.textContent = '';
   if (!user) { msg.textContent = 'Ingresa el nombre de usuario.'; return; }
   if (!p1 || p1.length < 6) { msg.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
   if (p1 !== p2) { msg.textContent = 'Las contraseñas no coinciden.'; return; }
@@ -2441,8 +2400,7 @@ async function cambiarPassManual() {
     registrarLog('Cambio manual de contraseña', 'Usuarios', user);
     setTimeout(() => { $('resetPass1').value = ''; $('resetPass2').value = ''; }, 1500);
   } catch (err) {
-    console.error(err);
-    msg.style.color = '#b03a2e';
+    console.error(err); msg.style.color = '#b03a2e';
     msg.textContent = 'Error: ' + (err.message || 'No se pudo actualizar.');
   }
 }
@@ -2622,7 +2580,7 @@ function tab(n) {
 }
 
 /* =====================================================================
-   SELECCIÓN DE CAMPOS
+   CAMPOS
    ===================================================================== */
 function _setH(id, h) { const e = document.getElementById(id); if (e) e.innerHTML = h; }
 function fillSel() {
@@ -2647,18 +2605,15 @@ function fillSel() {
 /* =====================================================================
    TEXTO DEL ACTA
    ===================================================================== */
-function cargarTextoActa(forzar) {
-  if (forzar || !$('at').value) $('at').value = TEXTO_ACTA_DEFECTO;
-}
+function cargarTextoActa(forzar) { if (forzar || !$('at').value) $('at').value = TEXTO_ACTA_DEFECTO; }
 function guardarTextoActa() { }
 function restaurarTextoActa() {
   if (!confirm('¿Restaurar el texto predefinido?')) return;
-  cargarTextoActa(true);
-  toast('Texto restaurado');
+  cargarTextoActa(true); toast('Texto restaurado');
 }
 
 /* =====================================================================
-   FUNCIONES DE FECHA / NÚMERO A LETRAS
+   FECHAS
    ===================================================================== */
 const NUM_BASE = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
 function numALetras(n) {
@@ -2673,8 +2628,7 @@ function numALetras(n) {
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 function fechaALetras(fechaStr) {
   if (!fechaStr) return '';
-  const f = new Date(fechaStr + 'T12:00:00');
-  if (isNaN(f)) return '';
+  const f = new Date(fechaStr + 'T12:00:00'); if (isNaN(f)) return '';
   return `${numALetras(f.getDate())} (${f.getDate()}) del mes de ${MESES[f.getMonth()]} de ${numALetras(f.getFullYear())} (${f.getFullYear()})`;
 }
 function horaALetras(h, m) {
@@ -2689,7 +2643,7 @@ function horaActualFmt(d) {
 }
 
 /* =====================================================================
-   ACTA — DATOS Y CONSTRUCCIÓN
+   ACTA
    ===================================================================== */
 function ajustarTamanoLetra(size) {
   document.documentElement.style.setProperty('--font-size-acta', size + 'px');
@@ -2700,7 +2654,6 @@ function ajustarTamanoLetra(size) {
     if (bodyAct) bodyAct.style.fontSize = size + 'px';
   }
 }
-
 let audioCtx;
 function playSound() {
   try {
@@ -2771,18 +2724,11 @@ function limpiarVotosEnBlancoInvalidos() {
     const docKey = String(c.pri.doc || '').trim();
     const nomKey = nf(c.pri.nombre);
     let clave;
-    if (blanco) {
-      clave = `B|${base}`;
-    } else if (docKey && nomKey) {
-      clave = `C|${base}|${docKey}|${nomKey}`;
-    } else if (docKey) {
-      clave = `C|${base}|${docKey}`;
-    } else if (nomKey) {
-      clave = `C|${base}|${nomKey}`;
-    } else {
-      clave = `C|${base}|__sin_id_${uid()}`;
-    }
-
+    if (blanco) clave = `B|${base}`;
+    else if (docKey && nomKey) clave = `C|${base}|${docKey}|${nomKey}`;
+    else if (docKey) clave = `C|${base}|${docKey}`;
+    else if (nomKey) clave = `C|${base}|${nomKey}`;
+    else clave = `C|${base}|__sin_id_${uid()}`;
     if (indice.has(clave)) {
       const i = indice.get(clave);
       if ((c.votos || 0) > (nuevoD[i].votos || 0)) nuevoD[i] = c;
@@ -2842,12 +2788,13 @@ function updateOrgActivos() {
 }
 
 /* =====================================================================
-   SEGUIMIENTO — RENDER
+   SEGUIMIENTO
    ===================================================================== */
 function filtered() {
   const q = norm($('q').value), o = $('fo').value, r = $('fr').value, e = $('fe').value, n = $('fnov').value;
+  const esVal = esValidadorRol();
   return D.filter(c => {
-    if (!enAlcance(c)) return false;
+    if (esVal && !enAlcance(c)) return false;
     const P = ppl(c);
     return (!q || P.some(([, p]) => norm(p.nombre).includes(q) || norm(p.doc).includes(q)))
       && (!o || c.org === o) && (!r || c.rol === r)
@@ -2895,7 +2842,8 @@ function rowP(c, w, lab, p, first, n, duplaColor) {
 }
 
 function draw() {
-  const LDall = D.filter(c => ORG_ACTIVOS.includes(c.org) && enAlcance(c));
+  const esVal = esValidadorRol();
+  const LDall = D.filter(c => ORG_ACTIVOS.includes(c.org) && (!esVal || enAlcance(c)));
   const _esBl = c => String(c.pri.nombre || '').replace(/\s+/g, ' ').trim().toUpperCase() === 'VOTO EN BLANCO';
   const LD = LDall.filter(c => !_esBl(c));
   const L = filtered().filter(c => ORG_ACTIVOS.includes(c.org));
@@ -2962,8 +2910,7 @@ function draw() {
 
 const per = (c, w) => w === 'pri' ? c.pri : c.sup;
 function cyc(id, w, k) {
-  const c = D.find(x => x.id === id);
-  if (!c) return;
+  const c = D.find(x => x.id === id); if (!c) return;
   if (SESSION && !puedeValidar(k, c)) { toast('⛔ No tienes permiso para marcar esta casilla'); return; }
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   if (!(CH[c.rol] || []).includes(k)) return;
@@ -3068,16 +3015,7 @@ function saveForm() {
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   const pri = readP('p', editId && D.find(x => x.id === editId).pri);
   if (!pri.nombre) { toast('Escribe el nombre del candidato principal'); return; }
-  const rol = $('f_rol').value;
-  const org = $('f_org').value;
-  const fac = $('f_fac').value;
-  const jornada = $('aJornada') ? $('aJornada').value : '1';
-  if (jornada === '2') {
-    const ganador1 = D.find(c => c.gan && c.rol === rol && c.org === org && c.fac === fac);
-    const vacantes1 = getVacantesPrimeraVuelta();
-    const esVacante = vacantes1.some(v => v.rol === rol && v.org === org && v.fac === fac);
-    if (ganador1 && !esVacante) { alert("⚠️ Este cargo ya fue ocupado en la primera vuelta."); return; }
-  }
+  const rol = $('f_rol').value, org = $('f_org').value, fac = $('f_fac').value;
   const sup = readP('s', editId && D.find(x => x.id === editId).sup);
   const d = { rol, org, fac, prog: $('f_prog').value.trim(), pri, sup: sup.nombre ? sup : null };
   if (editId) Object.assign(D.find(x => x.id === editId), d);
@@ -3122,28 +3060,13 @@ function importXL(inp) {
       for (let i = 1; i < jsonArr.length; i++) {
         const row = jsonArr[i];
         if (!row || row.length === 0 || !row.some(c => String(c).trim() !== '')) continue;
-        const tipo = getVal(row, idxTipo);
-        const facPost = getVal(row, idxFacPost);
-        const rol = getVal(row, idxRol);
-        const docPri = getVal(row, idxDocPri);
-        const nomPri = getVal(row, idxNomPri);
-        const inscPri = getVal(row, idxInscPri);
-        const emailPri = getVal(row, idxEmailPri);
-        const telPri = getVal(row, idxTelPri);
-        const docSup = getVal(row, idxDocSup);
-        const nomSup = getVal(row, idxNomSup);
-        const inscSup = getVal(row, idxInscSup);
-        const emailSup = getVal(row, idxEmailSup);
-        const telSup = getVal(row, idxTelSup);
+        const tipo = getVal(row, idxTipo), facPost = getVal(row, idxFacPost), rol = getVal(row, idxRol);
+        const docPri = getVal(row, idxDocPri), nomPri = getVal(row, idxNomPri), inscPri = getVal(row, idxInscPri);
+        const emailPri = getVal(row, idxEmailPri), telPri = getVal(row, idxTelPri);
+        const docSup = getVal(row, idxDocSup), nomSup = getVal(row, idxNomSup), inscSup = getVal(row, idxInscSup);
+        const emailSup = getVal(row, idxEmailSup), telSup = getVal(row, idxTelSup);
         if (!nomPri) continue;
-        const parseInscripcion = (str) => {
-          let fac = facPost, prog = '', sem = '', tot = '';
-          if (str && str.includes('-')) {
-            const parts = str.split('-').map(s => s.trim());
-            if (parts.length >= 3) { fac = parts[0]; prog = parts[1]; sem = parts[2].replace(/\D/g, ''); }
-          }
-          return { fac, prog, sem, tot };
-        };
+        const parseInscripcion = (str) => { let fac = facPost, prog = '', sem = '', tot = ''; if (str && str.includes('-')) { const parts = str.split('-').map(s => s.trim()); if (parts.length >= 3) { fac = parts[0]; prog = parts[1]; sem = parts[2].replace(/\D/g, ''); } } return { fac, prog, sem, tot }; };
         const parsedPri = parseInscripcion(inscPri);
         const parsedSup = parseInscripcion(inscSup);
         const mk = (nm, doc, tel, email, parsed) => ({ nombre: normNombre(nm), doc, tel, email, sem: parsed.sem, tot: parsed.tot, ck: {}, nov: '', obs: '' });
@@ -3161,9 +3084,7 @@ function importXL(inp) {
       save(); draw();
       const nota = repetidos ? ` (${repetidos} repetidos descartados)` : '';
       toast(`✅ Carga completada: ${n} registros${nota}`, 'ok');
-    } catch (err) {
-      console.error(err); toast('❌ Error al leer el archivo.', 'error');
-    }
+    } catch (err) { console.error(err); toast('❌ Error al leer el archivo.', 'error'); }
     inp.value = '';
   };
   r.readAsArrayBuffer(f);
@@ -3386,14 +3307,12 @@ async function genActa() {
     const alineacion = /^\s*•/.test(b.txt) ? 'left' : 'justify';
     return `<div style="white-space:pre-wrap;text-align:${alineacion};">${inlineHTML(b.txt)}</div>`;
   });
-
   const actaId = getActaId();
   let firmasDB = [];
   if (supabaseClient) {
     const { data } = await supabaseClient.from(CONFIG.tabla_firmas).select('*').eq('acta_id', actaId);
     if (data) firmasDB = data;
   }
-
   const firmaItemHTML = (imgSrc, nombre, cargo) => `
     <div class="acta-firma-item">
       <div class="firma-img-wrap">${imgSrc ? `<img src="${imgSrc}" alt="Firma">` : ''}</div>
@@ -3401,7 +3320,6 @@ async function genActa() {
       <div class="firma-nombre">${esc(nombre || '')}</div>
       <div class="firma-cargo">${esc(cargo || '')}</div>
     </div>`;
-
   let firmasHTML = '<div class="acta-firmas">';
   const _ordenadas = firmasOrdenadas(firmasDB);
   _ordenadas.forEach(f => { firmasHTML += firmaItemHTML(f.imgBase64, f.nombre, f.cargo); });
@@ -3410,12 +3328,10 @@ async function genActa() {
     firmasHTML += firmaItemHTML(null, 'Nombre', 'Cargo');
   }
   firmasHTML += '</div>';
-
   const chkFirmada = $('chkFirmada').checked ? '<div style="text-align:center; margin-top:20px; font-weight:bold; border:2px solid #000; display:inline-block; padding:5px 15px; color:green;">✔ FIRMADA</div>' : '';
   const nodes = [];
   partes.forEach(h => nodes.push(...nodosDesdeHTML(h)));
   nodes.push(...nodosDesdeHTML(`<div style="margin-top:30px;">${firmasHTML}${chkFirmada ? `<div style="text-align:center;">${chkFirmada}</div>` : ''}</div>`));
-
   $('actaOutContainer').classList.remove('hide');
   $('informeOutContainer').classList.add('hide');
   const total = paginarDoc($('actaOut'), { nodes, landscape: false });
@@ -3426,7 +3342,6 @@ async function genActa() {
 }
 
 function getActaId() { return `ACTA-${$('an').value || 'SN'}-${$('aJornada').value}`; }
-
 function firmasConfiguradas() {
   return FIRMAS.filter(f => (f.nombre || '').trim()).map((f, i) => ({ nombre: f.nombre.trim(), cargo: (f.cargo || '').trim(), orden: i + 1 }));
 }
@@ -3439,7 +3354,6 @@ function actualizarBotonesQR() {
   if (bi) bi.textContent = n ? `🔗 QR Individual (${n})` : '🔗 QR Individual';
   if (bg) bg.textContent = n ? `👥 QR Grupal (Mesa · ${n})` : '👥 QR Grupal (Mesa)';
 }
-
 function _crearQR(el, text, size) {
   const niveles = [QRCode.CorrectLevel.L, QRCode.CorrectLevel.M, QRCode.CorrectLevel.Q];
   for (const lvl of niveles) {
@@ -3449,27 +3363,22 @@ function _crearQR(el, text, size) {
   el.textContent = '⚠️ No se pudo generar el QR';
   return false;
 }
-
-function _baseUrlFirma() {
-  return `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(getActaId())}`;
-}
-
+function _baseUrlFirma() { return `${window.location.origin}${window.location.pathname}?firmar=1&acta=${encodeURIComponent(getActaId())}`; }
 function _avisoSinNombre() {
   const sinNombre = FIRMAS.length - firmasConfiguradas().length;
-  return sinNombre > 0 ? `<p class="help" style="margin-top:10px;color:var(--alert-line)">⚠️ ${sinNombre} firma(s) sin nombre no se incluyeron. Escribe el nombre en la configuración de firmas para generarles QR.</p>` : '';
+  return sinNombre > 0 ? `<p class="help" style="margin-top:10px;color:var(--alert-line)">⚠️ ${sinNombre} firma(s) sin nombre no se incluyeron.</p>` : '';
 }
-
 function generarEnlaceFirma() {
   const lista = firmasConfiguradas();
   const cont = $('qrContainer');
   cont.classList.remove('hide');
   if (!lista.length) {
     const url = `${_baseUrlFirma()}&tipo=individual`;
-    cont.innerHTML = `<div class="qr-box"><div id="qrcode"></div><small>${esc(url)}</small></div><p class="help" style="margin-top:12px;">No hay firmas con nombre configuradas, así que se generó un QR genérico.</p>`;
+    cont.innerHTML = `<div class="qr-box"><div id="qrcode"></div><small>${esc(url)}</small></div><p class="help" style="margin-top:12px;">No hay firmas con nombre configuradas.</p>`;
     _crearQR($('qrcode'), url, 180);
     return;
   }
-  cont.innerHTML = `<p class="help" style="margin:0 0 4px;"><b>${lista.length} QR individual(es)</b>, uno por firmante.</p>${_avisoSinNombre()}<div class="qr-grid">
+  cont.innerHTML = `<p class="help" style="margin:0 0 4px;"><b>${lista.length} QR individual(es)</b>.</p>${_avisoSinNombre()}<div class="qr-grid">
     ${lista.map((f, i) => `<div class="qr-card"><div class="qr-num">${f.orden}</div><div class="qr-img" id="qrInd_${i}"></div><b>${esc(f.nombre)}</b><small>${esc(f.cargo || 'Sin cargo')}</small><span class="qr-estado" data-key="${_attr(_kFirmante(f.nombre))}">⏳ Pendiente</span></div>`).join('')}
   </div>`;
   lista.forEach((f, i) => {
@@ -3478,7 +3387,6 @@ function generarEnlaceFirma() {
   });
   cargarFirmasSupabase();
 }
-
 function generarQRGrupal() {
   const lista = firmasConfiguradas();
   const cont = $('qrContainer');
@@ -3493,13 +3401,12 @@ function generarQRGrupal() {
   const lst = lista.map(f => `${limpio(f.nombre)}~${limpio(f.cargo)}`).join('|');
   const url = `${_baseUrlFirma()}&tipo=grupal&lista=${encodeURIComponent(lst)}`;
   const size = url.length > 900 ? 340 : url.length > 500 ? 300 : 260;
-  cont.innerHTML = `<div class="qr-box"><div id="qrcode"></div></div><p class="help" style="margin-top:12px;"><b>Modo Mesa (1 solo QR):</b> los asistentes firman uno tras otro.</p>${_avisoSinNombre()}<ol class="qr-orden">
+  cont.innerHTML = `<div class="qr-box"><div id="qrcode"></div></div><p class="help" style="margin-top:12px;"><b>Modo Mesa:</b> los asistentes firman uno tras otro.</p>${_avisoSinNombre()}<ol class="qr-orden">
     ${lista.map(f => `<li><span class="n">${f.orden}</span><span class="t">${esc(f.nombre)}<small>${esc(f.cargo || 'Sin cargo')}</small></span><span class="qr-estado" data-key="${_attr(_kFirmante(f.nombre))}">⏳ Pendiente</span></li>`).join('')}
   </ol>`;
   _crearQR($('qrcode'), url, size);
   cargarFirmasSupabase();
 }
-
 function actualizarEstadoQR(data) {
   const firmadas = new Set((data || []).map(d => _kFirmante(d.firmante)));
   document.querySelectorAll('.qr-estado').forEach(el => {
@@ -3508,12 +3415,10 @@ function actualizarEstadoQR(data) {
     el.classList.toggle('ok', ok);
   });
 }
-
 setInterval(() => {
   const qc = document.getElementById('qrContainer');
   if (qc && !qc.classList.contains('hide') && !document.hidden) cargarFirmasSupabase();
 }, 8000);
-
 function enviarEnlacePorCorreo() {
   if (!emailjsReady) { toast('EmailJS no configurado'); return; }
   const correo = prompt("Ingresa el correo al que deseas enviar el enlace de firma:");
@@ -3534,7 +3439,6 @@ function enviarEnlacePorCorreo() {
     if (btn) { btn.disabled = false; btn.textContent = '📧 Enviar link por correo'; }
   });
 }
-
 async function cargarFirmasSupabase() {
   if (!supabaseClient) return;
   const actaId = getActaId();
@@ -3543,10 +3447,7 @@ async function cargarFirmasSupabase() {
   actualizarEstadoQR(data);
   const grid = $('firmasGridDigital');
   if (!grid) return;
-  if (data.length === 0) {
-    grid.innerHTML = '<p class="empty" style="grid-column:1/-1">Aún no hay firmas registradas.</p>';
-    return;
-  }
+  if (data.length === 0) { grid.innerHTML = '<p class="empty" style="grid-column:1/-1">Aún no hay firmas registradas.</p>'; return; }
   grid.innerHTML = data.map(f => `
     <div class="firma-item" style="border-left: 4px solid var(--ok); position: relative;">
       <button class="del-firma" onclick="eliminarFirma('${f.id}')" title="Eliminar firma">✕</button>
@@ -3556,7 +3457,6 @@ async function cargarFirmasSupabase() {
     </div>
   `).join('');
 }
-
 async function eliminarFirma(id) {
   if (!confirm('¿Estás seguro de eliminar esta firma? La persona tendrá que volver a firmar.')) return;
   if (!supabaseClient) return;
@@ -3567,9 +3467,7 @@ async function eliminarFirma(id) {
     cargarFirmasSupabase();
   } catch (e) { toast('Error al eliminar: ' + e.message); }
 }
-
 const FIRMA_GRUPAL_ORDEN_ESTRICTO = false;
-
 async function _firmasYaGuardadas(actaId) {
   if (!supabaseClient) return [];
   try {
@@ -3584,13 +3482,12 @@ function _mostrarPad(visible) {
   [cont, bar, btn].forEach(el => { if (el) el.style.display = visible ? '' : 'none'; });
 }
 function _numActa(actaId) { return esc((actaId || '').split('-')[1] || ''); }
-
 async function renderGrupalPublico(actaId) {
   const firmadas = (await _firmasYaGuardadas(actaId)).map(d => _kFirmante(d.firmante));
   const total = _listaGrupal.length;
   const sig = _listaGrupal.findIndex(f => !firmadas.includes(_kFirmante(f.nombre)));
   const info = document.getElementById('publicSignInfo');
-  info.innerHTML = `Acta N.º <b>${_numActa(actaId)}</b><br><b>Modo Mesa:</b> selecciona tu nombre en la lista y firma.${sig === -1 ? '<div style="margin:12px 0;color:#14744a;font-weight:800;">✅ Ya se registraron todas las firmas.</div>' : `<div style="margin:8px 0 12px;font-size:12px;color:var(--mut)">${total - firmadas.filter(k => _listaGrupal.some(f => _kFirmante(f.nombre) === k)).length} de ${total} firma(s) pendiente(s)</div>`}`;
+  info.innerHTML = `Acta N.º <b>${_numActa(actaId)}</b><br><b>Modo Mesa:</b> selecciona tu nombre.${sig === -1 ? '<div style="margin:12px 0;color:#14744a;font-weight:800;">✅ Ya se registraron todas las firmas.</div>' : `<div style="margin:8px 0 12px;font-size:12px;color:var(--mut)">${total - firmadas.filter(k => _listaGrupal.some(f => _kFirmante(f.nombre) === k)).length} de ${total} firma(s) pendiente(s)</div>`}`;
   if (sig === -1) { _mostrarPad(false); return; }
   const select = document.createElement('select');
   select.id = 'selectFirmanteGrupal';
@@ -3627,7 +3524,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       _listaGrupal = rawLista.split('|').map(s => { const [n, ...r] = s.split('~'); return { nombre: (n || '').trim(), cargo: r.join('~').trim() }; }).filter(f => f.nombre);
       await renderGrupalPublico(actaId);
     } else if (tipo === 'grupal') {
-      info.innerHTML = `Acta N.º <b>${_numActa(actaId)}</b><br><b>Modo Mesa:</b> Selecciona tu nombre de la lista.`;
+      info.innerHTML = `Acta N.º <b>${_numActa(actaId)}</b><br><b>Modo Mesa:</b> Selecciona tu nombre.`;
     } else if (nombreQR) {
       _firmanteIndividual = { nombre: nombreQR, cargo: (params.get('c') || '').trim(), orden: params.get('orden') || '' };
       info.innerHTML = `Acta N.º <b>${_numActa(actaId)}</b><br>Firma de${_firmanteIndividual.orden ? ` (#${esc(_firmanteIndividual.orden)})` : ''}:<div style="margin:10px 0 4px;padding:10px 12px;border-left:4px solid var(--oscuro);background:#f0f7f2;border-radius:8px;"><b>${esc(_firmanteIndividual.nombre)}</b><br><span style="color:var(--mut)">${esc(_firmanteIndividual.cargo || 'Sin cargo')}</span></div>`;
@@ -3643,7 +3540,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 function limpiarFirmaPublica() { if (publicSignaturePad) publicSignaturePad.clear(); }
-
 async function enviarFirmaPublica() {
   if (!publicSignaturePad || publicSignaturePad.isEmpty()) { toast('⚠️ Por favor dibuja tu firma'); return; }
   const params = new URLSearchParams(window.location.search);
@@ -3660,8 +3556,7 @@ async function enviarFirmaPublica() {
     if (firmadas.includes(_kFirmante(f.nombre))) { toast('⚠️ Esta firma ya fue registrada'); await renderGrupalPublico(actaId); return; }
     nombre = f.nombre; cargo = f.cargo;
   } else if (tipo === 'grupal') {
-    toast('⚠️ Selecciona tu nombre de la lista');
-    return;
+    toast('⚠️ Selecciona tu nombre de la lista'); return;
   } else if (_firmanteIndividual) {
     nombre = _firmanteIndividual.nombre;
     cargo = _firmanteIndividual.cargo;
@@ -3674,12 +3569,10 @@ async function enviarFirmaPublica() {
   }
   const dataURL = publicSignaturePad.toDataURL('image/png');
   const btn = document.getElementById('btnEnviarFirmaPublica');
-  btn.disabled = true;
-  btn.textContent = '⏳ Guardando...';
+  btn.disabled = true; btn.textContent = '⏳ Guardando...';
   if (!supabaseClient) {
     document.getElementById('publicSignMsg').textContent = '❌ Error de conexión.';
-    btn.disabled = false; btn.textContent = '✅ Enviar firma';
-    return;
+    btn.disabled = false; btn.textContent = '✅ Enviar firma'; return;
   }
   try {
     const { error } = await supabaseClient.from(CONFIG.tabla_firmas).insert([{
@@ -3692,13 +3585,11 @@ async function enviarFirmaPublica() {
       setTimeout(async () => {
         publicSignaturePad.clear();
         document.getElementById('publicSignMsg').textContent = '';
-        btn.disabled = false;
-        btn.textContent = '✅ Enviar firma';
+        btn.disabled = false; btn.textContent = '✅ Enviar firma';
         if (_listaGrupal) await renderGrupalPublico(actaId);
       }, 2000);
     } else {
-      publicSignaturePad.off();
-      btn.style.display = 'none';
+      publicSignaturePad.off(); btn.style.display = 'none';
     }
   } catch (e) {
     document.getElementById('publicSignMsg').textContent = '❌ Error: ' + e.message;
@@ -3717,7 +3608,6 @@ function docsResumen() {
     el.innerHTML = `<b>Acta N.º ${esc(v.numero)}</b> · ${esc(v.jornada)} · Órgano: ${esc(v.consejo)} · Facultad: ${esc(v.facultad)}`;
   } catch (e) { el.textContent = ''; }
 }
-
 async function docsConstruirActa() {
   const d = datosActa();
   const bloques = bloquesActa($('at').value, d);
@@ -3752,7 +3642,6 @@ async function docsConstruirActa() {
   $('docsActaWrap').classList.remove('hide');
   return paginarDoc($('docsActaOut'), { nodes, landscape: false });
 }
-
 async function docsVerActa() {
   if (SESSION && !puedeVer('vDocs')) { toast('⛔ No tienes permiso'); return false; }
   const btn = $('btnDocsVer'); btn.disabled = true; $('docsEstado').textContent = 'Generando acta…';
@@ -3766,7 +3655,6 @@ async function docsVerActa() {
     toast('❌ No se pudo generar el acta: ' + (e.message || e)); return false;
   } finally { btn.disabled = false; }
 }
-
 async function docsDescargarPDF() {
   if (SESSION && !puedeVer('vDocs')) { toast('⛔ No tienes permiso'); return; }
   const btn = $('btnDocsPDF'); btn.disabled = true;
@@ -3795,7 +3683,7 @@ async function docsDescargarPDF() {
 }
 
 /* =====================================================================
-   PAGINACIÓN / ACTA
+   PAGINACIÓN
    ===================================================================== */
 const CM_PX = 96 / 2.54;
 const HEAD_HTML = `<div class="acta-header" style="background-color:#007a3d; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-radius: 0; box-sizing: border-box; width: 100%;"><div style="display: flex; align-items: center; gap: 12px; color: #ffffff;"><img src="Logo_de_la_Universidad_El_Bosque.png" alt="Logo U. El Bosque" style="height: 48px; width: auto; filter: brightness(0) invert(1);"></div><div style="background-color: #7ab800; color: #ffffff; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 2px; letter-spacing: 0.5px; white-space: nowrap; font-family: Arial, sans-serif;">Dirección Registro y Control Académico</div></div>`;
@@ -3999,7 +3887,7 @@ function tablaActaHTML(d) {
 }
 
 /* =====================================================================
-   INFORME DE VOTACIÓN
+   INFORME
    ===================================================================== */
 function generarInformeVotacion() {
   limpiarVotosEnBlancoInvalidos();
@@ -4009,10 +3897,10 @@ function generarInformeVotacion() {
   const anio = new Date().getFullYear();
   const periodo = `${anio}-${anio + 1}`;
   const rolDe = c => mRol(c.rol);
-  let html = ''; let secciones = 0; const sinDatos = [];
+  let html = ''; let secciones = 0;
   roles.forEach(rol => {
     const L = D.filter(c => rolDe(c) === rol && ORG_ACTIVOS.includes(c.org));
-    if (L.length === 0) { sinDatos.push(rol + 's'); return; }
+    if (L.length === 0) return;
     html += `<div data-keep="1" ${secciones ? 'data-newpage="1"' : ''} style="text-align:center; margin-bottom: 14px;"><h2 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase;">Informe de votaciones ${jornada === '2' ? 'segunda' : 'primera'} jornada ${periodo}_${rol}s</h2></div>`;
     secciones++;
     const gruposOrg = {};
@@ -4214,7 +4102,7 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 function descargarPlantillaVotos() {
-  const data = [['Tipo', 'Facultad', 'Rol', 'Doc. principal', 'Nombre1', 'Email1', 'Teléfono1', 'Doc. suplente', 'Nombre2', 'Email2', 'Teléfono2', 'Estado', 'Votos'], ['Consejo Facultad', 'Facultad de Ingenieria', 'Docente', '4521879813', 'Fidel Andres Perez Ramirez Aristizabal', 'dasffgmirez@unbosque.edu.co', '23443328140', 'Martha Julia Perez Lopez Maldonado', 'lmartha@unbosque.edu.co', '', 'Aprobado', 140]];
+  const data = [['Tipo', 'Facultad', 'Rol', 'Doc. principal', 'Nombre1', 'Email1', 'Teléfono1', 'Doc. suplente', 'Nombre2', 'Email2', 'Teléfono2', 'Estado', 'Votos'], ['Consejo Facultad', 'Facultad de Ingenieria', 'Docente', '4521879813', 'Fidel Andres Perez', 'fidel@unbosque.edu.co', '23443328140', 'Martha Julia Perez', 'martha@unbosque.edu.co', '', 'Aprobado', 140]];
   const ws = XLSX.utils.aoa_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Plantilla_Votos');
@@ -4437,7 +4325,7 @@ function renderAnalitica() {
 }
 
 /* =====================================================================
-   VACANTES RENDER
+   VACANTES
    ===================================================================== */
 function renderVacantes() {
   const facs = FACULTADES;
@@ -4638,7 +4526,7 @@ function delSoporte(id) {
   if (confirm('¿Eliminar este registro?')) { SOPORTES = SOPORTES.filter(x => x.id !== id); saveSoportes(); renderSoportes(); }
 }
 function descargarPlantillaForms() {
-  const data = [['Nombre Completo', 'Documento', 'Motivo del Soporte', 'Gestor', 'Canales (separados por coma)', 'Solucionado (SI/NO)', 'Observaciones'], ['Juan Pérez', '10203040', 'No aparece en el censo', 'Coordinador Electoral', 'WhatsApp, Forms', 'NO', 'Se escaló a sistemas'], ['Ana Gómez', '10203041', 'Problema con el voto', 'Soporte Técnico', 'Teléfono, Correo', 'SI', 'Se reinició la contraseña']];
+  const data = [['Nombre Completo', 'Documento', 'Motivo del Soporte', 'Gestor', 'Canales (separados por coma)', 'Solucionado (SI/NO)', 'Observaciones'], ['Juan Pérez', '10203040', 'No aparece en el censo', 'Coordinador Electoral', 'WhatsApp, Forms', 'NO', 'Se escaló a sistemas']];
   const ws = XLSX.utils.aoa_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Plantilla_Forms');
@@ -4702,7 +4590,6 @@ function estadoGuardado() {
   el.className = 'cr-save';
   el.innerHTML = `☁️ Sincronizado con el servidor · ${CRON.length} actividades · ${hora}`;
 }
-
 let _crI = 0;
 function cronItemHTML(a, hoy, interno) {
   const fin = a.fechaFin || a.fecha;
@@ -5075,7 +4962,7 @@ function importarRespaldo(input) {
 }
 
 /* =====================================================================
-   RESET DE TOKEN (link de correo)
+   RESET TOKEN
    ===================================================================== */
 (async function verificarTokenReset() {
   const params = new URLSearchParams(window.location.search);
@@ -5085,7 +4972,7 @@ function importarRespaldo(input) {
   if (!supabaseClient) return;
   try {
     const { data, error } = await supabaseClient.from(CONFIG.tabla_usuarios).select('id, reset_expira, activo').eq('email', email).eq('reset_token', token).maybeSingle();
-    if (error || !data) { toast('❌ El enlace de restablecimiento no es válido.'); window.history.replaceState({}, '', window.location.pathname); return; }
+    if (error || !data) { toast('❌ El enlace no es válido.'); window.history.replaceState({}, '', window.location.pathname); return; }
     if (!data.activo) { toast('❌ El usuario está inactivo.'); window.history.replaceState({}, '', window.location.pathname); return; }
     if (new Date(data.reset_expira) < new Date()) { toast('❌ El enlace expiró.'); window.history.replaceState({}, '', window.location.pathname); return; }
     const nuevaPass = prompt('Ingresa tu nueva contraseña (mínimo 6 caracteres):');
@@ -5105,7 +4992,7 @@ function importarRespaldo(input) {
 })();
 
 /* =====================================================================
-   BOOTSTRAP — TODO VACÍO
+   BOOTSTRAP
    ===================================================================== */
 function normalizarFacultadesGlobal() {
   let cambios = 0;
@@ -5133,39 +5020,47 @@ renderVacantes();
 renderSoportes();
 
 /* =====================================================================
-   INIT AUTH
+   INIT AUTH — restauración de sesión desde sessionStorage (F5 mantiene sesión)
    ===================================================================== */
 (async function initAuth() {
+  if (!SESSION) {
+    const guardada = cargarSesionGuardada();
+    if (guardada) {
+      SESSION = guardada;
+      if (SESSION.rol === 'leer') SESSION.rol = 'lectura';
+      if (SESSION.rol === 'admin' || SESSION.rol === 'administrator') SESSION.rol = 'administrador';
+    }
+  }
   if (SESSION) {
     document.body.classList.add('logged-in');
     document.body.classList.remove('logged-out');
-    if (SESSION.rol === 'leer') SESSION.rol = 'lectura';
     aplicarSesion();
     if (supabaseClient) {
       try {
-        const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
-        let perfil = null;
-        if (!userErr && userData?.user) {
-          const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', userData.user.id).maybeSingle();
-          perfil = data;
-        }
-        if (!perfil) {
-          const { data } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', SESSION.id).maybeSingle();
-          perfil = data;
-        }
+        const { data: perfil } = await supabaseClient
+          .from(CONFIG.tabla_usuarios).select('*')
+          .eq(CONFIG.col_user, SESSION.username).maybeSingle();
         if (!perfil || perfil[CONFIG.col_activo] === false) {
           await supabaseClient.auth.signOut();
           detenerTimerSesion();
           SESSION = null;
+          saveSession();
           location.reload();
           return;
         }
-        let rolFinal = perfil[CONFIG.col_rol];
-        if (rolFinal === 'leer') rolFinal = 'lectura';
-        SESSION = { ...SESSION, nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user], rol: rolFinal, modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : [] };
+        let rolFinal = String(perfil[CONFIG.col_rol] || 'lectura').toLowerCase().trim();
+        if (rolFinal === 'leer' || rolFinal === 'readonly') rolFinal = 'lectura';
+        if (rolFinal === 'admin' || rolFinal === 'administrator') rolFinal = 'administrador';
+        SESSION = {
+          ...SESSION, id: perfil.id,
+          nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user],
+          rol: rolFinal,
+          modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []
+        };
+        saveSession();
         await cargarEstadoElecciones();
         actualizarUserCard(); aplicarPermisosUI(); actualizarBannerCierre();
-      } catch (e) { console.warn('No se pudo validar sesión:', e.message); }
+      } catch (e) { console.warn('Validación sesión:', e.message); }
     }
   } else {
     document.body.classList.add('logged-out');
@@ -5175,8 +5070,6 @@ renderSoportes();
 })();
 
 setInterval(async () => { if (SESSION && supabaseClient) { await cargarEstadoElecciones(); actualizarBannerCierre(); } }, 60000);
-
-/* Poll periódico: 8 s + focus + visibilitychange + recarga manual */
 setInterval(() => { if (!document.hidden) pullYRefrescar(true); }, 8000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pullYRefrescar(true); });
 window.addEventListener('focus', () => pullYRefrescar());
