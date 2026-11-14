@@ -2146,6 +2146,12 @@ const normFacultad = (s) => { if(!s) return ''; let raw = String(s).trim(); raw 
 function normalizarFacultadesGlobal(){ let cambios = 0; D.forEach(c => { const nueva = normFacultad(c.fac); if(nueva && nueva !== c.fac) { c.fac = nueva; cambios++; } }); if(cambios) save(); }
 function normalizarNombresGlobal(){ let cambios = 0; D.forEach(c => { if(c.pri && c.pri.nombre){ const n = normNombre(c.pri.nombre); if(n !== c.pri.nombre){ c.pri.nombre = n; cambios++; } } if(c.sup && c.sup.nombre){ const n = normNombre(c.sup.nombre); if(n !== c.sup.nombre){ c.sup.nombre = n; cambios++; } } }); if(cambios) save(); }
 
+function _esBlancoC(c){ return String(c?.pri?.nombre||'').replace(/\s+/g,' ').trim().toUpperCase() === 'VOTO EN BLANCO'; }
+// ¿Hay al menos un candidato real (no "voto en blanco") en este órgano / facultad / rol?
+function grupoTieneCandidatos(org, fac, rol){
+  const nf = t => norm(t).replace(/\s+/g,' ');
+  return D.some(c => !_esBlancoC(c) && c.org === org && c.rol === rol && (esGlobal(org) || nf(c.fac) === nf(fac)));
+}
 function limpiarVotosEnBlancoInvalidos() {
   const esBl = c => String(c.pri.nombre||'').replace(/\s+/g,' ').trim().toUpperCase() === 'VOTO EN BLANCO';
   const nf = t => norm(t).replace(/\s+/g,' ');
@@ -2154,7 +2160,7 @@ function limpiarVotosEnBlancoInvalidos() {
   let cambios = 0;
   D.forEach(c => {
     const blanco = esBl(c);
-    if (blanco) { c.pri.nombre = 'Voto en Blanco'; if (esGlobal(c.org) && c.votos === 0) { cambios++; return; } }
+    if (blanco) { c.pri.nombre = 'Voto en Blanco'; if (esGlobal(c.org) && c.votos === 0) { cambios++; return; } if (!(c.votos > 0) && !grupoTieneCandidatos(c.org, c.fac, c.rol)) { cambios++; return; } }
     const base = `${c.org}|${esGlobal(c.org) ? '' : nf(c.fac)}|${c.rol}`;
     const clave = blanco ? `B|${base}` : `C|${base}|${String(c.pri.doc||'').trim() || nf(c.pri.nombre)}`;
     if (indice.has(clave)) { const i = indice.get(clave); if ((c.votos||0) > (nuevoD[i].votos||0)) nuevoD[i] = c; cambios++; return; }
@@ -2264,6 +2270,7 @@ async function sincronizarAhora(){
   registrarLog('Sincronizar ahora', '-', fallos ? fallos + ' errores' : 'OK');
 }
 function refrescarVistas(){
+  if(SESSION?.rol === 'administrador'){ try{ limpiarVotosEnBlancoInvalidos(); }catch(e){} }
   try { normalizarFacultadesGlobal(); normalizarNombresGlobal(); } catch(e){}
   try { fillSel(); } catch(e){}
   try { if(document.querySelector('main > section:not(.hide)')?.id === 'vSeg') aplicarAlcanceSeguimiento(); } catch(e){}
@@ -2376,13 +2383,13 @@ function inyectarVotosEnBlanco() {
     if (esGlobal(org)) {
       obligatorios[org].forEach(rol => {
         const existe = D.some(c => c.org === org && c.rol === rol && c.pri.nombre.toUpperCase() === 'VOTO EN BLANCO');
-        if (!existe) { D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: 'N/A',prog: 'N/A',pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null}); agregados++; }
+        if (!existe && grupoTieneCandidatos(org, '', rol)) { D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: 'N/A',prog: 'N/A',pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null}); agregados++; }
       });
     } else {
       FACULTADES.forEach(fac => {
         obligatorios[org].forEach(rol => {
           const existe = D.some(c => c.org === org && norm(c.fac).replace(/\s+/g,' ') === norm(fac).replace(/\s+/g,' ') && c.rol === rol && c.pri.nombre.toUpperCase() === 'VOTO EN BLANCO');
-          if (!existe) { D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: fac,prog: 'N/A',pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null}); agregados++; }
+          if (!existe && grupoTieneCandidatos(org, fac, rol)) { D.push({id: uid(),votos: 0,gan: false,rol: rol,org: org,fac: fac,prog: 'N/A',pri: { nombre: 'Voto en Blanco', doc: '0', tel: '', email: '', sem: '', tot: '', ck: {}, nov: '', obs: '' },sup: null}); agregados++; }
         });
       });
     }
@@ -2679,14 +2686,14 @@ function setNov(id,w,v){
   window.scrollTo(0, scrollY);
   if(v==='Renuncia'){ toast('Renuncia registrada.'); playSound(); }
 }
-function del(id){ if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } if(confirm('¿Eliminar esta fórmula?')){D=D.filter(x=>x.id!==id);save();draw();toast('Fórmula eliminada')} }
+function del(id){ if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } if(confirm('¿Eliminar esta fórmula?')){D=D.filter(x=>x.id!==id);limpiarVotosEnBlancoInvalidos();save();draw();toast('Fórmula eliminada')} }
 function aprobarTodos() { if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } if(!confirm('¿Marcar todas las validaciones como "Cumple"?')) return; let count = 0; D.filter(c => ORG_ACTIVOS.includes(c.org) && c.pri.nombre.toUpperCase() !== 'VOTO EN BLANCO').forEach(c => { const act = CH[c.rol] || []; act.forEach(k => { if (c.pri.ck[k] !== 'x') c.pri.ck[k] = 'ok'; }); if (c.sup) { act.forEach(k => { if (c.sup.ck[k] !== 'x') c.sup.ck[k] = 'ok'; }); } count++; }); save(); draw(); toast(`✅ Se aprobaron ${count} fórmulas.`); }
 
 function toggleSem(){document.querySelectorAll('.semrow').forEach(e=>e.classList.toggle('hide',$('f_rol').value!=='Estudiante'))}
 function fillP(pre,p){ p=p||{}; $(pre+'_nombre').value=p.nombre||'';$(pre+'_doc').value=p.doc||'';$(pre+'_tel').value=p.tel||''; $(pre+'_email').value=p.email||'';$(pre+'_foto').value=p.foto||'';$(pre+'_sem').value=p.sem||''; $(pre+'_tot').value=p.tot||'';$(pre+'_nov').value=p.nov||'';$(pre+'_obs').value=p.obs||''; toggleErr(pre); }
 function readP(pre,old){ const est=$('f_rol').value==='Estudiante'; return {nombre:$(pre+'_nombre').value.trim(),doc:$(pre+'_doc').value.trim(),tel:$(pre+'_tel').value.trim(),email:$(pre+'_email').value.trim(),foto:$(pre+'_foto').value.trim(),sem:est?$(pre+'_sem').value:'',tot:est?$(pre+'_tot').value:'',nov:$(pre+'_nov').value,err:$(pre+'_err').value,obs:$(pre+'_obs').value.trim(),ck:(old&&old.ck)||{},ckMeta:(old&&old.ckMeta)||{},novMeta:(old&&old.novMeta)||{}}; }
 function openForm(id){ if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } editId=id||null;const c=id?D.find(x=>x.id===id):{}; $('dt').textContent=id?'Editar candidato':'Agregar candidato'; $('f_rol').value=c.rol||'Estudiante';$('f_org').value=c.org||'Consejo de Facultad'; $('f_fac').value=c.fac||'';$('f_prog').value=c.prog||''; fillP('p',c.pri);fillP('s',c.sup);toggleSem();$('dlg').showModal(); }
-function saveForm(){ if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } const pri=readP('p',editId&&D.find(x=>x.id===editId).pri); if(!pri.nombre){toast('Escribe el nombre del candidato principal');return} const rol = $('f_rol').value; const org = $('f_org').value; const fac = $('f_fac').value; const jornada = $('aJornada') ? $('aJornada').value : '1'; if (jornada === '2') { const ganador1 = D.find(c => c.gan && c.rol === rol && c.org === org && c.fac === fac); const vacantes1 = getVacantesPrimeraVuelta(); const esVacante = vacantes1.some(v => v.rol === rol && v.org === org && v.fac === fac); if (ganador1 && !esVacante) { alert("⚠️ Este cargo ya fue ocupado en la primera vuelta."); return; } } const sup=readP('s',editId&&D.find(x=>x.id===editId).sup); const d={rol,org,fac,prog:$('f_prog').value.trim(),pri,sup:sup.nombre?sup:null}; if(editId)Object.assign(D.find(x=>x.id===editId),d);else D.push({id:uid(),votos:0,gan:false,...d}); save();$('dlg').close();draw();toast('Candidato guardado'); }
+function saveForm(){ if(SESSION && !puedeEditar('vSeg')){ toast('⛔ Sin permiso'); return; } if(ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador'){ toast('🔒 Elecciones cerradas'); return; } const pri=readP('p',editId&&D.find(x=>x.id===editId).pri); if(!pri.nombre){toast('Escribe el nombre del candidato principal');return} const rol = $('f_rol').value; const org = $('f_org').value; const fac = $('f_fac').value; const jornada = $('aJornada') ? $('aJornada').value : '1'; if (jornada === '2') { const ganador1 = D.find(c => c.gan && c.rol === rol && c.org === org && c.fac === fac); const vacantes1 = getVacantesPrimeraVuelta(); const esVacante = vacantes1.some(v => v.rol === rol && v.org === org && v.fac === fac); if (ganador1 && !esVacante) { alert("⚠️ Este cargo ya fue ocupado en la primera vuelta."); return; } } const sup=readP('s',editId&&D.find(x=>x.id===editId).sup); const d={rol,org,fac,prog:$('f_prog').value.trim(),pri,sup:sup.nombre?sup:null}; if(editId)Object.assign(D.find(x=>x.id===editId),d);else D.push({id:uid(),votos:0,gan:false,...d}); inyectarVotosEnBlanco(); save();$('dlg').close();draw();toast('Candidato guardado'); }
 
 const mOrg=v=>{const n=norm(v);return n.includes('direct')?'Consejo Directivo':n.includes('acad')?'Consejo Académico':n.includes('posg')?'Comité de Posgrado':(n.includes('facul')||n.includes('consejo'))?'Consejo de Facultad':v};
 const mRol=v=>{const n=norm(v);return n.startsWith('est')?'Estudiante':(n.startsWith('doc')||n.startsWith('prof'))?'Docente':(n.startsWith('egr')||n.startsWith('gra'))?'Egresado':v};
