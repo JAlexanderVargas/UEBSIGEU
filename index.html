@@ -270,15 +270,47 @@ dialog[open] .dh{animation:slideRight .3s ease both}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dlg{margin:0}
 
-#toast{position:fixed;inset:auto auto 24px 50%;margin:0;border:0;padding:0;background:transparent;overflow:visible;width:max-content;max-width:min(580px,92vw);height:auto;transform:translate(-50%,30px);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:2147483647;color:#fff}
-#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-#toast::backdrop{background:transparent}
-#toast .t-in{display:flex;align-items:flex-start;gap:12px;padding:13px 12px 13px 18px;border-radius:14px;background:var(--oscuro);border-left:5px solid var(--naranja);box-shadow:0 18px 44px -10px rgba(0,0,0,.55);font-weight:600;line-height:1.4;animation:popIn .25s cubic-bezier(.2,.8,.2,1) both}
-#toast.err .t-in{background:#8f1f16;border-left-color:#ff9a8d}
-#toast.warn .t-in{background:#7a4a05;border-left-color:#ffc861}
-#toast .t-msg{flex:1;white-space:pre-line;word-break:break-word;font-size:14px}
-#toast .t-x{border:0;background:rgba(255,255,255,.18);color:#fff;width:26px;height:26px;border-radius:8px;cursor:pointer;font-weight:800;flex:none;line-height:1;transition:background .2s,transform .2s}
-#toast .t-x:hover{background:rgba(255,255,255,.32);transform:rotate(90deg)}
+/* === TOASTS PREMIUM === */
+#toast {
+  position: fixed; inset: auto auto 24px 50%; margin: 0; border: 0; padding: 0;
+  background: transparent; overflow: visible; width: max-content; max-width: min(420px, 92vw);
+  height: auto; transform: translate(-50%, 30px); opacity: 0;
+  transition: opacity .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+  pointer-events: none; z-index: 2147483647; color: #fff;
+}
+#toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+#toast::backdrop { background: transparent; }
+#toast .t-in {
+  display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px;
+  border-radius: 16px; background: rgba(11, 59, 44, 0.95);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  font-weight: 500; line-height: 1.4; animation: toastIn .4s cubic-bezier(.2,.8,.2,1) both;
+}
+#toast .t-icon {
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--naranja); color: #fff; flex: none; font-size: 14px; font-weight: 900;
+  box-shadow: 0 4px 10px -2px rgba(247, 148, 29, 0.4);
+}
+#toast.ok .t-in { border-left: 4px solid var(--ok); }
+#toast.ok .t-icon { background: var(--ok); box-shadow: 0 4px 10px -2px rgba(30, 142, 90, 0.4); }
+#toast.err .t-in { border-left: 4px solid var(--alert-line); }
+#toast.err .t-icon { background: var(--alert-line); box-shadow: 0 4px 10px -2px rgba(225, 74, 61, 0.4); }
+#toast.warn .t-in { border-left: 4px solid #f7b84b; }
+#toast.warn .t-icon { background: #f7b84b; box-shadow: 0 4px 10px -2px rgba(247, 184, 75, 0.4); color: #000; }
+
+#toast .t-content { flex: 1; min-width: 0; }
+#toast .t-title { font-size: 13.5px; font-weight: 800; color: #fff; margin-bottom: 2px; display: block; }
+#toast .t-msg { font-size: 13px; color: rgba(255, 255, 255, 0.85); white-space: pre-line; word-break: break-word; display: block; }
+
+#toast .t-x {
+  border: 0; background: transparent; color: rgba(255, 255, 255, 0.5);
+  width: 24px; height: 24px; border-radius: 6px; cursor: pointer; font-weight: 800; flex: none;
+  display: grid; place-items: center; transition: all .2s;
+}
+#toast .t-x:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+@keyframes toastIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
 .ro-banner{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:#fff7e0;border:1px solid #f0d58a;color:#7a5a06;font-weight:700;font-size:13px;animation:fadeUp .3s ease both}
 .ro-banner[hidden]{display:none!important}
@@ -646,7 +678,8 @@ body.logged-in #topbar { display: flex; }
 </style>
 </head>
 <body class="logged-out">
-  <!-- LOGIN -->
+
+<!-- LOGIN -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 140%);display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:22px;padding:34px 30px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);animation:popIn .45s cubic-bezier(.2,.8,.2,1) both;">
     <div style="text-align:center;margin-bottom:20px;">
@@ -1322,6 +1355,7 @@ body.logged-in #topbar { display: flex; }
 </dialog>
 
 <div id="toast" popover="manual" role="status" aria-live="assertive"></div>
+
 <script>
 /* =====================================================================
    CONFIGURACIÓN SUPABASE — tablas nuevas (sis_*)
@@ -1514,7 +1548,7 @@ const normFacultad = (s) => {
   return 'Facultad de ' + raw;
 };
 
-/* Toast */
+/* Toast Premium */
 let tt, _ttHide;
 function toast(m, tipo) {
   const t = $('toast'); if (!t) return;
@@ -1522,14 +1556,41 @@ function toast(m, tipo) {
   const lim = txt.trim();
   const esErr = tipo === 'error' || /^(❌|⛔|🚫|Error|No se pudo|Sin permiso|Sin conexión|Solo (el )?admin)/i.test(lim);
   const esAv = !esErr && (tipo === 'warn' || /^(⚠|🔒|Primero|Debe |Selecciona|Completa)/i.test(lim));
+  
+  const cls = esErr ? 'err' : esAv ? 'warn' : 'ok';
   t.classList.remove('err', 'warn', 'ok');
-  t.classList.add(esErr ? 'err' : esAv ? 'warn' : 'ok');
+  t.classList.add(cls);
+  
+  let icon = '✓';
+  if (esErr) icon = '✕';
+  else if (esAv) icon = '!';
+  else if (/[🔔🔊]/u.test(lim)) icon = '🔔';
+  else if (/[🧹📂💾📥]/u.test(lim)) icon = '🗂';
+  else if (/[🏆🥇]/u.test(lim)) icon = '🏆';
+  
   t.textContent = '';
   const box = document.createElement('div'); box.className = 't-in';
-  const sp = document.createElement('span'); sp.className = 't-msg'; sp.textContent = txt;
-  const x = document.createElement('button'); x.className = 't-x'; x.type = 'button'; x.setAttribute('aria-label', 'Cerrar aviso'); x.textContent = '✕';
+  
+  const ic = document.createElement('div'); ic.className = 't-icon'; ic.textContent = icon;
+  const content = document.createElement('div'); content.className = 't-content';
+  
+  let title = 'Aviso';
+  let msg = lim;
+  const parts = lim.match(/^([^:]+):\s*(.*)$/);
+  if (parts && parts[1].length < 30) {
+    title = parts[1];
+    msg = parts[2];
+  }
+  
+  const titleEl = document.createElement('span'); titleEl.className = 't-title'; titleEl.textContent = title;
+  const msgEl = document.createElement('span'); msgEl.className = 't-msg'; msgEl.textContent = msg;
+  content.append(titleEl, msgEl);
+  
+  const x = document.createElement('button'); x.className = 't-x'; x.type = 'button'; x.setAttribute('aria-label', 'Cerrar aviso'); x.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
   x.onclick = () => _toastOcultar();
-  box.append(sp, x); t.appendChild(box);
+  
+  box.append(ic, content, x); t.appendChild(box);
+  
   clearTimeout(tt); clearTimeout(_ttHide);
   try { if (t.showPopover) { if (t.matches(':popover-open')) t.hidePopover(); t.showPopover(); } } catch (e) { }
   requestAnimationFrame(() => t.classList.add('on'));
@@ -1784,54 +1845,46 @@ async function doLogin() {
     if (!supabaseClient) { $('loginErr').textContent = '⚠️ No hay conexión configurada.'; return; }
     if (!u || !p) { $('loginErr').textContent = 'Usuario y contraseña son obligatorios.'; return; }
 
-    const emailMap = { 'admin': 'admin@unbosque.edu.co' };
-    const email = u.includes('@') ? u : (emailMap[u.toLowerCase()] || `${u}@unbosque.edu.co`);
+    console.log('[login] intentando con:', u);
 
-    let perfil = null;
-    let uidAuth = null;
+    const { data: rows, error: errPerfil } = await supabaseClient
+      .from(CONFIG.tabla_usuarios)
+      .select('*')
+      .or(`username.eq.${u},email.eq.${u}`)
+      .limit(1);
 
-    const { data: authData, error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: p });
+    console.log('[login] rows:', rows, 'error:', errPerfil);
 
-    if (!authErr && authData?.user) {
-      uidAuth = authData.user.id;
-      const { data: p1 } = await supabaseClient.from(CONFIG.tabla_usuarios).select('*').eq('id', uidAuth).maybeSingle();
-      if (p1) perfil = p1;
+    if (errPerfil) {
+      $('loginErr').textContent = '❌ Error consultando usuarios: ' + errPerfil.message;
+      return;
     }
-
-    if (!perfil) {
-      const { data, error } = await supabaseClient
-        .from(CONFIG.tabla_usuarios)
-        .select('*')
-        .eq(CONFIG.col_user, u)
-        .eq(CONFIG.col_activo, true)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
-      const storedPass = String(data[CONFIG.col_pass] || '');
-      if (storedPass !== p) { $('loginErr').textContent = 'Usuario o contraseña incorrectos.'; return; }
-      perfil = data;
-      uidAuth = data.id;
-    }
-
+    const perfil = Array.isArray(rows) ? rows[0] : rows;
     if (!perfil) { $('loginErr').textContent = 'Usuario no encontrado.'; return; }
     if (perfil[CONFIG.col_activo] === false) { $('loginErr').textContent = 'Usuario inactivo.'; return; }
+
+    const storedPass = String(perfil[CONFIG.col_pass] ?? '').trim();
+    if (storedPass !== p) {
+      $('loginErr').textContent = 'Usuario o contraseña incorrectos.';
+      return;
+    }
 
     let rolFinal = perfil[CONFIG.col_rol];
     if (rolFinal === 'leer') rolFinal = 'lectura';
 
     SESSION = {
-      id: uidAuth || perfil.id,
+      id: perfil.id,
       username: perfil[CONFIG.col_user],
       nombre: perfil[CONFIG.col_nombre] || perfil[CONFIG.col_user],
       rol: rolFinal,
       modulos: Array.isArray(perfil[CONFIG.col_modulos]) ? perfil[CONFIG.col_modulos] : []
     };
+
     await registrarLog('Inicio de sesión', '-', SESSION.username);
     await cargarEstadoElecciones();
     aplicarSesion();
   } catch (err) {
-    console.error(err);
+    console.error('[login] excepción:', err);
     $('loginErr').textContent = '❌ ' + (err.message || 'Error de conexión');
   } finally {
     $('loginLoad').classList.add('hide');
@@ -2715,7 +2768,21 @@ function limpiarVotosEnBlancoInvalidos() {
       if (!(c.votos > 0) && !grupoTieneCandidatos(c.org, c.fac, c.rol)) { cambios++; return; }
     }
     const base = `${c.org}|${esGlobal(c.org) ? '' : nf(c.fac)}|${c.rol}`;
-    const clave = blanco ? `B|${base}` : `C|${base}|${String(c.pri.doc || '').trim() || nf(c.pri.nombre)}`;
+    const docKey = String(c.pri.doc || '').trim();
+    const nomKey = nf(c.pri.nombre);
+    let clave;
+    if (blanco) {
+      clave = `B|${base}`;
+    } else if (docKey && nomKey) {
+      clave = `C|${base}|${docKey}|${nomKey}`;
+    } else if (docKey) {
+      clave = `C|${base}|${docKey}`;
+    } else if (nomKey) {
+      clave = `C|${base}|${nomKey}`;
+    } else {
+      clave = `C|${base}|__sin_id_${uid()}`;
+    }
+
     if (indice.has(clave)) {
       const i = indice.get(clave);
       if ((c.votos || 0) > (nuevoD[i].votos || 0)) nuevoD[i] = c;
@@ -3093,10 +3160,9 @@ function importXL(inp) {
       const repetidos = Math.max(0, antesD + n - D.length);
       save(); draw();
       const nota = repetidos ? ` (${repetidos} repetidos descartados)` : '';
-      alert(`Se cargaron ${n} registros${nota}.`);
-      toast(`✅ ${n} fórmulas cargadas${nota}`);
+      toast(`✅ Carga completada: ${n} registros${nota}`, 'ok');
     } catch (err) {
-      console.error(err); alert('❌ Error al leer el archivo.'); toast('No se pudo leer el archivo.');
+      console.error(err); toast('❌ Error al leer el archivo.', 'error');
     }
     inp.value = '';
   };
