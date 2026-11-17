@@ -506,6 +506,8 @@ details.matriz>summary{cursor:pointer;font-weight:800}
 .pg{width:21.59cm;height:27.9cm;margin:0 auto 18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;flex-direction:column;position:relative;overflow:hidden;
     font-family: var(--font-acta);color:#000;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid;animation:fadeUp .4s ease both}
 .pg.land{width:27.9cm;height:21.55cm}
+.acta-sello{position:absolute;right:2cm;bottom:2.68cm;z-index:2;font-size:9px;line-height:1.2;font-style:italic;color:#5f6f68;letter-spacing:.1px;pointer-events:none}
+.pg.land .acta-sello{right:1.5cm}
 .pg-head{flex:none;height:2.5cm;overflow:hidden}
 .pg-head .acta-header{height:100%;box-sizing:border-box}
 .pg-foot{flex:none;height:2.6cm;position:relative;overflow:hidden}
@@ -1472,6 +1474,12 @@ const NOV = { '': 'Sin novedad', 'Renuncia': 'Renuncia', 'Ubicación semestre': 
 const ERRORS = { '': 'Seleccione error...', 'No quiero postularme': 'No quiero postularme', 'Me postulé como principal pero quería ser suplente': 'Me postulé como principal pero quería ser suplente', 'Me postulé como suplente pero quiero ser principal': 'Me postulé como suplente pero quiero ser principal', 'Nos postulamos por la facultad errada': 'Nos postulamos por la facultad errada', 'Nos postulamos con error equivocado': 'Nos postulamos con error equivocado', 'Me postulé pero me arrepentí': 'Me postulé pero me arrepentí' };
 
 const CRON_TOK = { publico: 'cron:publico', interno: 'cron:interno' };
+const FAC_TOK = 'fac:';
+function facultadDeLista(arr) {
+  const t = (Array.isArray(arr) ? arr : []).find(x => typeof x === 'string' && x.startsWith(FAC_TOK));
+  return t ? t.slice(FAC_TOK.length) : '';
+}
+function facultadSesion() { return SESSION ? facultadDeLista(SESSION.modulos) : ''; }
 const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 
 const CARGOS_TITULAR = ['Vicerrector(a) Académico', 'Secretaría General', 'Director (a) de Tecnología', 'Director (a) Registro y Control Académico', 'Director (a) de Auditoría Interna'];
@@ -1978,7 +1986,7 @@ async function guardarEstadoElecciones(cerrado) {
 function actualizarUserCard() {
   if (!SESSION) { $('userCard').classList.add('hide'); return; }
   $('userCard').classList.remove('hide');
-  $('userCardRole').textContent = ROLES[SESSION.rol]?.label || SESSION.rol;
+  $('userCardRole').textContent = (ROLES[SESSION.rol]?.label || SESSION.rol) + (SESSION.rol === 'fac_prog' && facultadSesion() ? ' · ' + facultadSesion() : '');
   $('userCardName').textContent = (SESSION.nombre || SESSION.username);
 }
 
@@ -2054,7 +2062,12 @@ function enAlcance(c) {
   if (!kv) return true;
   const rolCand = String(c.rol || '').trim();
   const cols = CH[rolCand] || [];
-  return cols.some(k => kv.includes(k));
+  if (!cols.some(k => kv.includes(k))) return false;
+  if (SESSION.rol === 'fac_prog') {
+    const fs = facultadSesion();
+    if (fs) { const nf = t => norm(t).replace(/\s+/g, ' '); return nf(c.fac) === nf(fs); }
+  }
+  return true;
 }
 
 function puedeEditar(modulo) {
@@ -2104,7 +2117,7 @@ function aplicarPermisosUI() {
     const etiquetas = { th: 'Talento Humano', eg: 'Egresados', sg: 'Secretaría General', fp: 'Facultad / Programa' };
     infoBox.classList.remove('hide');
     const rolesAlc = Object.keys(CH).filter(r => CH[r].some(k => rol.validador.includes(k)));
-    infoBox.innerHTML = `🛡️ <b>Modo validador:</b> solo ves a los candidatos de <b>${rolesAlc.join(' / ')}</b> y solo puedes marcar ✔ o ✕ en tu columna (<b>${rol.validador.map(v => etiquetas[v]).join(', ')}</b>) y registrar novedades. No puedes agregar, editar, eliminar ni aprobar masivamente. <span class="validador-pend" id="validadorPend"></span>`;
+    infoBox.innerHTML = `🛡️ <b>Modo validador:</b> solo ves a los candidatos de <b>${rolesAlc.join(' / ')}</b>${rol.validador.includes('fp') && facultadSesion() ? ' de <b>' + esc(facultadSesion()) + '</b>' : ''} y solo puedes marcar ✔ o ✕ en tu columna (<b>${rol.validador.map(v => etiquetas[v]).join(', ')}</b>) y registrar novedades. No puedes agregar, editar, eliminar ni aprobar masivamente. <span class="validador-pend" id="validadorPend"></span>`;
   } else if (infoBox) { infoBox.classList.add('hide'); }
 
   const cardForms = $('cardFormsExcel');
@@ -2206,7 +2219,7 @@ function renderTablaUsuarios() {
       <td><b>${esc(u[CONFIG.col_user])}</b></td>
       <td>${esc(u[CONFIG.col_nombre] || '')}</td>
       <td><span class="tag ${ROLES[rol]?.color || 'b'}">${ROLES[rol]?.label || rol}</span></td>
-      <td style="font-size:11.5px">${modsLabel}${cronBadge}</td>
+      <td style="font-size:11.5px">${modsLabel}${cronBadge}${rol === 'fac_prog' ? (facultadDeLista(mods) ? ` <span class="rol-validador-badge">🏛️ ${esc(facultadDeLista(mods))}</span>` : ' <span class="rol-validador-badge" style="background:#fde7e5;color:#b5302a">⚠ sin facultad (ve todas)</span>') : ''}</td>
       <td>${activo ? '<span class="pill ok">Activo</span>' : '<span class="pill no">Inactivo</span>'}</td>
       <td class="c" style="white-space:nowrap">
         <button class="ic" title="Editar permisos" onclick="abrirEditarUsuario('${u.id}')">✎</button>
@@ -2228,7 +2241,7 @@ function abrirEditarUsuario(id) {
   $('u_edit_rol').value = u[CONFIG.col_rol] || 'lectura';
   $('u_edit_activo').value = u[CONFIG.col_activo] ? 'true' : 'false';
   const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
-  actualizarPermisosUI('u_edit', false, { mods: modulosDeLista(mods), cron: cronVistaDeLista(mods, u[CONFIG.col_rol] || 'lectura') });
+  actualizarPermisosUI('u_edit', false, { mods: modulosDeLista(mods), cron: cronVistaDeLista(mods, u[CONFIG.col_rol] || 'lectura'), fac: facultadDeLista(mods) });
   dlgEditarUsuario.showModal();
 }
 
@@ -2238,8 +2251,9 @@ async function guardarEdicionUsuario() {
   const email = $('u_edit_email').value.trim();
   const rol = $('u_edit_rol').value;
   const activo = $('u_edit_activo').value === 'true';
-  const { mods } = leerPermisos('u_edit');
+  const { mods, fac } = leerPermisos('u_edit');
   if (!supabaseClient) { toast('❌ Sin conexión a la base de datos'); return; }
+  if (rol === 'fac_prog' && !fac) { toast('Selecciona la facultad de este usuario'); return; }
   if (!nombre) { toast('Completa el nombre del usuario'); return; }
   if ((rol === 'editor' || rol === 'lectura') && !modulosDeLista(mods).length) { toast('Selecciona al menos un módulo para este rol'); return; }
   if (SESSION && id === SESSION.id && (rol !== 'administrador' || !activo)) { toast('❌ No puedes quitarte el rol de administrador ni desactivarte a ti mismo'); return; }
@@ -2248,7 +2262,7 @@ async function guardarEdicionUsuario() {
     if (email) updateData.email = email;
     const { error } = await supabaseClient.from(CONFIG.tabla_usuarios).update(updateData).eq('id', id);
     if (error) throw error;
-    registrarLog('Editar permisos', 'Usuarios', `${$('u_edit_user').value} → ${rol} [${mods.join(', ')}]`);
+    registrarLog('Editar permisos', 'Usuarios', `${$('u_edit_user').value} → ${rol}${fac ? ' · ' + fac : ''} [${mods.join(', ')}]`);
     toast('✅ Usuario actualizado');
     dlgEditarUsuario.close();
     await cargarUsuariosDeSupabase();
@@ -2266,7 +2280,8 @@ async function crearUsuario() {
   if (!username || !pass || !email) { toast('Usuario, correo y contraseña son obligatorios'); return; }
   if (pass.length < 6) { toast('La contraseña debe tener al menos 6 caracteres'); return; }
   if (!supabaseClient) { toast('Sin conexión a la base de datos'); return; }
-  const { mods } = leerPermisos('u_new');
+  const { mods, fac } = leerPermisos('u_new');
+  if (rol === 'fac_prog' && !fac) { toast('Selecciona la facultad de este usuario'); return; }
   if ((rol === 'editor' || rol === 'lectura') && !modulosDeLista(mods).length) { toast('Selecciona al menos un módulo para este rol'); return; }
   try {
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password: pass, options: { data: { nombre } } });
@@ -2287,7 +2302,8 @@ async function crearUsuario() {
         toast('✅ Usuario creado y correo enviado');
       } catch (errEmail) { toast('✅ Usuario creado, pero el correo falló'); }
     } else { toast('✅ Usuario creado'); }
-    registrarLog('Crear usuario', 'Usuarios', `${username} (${rol})`);
+    registrarLog('Crear usuario', 'Usuarios', `${username} (${rol}${fac ? ' · ' + fac : ''})`);
+    if ($('u_new_fac')) $('u_new_fac').value = '';
     $('u_new_user').value = ''; $('u_new_nombre').value = ''; $('u_new_pass').value = ''; $('u_new_email').value = '';
     await cargarUsuariosDeSupabase();
     renderTablaUsuarios();
@@ -2528,6 +2544,20 @@ function actualizarPermisosUI(pre, cambioRol, init) {
   const selFinal = [...document.querySelectorAll('.' + cls + ':checked')].map(i => i.value);
   const incCron = rolKey !== 'administrador' && (todos || selFinal.includes('vCron'));
   const box = $(pre + '_cronbox');
+  let fb = $(pre + '_facbox');
+  if (!fb) {
+    fb = document.createElement('div'); fb.id = pre + '_facbox'; fb.style.marginTop = '12px';
+    fb.innerHTML = `<label style="font-weight:700">🏛️ Facultad asignada</label><select class="in" id="${pre}_fac" style="width:100%;margin-top:6px"></select><div class="perm-legend">Esta persona solo verá y podrá aprobar a los candidatos de la facultad que elijas.</div>`;
+    box.insertAdjacentElement('afterend', fb);
+  }
+  const esFp = rolKey === 'fac_prog';
+  fb.classList.toggle('hide', !esFp);
+  if (esFp) {
+    const selF = $(pre + '_fac');
+    const prevF = (init && init.fac !== undefined) ? init.fac : selF.value;
+    selF.innerHTML = '<option value="">— Selecciona la facultad —</option>' + FACULTADES.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+    selF.value = prevF || '';
+  }
   box.classList.toggle('hide', !incCron);
   if (incCron) {
     let actual = init?.cron;
@@ -2550,7 +2580,9 @@ function leerPermisos(pre) {
     if (cv === 'ambos' || cv === 'publico') mods.push(CRON_TOK.publico);
     if (cv === 'ambos' || cv === 'interno') mods.push(CRON_TOK.interno);
   }
-  return { mods, cron: cv };
+  let fac = '';
+  if (rolKey === 'fac_prog') { fac = $(pre + '_fac')?.value || ''; if (fac) mods.push(FAC_TOK + fac); }
+  return { mods, cron: cv, fac };
 }
 
 function aplicarVistaCron() {
@@ -2976,7 +3008,7 @@ function draw() {
     const porRol = {};
     fuera.forEach(c => { const r = (c.rol || 'Sin rol') + 's'; porRol[r] = (porRol[r] || 0) + 1; });
     ob.classList.remove('hide');
-    ob.innerHTML = 'ℹ️ Hay <b>' + fuera.length + '</b> candidato(s) que no ves porque no son de tu alcance (' + Object.entries(porRol).map(([r, n]) => n + ' ' + r).join(', ') + '). Tu perfil solo valida: <b>' + [...new Set(Object.keys(CH).filter(r => CH[r].some(k => kv2.includes(k))))].join(' / ') + '</b>.';
+    ob.innerHTML = 'ℹ️ Hay <b>' + fuera.length + '</b> candidato(s) que no ves porque no son de tu alcance (' + Object.entries(porRol).map(([r, n]) => n + ' ' + r).join(', ') + '). Tu perfil solo valida: <b>' + [...new Set(Object.keys(CH).filter(r => CH[r].some(k => kv2.includes(k))))].join(' / ') + '</b>' + (SESSION.rol === 'fac_prog' && facultadSesion() ? ' de <b>' + esc(facultadSesion()) + '</b>' : '') + '.';
   } catch (e) { }
 }
 
@@ -3828,7 +3860,7 @@ async function docsVerActa() {
   try {
     docsResumen();
     const total = await docsConstruirActa();
-    $('docsEstado').textContent = `${total} página(s)`;
+    $('docsEstado').textContent = `${total} página(s) · ${$('docsActaOut').dataset.generado || ''}`;
     return true;
   } catch (e) {
     console.error(e); $('docsEstado').textContent = '';
@@ -3854,7 +3886,7 @@ async function docsDescargarPDF() {
     const v = datosActa().vars;
     const nombre = `Acta_${String(v.numero || 'SN').replace(/[^\w-]+/g, '_')}_${v.jornada.replace(/\s+/g, '_')}.pdf`;
     pdf.save(nombre);
-    $('docsEstado').textContent = `✅ ${nombre}`;
+    $('docsEstado').textContent = `✅ ${nombre} · ${$('docsActaOut').dataset.generado || ''}`;
     try { registrarLog('Descarga de acta en PDF', '-', nombre); } catch (e) { }
   } catch (e) {
     console.error(e); $('docsEstado').textContent = '';
@@ -3977,6 +4009,12 @@ function paginarDoc(cont, o) {
   });
   const total = paginas.length;
   paginas.forEach((pg, i) => pg.querySelectorAll('[data-pg]').forEach(e => { e.textContent = e.dataset.pg === 'n' ? `${i + 1} de ${total}` : total; }));
+  const _ahora = new Date();
+  const _fecha = _ahora.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+  const _hora = _ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  const _txtGen = `${/informe/i.test(cont.id || '') ? 'Informe generado' : 'Acta generada'} el ${_fecha} a las ${_hora}`;
+  cont.dataset.generado = _txtGen;
+  paginas.forEach(pg => { const sello = document.createElement('div'); sello.className = 'acta-sello'; sello.textContent = _txtGen; pg.appendChild(sello); });
   return total;
 }
 
