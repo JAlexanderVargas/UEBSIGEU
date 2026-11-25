@@ -752,6 +752,26 @@ body.logged-in #topbar { display: flex; }
 .vac-card[style*="grid-column"]{animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both, pulseRing 2.8s ease-in-out 1s 1}
 dialog#dlgListas{width:min(640px,96vw)}
 
+
+/* === Actas rediseño === */
+#vAct .act-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;
+  padding:20px 22px;border-radius:20px;background:linear-gradient(120deg,#0B3B2C 0%,#0B7A4B 55%,#6CBE28 130%);color:#fff;
+  box-shadow:0 18px 36px -22px rgba(11,59,44,.55);animation:fadeUp .4s ease both}
+#vAct .act-hero h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.4px;color:#fff}
+#vAct .act-hero p{margin:4px 0 0;opacity:.9;color:#e8f6ee;font-size:13.5px}
+#vAct .act-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+#vAct .act-step{padding:12px 14px;border-radius:14px;background:#fff;border:1px solid var(--line);text-align:center;
+  box-shadow:0 8px 18px -14px rgba(11,59,44,.35);transition:transform .2s}
+#vAct .act-step:hover{transform:translateY(-2px)}
+#vAct .act-step b{display:block;font-size:20px;margin-bottom:2px}
+#vAct .act-step span{font-size:11.5px;font-weight:700;color:#6b8378;text-transform:uppercase;letter-spacing:.4px}
+#vAct .card{border-radius:18px;box-shadow:0 14px 28px -22px rgba(11,59,44,.4)}
+#vAct .card h3{display:flex;align-items:center;gap:8px;font-size:15.5px}
+#vAct .act-actions{display:flex;flex-wrap:wrap;gap:10px;padding:16px;border-radius:16px;background:linear-gradient(180deg,#f7fbf8,#eef7f1);border:1px solid #cfe6d8}
+#vAct .act-actions .btn.p{padding:12px 18px;font-size:14.5px}
+#firmanteBanner{display:none;margin-bottom:14px;padding:12px 16px;border-radius:14px;background:#eaf3fd;border:1px solid #b3d4f5;color:#1b5fae;font-weight:600}
+body.firmante-only #firmanteBanner{display:flex;align-items:center;gap:10px}
+
 </style>
 </head>
 <body class="logged-out">
@@ -864,6 +884,7 @@ dialog#dlgListas{width:min(640px,96vw)}
      <button class="btn sm p" onclick="abrirGestorListas('tipos')">🎨 Tipos (colores)</button>
      <button class="btn sm p" onclick="abrirGestorListas('novedades')">📌 Novedades</button>
      <button class="btn sm p" onclick="abrirGestorListas('errores')">⚠️ Errores de postulación</button>
+     <button class="btn sm p" onclick="abrirGestorListas('etapas')">📅 Etapas del proceso</button>
    </div>
  </div>
  <div class="cron-grid">
@@ -876,6 +897,7 @@ dialog#dlgListas{width:min(640px,96vw)}
    </div>
    <div class="cron-panel" id="panelCronInt">
      <div class="cron-header"><h3>🔒 Cronograma Interno</h3><button class="btn sm" onclick="descargarCronImagen('panelCronInt', 'Cronograma_Interno')">📸 Descargar Imagen</button></div>
+     <div id="cronAprobPanel" class="card" style="margin-bottom:14px;padding:14px 16px;border:2px solid #1f6fd1;background:linear-gradient(135deg,#f0f7ff,#fff)"></div>
      <div class="bar" style="margin-bottom:10px">
        <button class="btn sm p" onclick="addActividad()">+ Actividad</button>
        <button class="btn sm" onclick="cronFileInput.click()">📂 Cargar Excel</button>
@@ -927,9 +949,22 @@ dialog#dlgListas{width:min(640px,96vw)}
 </section>
 
 <section id="vAct" class="hide">
- <div class="top noprint"><h1>Actas</h1><p>Registra los votos, marca los ganadores y genera el acta lista para firmar.</p></div>
+ <div class="act-hero noprint">
+   <div>
+     <h1>📜 Actas oficiales</h1>
+     <p>Configura la jornada, registra votos, genera el acta y recoge firmas digitales.</p>
+   </div>
+ </div>
+ <div id="firmanteBanner" class="noprint">✍️ Eres <b>firmante del acta</b>. Puedes revisar el documento y firmar digitalmente, cargar tu firma o recibir el enlace por correo.</div>
+ <div class="act-steps noprint">
+   <div class="act-step"><b>1</b><span>Datos</span></div>
+   <div class="act-step"><b>2</b><span>Votos</span></div>
+   <div class="act-step"><b>3</b><span>Texto</span></div>
+   <div class="act-step"><b>4</b><span>Generar</span></div>
+   <div class="act-step"><b>5</b><span>Firmar</span></div>
+ </div>
  <div class="card noprint">
-  <h3>Datos del acta</h3>
+  <h3>📋 Datos del acta</h3>
   <div class="grid">
    <div><label>Jornada</label><select class="in" id="aJornada" onchange="updateJornada()"><option value="1">Primera Vuelta</option><option value="2">Segunda Vuelta</option></select></div>
    <div><label>Órgano</label><select class="in" id="ao" onchange="listaGan()"></select></div>
@@ -1000,12 +1035,10 @@ dialog#dlgListas{width:min(640px,96vw)}
      <button class="btn" onclick="imprimirInforme()">Imprimir / PDF (horizontal)</button>
    </div>
  </div>
- <div class="card noprint">
-  <div class="bar" style="margin:0">
-    <button class="btn p" onclick="genActa()">Generar acta oficial</button>
-    <button class="btn" onclick="window.print()">Imprimir o guardar PDF (Acta)</button>
-    <button class="btn" style="background:#2b579a;color:white;border-color:#2b579a" onclick="exportarDOCX()">Descargar Word (.docx)</button>
-  </div>
+ <div class="card noprint act-actions">
+  <button class="btn p" onclick="genActa()">✨ Generar acta oficial</button>
+  <button class="btn" onclick="window.print()">🖨️ Imprimir / PDF</button>
+  <button class="btn" style="background:#2b579a;color:white;border-color:#2b579a" onclick="exportarDOCX()">📄 Descargar Word</button>
  </div>
 
  <div id="actaOutContainer" class="hide">
@@ -1294,9 +1327,7 @@ dialog#dlgListas{width:min(640px,96vw)}
       <div><label>Fecha de fin</label><input class="in" type="date" id="a_fin"></div>
       <div><label>Responsable</label><input class="in" id="a_resp" placeholder="Ej. Secretaría General"></div>
      <div><label>Tipo</label><select class="in" id="a_tipo"></select></div>
-     <div><label>Etapa del Proceso</label><select class="in" id="a_etapa">
-        <option>Preelectoral</option><option>Electoral</option><option>Postelectoral</option><option>Posesión</option><option>Segunda Vuelta</option>
-     </select></div>
+     <div><label>Etapa del Proceso</label><select class="in" id="a_etapa"></select></div>
    </div>
    <div><label style="margin-top:12px">Observaciones</label><textarea class="in" id="a_desc" style="min-height:70px"></textarea></div>
    <div><label style="margin-top:12px"><input type="checkbox" id="a_publica" style="width:16px;height:16px;vertical-align:middle"> Visible en el cronograma público</label></div>
@@ -1600,6 +1631,7 @@ const TEXTO_ACTA_DEFECTO = [
 let D = []; CRON = []; FIRMAS = [];
 let VOTANTES = { totalCenso: 0, totalHabilitados: 0, fechaCorte: '', historial: [] };
 let CENSO_DATA = []; SOPORTES = []; ORG_ACTIVOS = [];
+let CRON_APROB = { ronda: 1, locked: false, required: [], approvals: [] };
 let SESSION = null; LOG = []; ELECCIONES_CERRADAS = false; USERS_CACHE = [];
 
 let editId = null;
@@ -1714,12 +1746,14 @@ window.addEventListener('unhandledrejection', ev => _reportarErrorGlobal(ev.reas
 const SYNC_KEYS = {
   cand_v2: 'candidatos', cronograma_v2: 'cronograma', votantes_v2: 'votantes',
   censo_data_v1: 'censo', org_activos_v1: 'org_activos', soporte_data_v1: 'soporte',
-  config_listas_v1: 'config_listas'
+  config_listas_v1: 'config_listas',
+  cron_aprob_v1: 'cron_aprob'
 };
 const _syncGet = {
   cand_v2: () => D, cronograma_v2: () => CRON, votantes_v2: () => VOTANTES,
   censo_data_v1: () => CENSO_DATA, org_activos_v1: () => ORG_ACTIVOS, soporte_data_v1: () => SOPORTES,
-  config_listas_v1: () => ({ facultades: FACULTADES, tiposCron: TIPO_STYLE, novedades: NOV, errores: ERRORS })
+  config_listas_v1: () => ({ facultades: FACULTADES, tiposCron: TIPO_STYLE, novedades: NOV, errores: ERRORS, etapas: ETAPAS_BASE }),
+  cron_aprob_v1: () => CRON_APROB
 };
 
 let _syncEnabled = false;
@@ -1803,11 +1837,23 @@ async function syncPullAll() {
       }
       if (v.novedades && typeof v.novedades === 'object') NOV = v.novedades;
       if (v.errores && typeof v.errores === 'object') ERRORS = v.errores;
+      if (Array.isArray(v.etapas) && v.etapas.length) ETAPAS_BASE = v.etapas;
       try { localStorage.setItem('elecciones_config_listas_v1', JSON.stringify({
         facultades: FACULTADES, tiposCron: TIPO_STYLE, novedades: NOV, errores: ERRORS
       })); } catch (e) {}
     });
-    return changed;
+    
+    apply('cron_aprob_v1', v => {
+      if (v && typeof v === 'object') {
+        CRON_APROB = {
+          ronda: Number(v.ronda) || 1,
+          locked: !!v.locked,
+          required: Array.isArray(v.required) ? v.required : [],
+          approvals: Array.isArray(v.approvals) ? v.approvals : []
+        };
+      }
+    });
+return changed;
   } catch (e) { console.warn('syncPullAll:', e.message); return false; }
 }
 
@@ -1851,6 +1897,7 @@ const saveVotantes = () => _syncPush('votantes_v2');
 const saveCenso = () => _syncPush('censo_data_v1');
 const saveSoportes = () => _syncPush('soporte_data_v1');
 const saveOrgActivos = () => _syncPush('org_activos_v1');
+const saveCronAprob = () => { try { localStorage.setItem('elecciones_cron_aprob_v1', JSON.stringify(CRON_APROB)); } catch (e) {} _syncPush('cron_aprob_v1'); };
 function saveConfigListas() {
   const payload = { facultades: FACULTADES, tiposCron: TIPO_STYLE, novedades: NOV, errores: ERRORS };
   try {
@@ -1893,6 +1940,7 @@ function loadConfigListasLocal() {
     }
     if (v.novedades && typeof v.novedades === 'object') NOV = v.novedades;
     if (v.errores && typeof v.errores === 'object') ERRORS = v.errores;
+    if (Array.isArray(v.etapas) && v.etapas.length) ETAPAS_BASE = v.etapas;
   } catch (e) { console.warn('loadConfigListasLocal', e); }
 }
 
@@ -2160,9 +2208,13 @@ function getModulosPermitidos() {
   const rol = ROLES[SESSION.rol]; if (!rol) return [];
   if (rol.mods === '*') return MODULOS.map(m => m.key);
   const guardados = modulosDeLista(SESSION.modulos);
-  if (SESSION.rol === 'editor' || SESSION.rol === 'lectura') return guardados;
-  if (Array.isArray(rol.mods) && rol.mods.length) return [...new Set([...rol.mods, ...guardados])];
-  return guardados;
+  let base;
+  if (SESSION.rol === 'editor' || SESSION.rol === 'lectura') base = guardados;
+  else if (Array.isArray(rol.mods) && rol.mods.length) base = [...new Set([...rol.mods, ...guardados])];
+  else base = guardados;
+  // Firmante del acta: acceso al módulo Actas aunque no esté en la lista
+  if ((SESSION.modulos || []).includes('firmante_acta') && !base.includes('vAct')) base = [...base, 'vAct'];
+  return base;
 }
 function puedeVer(modulo) { if (!SESSION) return false; return getModulosPermitidos().includes(modulo); }
 function esValidadorRol() { return !!ROLES[SESSION?.rol]?.validador; }
@@ -2693,10 +2745,30 @@ function actualizarPermisosUI(pre, cambioRol, init) {
       </select>
     </div>`;
   }).join('');
+  const flagsInit = init && Array.isArray(init.mods) ? init.mods : (SESSION && pre === 'x' ? [] : null);
+  let ckAprob = false, ckFirm = false;
+  if (init && Array.isArray(init.mods)) {
+    ckAprob = init.mods.includes('aprobador') || init.mods.includes('aprobador:cron');
+    ckFirm = init.mods.includes('firmante_acta');
+  } else if (!cambioRol) {
+    ckAprob = !!$(pre + '_flag_aprob')?.checked;
+    ckFirm = !!$(pre + '_flag_firm')?.checked;
+  }
   $(pre + '_mods').innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${rows}</div>
-    <p class="perm-legend" style="margin-top:8px">Por cada módulo: <b>Lectura</b> (solo ver) o <b>Editar</b> (crear/modificar). Ej.: lectura en A, B, C y editar solo en J.</p>`;
+    <div style="margin-top:14px;padding:12px;border-radius:12px;background:#f0f7ff;border:1px solid #b3d4f5">
+      <div style="font-weight:800;margin-bottom:8px;color:#1b5fae">⭐ Permisos especiales</div>
+      <label style="display:flex;gap:10px;align-items:center;margin-bottom:8px;cursor:pointer">
+        <input type="checkbox" id="${pre}_flag_aprob" ${ckAprob ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--oscuro)">
+        <span><b>Aprobador del cronograma</b><small style="display:block;color:var(--mut)">Puede aprobar el cronograma (no puede desaprobar)</small></span>
+      </label>
+      <label style="display:flex;gap:10px;align-items:center;cursor:pointer">
+        <input type="checkbox" id="${pre}_flag_firm" ${ckFirm ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--oscuro)">
+        <span><b>Firmante del acta</b><small style="display:block;color:var(--mut)">Accede a Actas para firmar (digital, cargar imagen o por correo)</small></span>
+      </label>
+    </div>
+    <p class="perm-legend" style="margin-top:8px">Por cada módulo: <b>Lectura</b> o <b>Editar</b>. Los permisos especiales se guardan junto a los módulos.</p>`;
   $(pre + '_perm').innerHTML = `<b>${esc(def?.label || rolKey)}</b>: ${esc(ROLES_DESC[rolKey] || '')}
-    <span style="color:var(--naranja)"> — Personaliza Lectura/Editar por módulo.</span>`;
+    <span style="color:var(--naranja)"> — Personaliza Lectura/Editar y roles especiales.</span>`;
   const nivCron = niveles['vCron'] || 'none';
   const incCron = rolKey !== 'administrador' && nivCron !== 'none';
   const box = $(pre + '_cronbox');
@@ -2746,6 +2818,11 @@ function leerPermisos(pre) {
   }
   let fac = '';
   if (rolKey === 'fac_prog') { fac = $(pre + '_fac')?.value || ''; if (fac) mods.push(FAC_TOK + fac); }
+  if ($(pre + '_flag_aprob')?.checked) mods.push('aprobador');
+  if ($(pre + '_flag_firm')?.checked) {
+    mods.push('firmante_acta');
+    if (!mods.includes('vAct') && !mods.includes('edit:vAct')) mods.push('vAct');
+  }
   return { mods, cron: cv, fac };
 }
 
@@ -2822,7 +2899,8 @@ function tab(n) {
     $(id).classList.toggle('hide', i + 1 !== n);
     $('n' + (i + 1)).classList.toggle('on', i + 1 === n);
   });
-  if (n === 1) aplicarVistaCron();
+  if (n === 1) { try { if (SESSION?.rol === 'administrador' || esAprobadorCron()) cargarUsuariosDeSupabase().then(() => renderCronAprobacion()); } catch(e) {} }
+  if (n === 1 /*cron*/) aplicarVistaCron();
   if (n === 2) { aplicarAlcanceSeguimiento(); draw(); }
   if (n === 3) renderCensoData();
   if (n === 4) renderAnalitica();
@@ -2865,6 +2943,9 @@ function fillSel() {
   const prevTipo = $('a_tipo') ? $('a_tipo').value : '';
   _setH('a_tipo', (typeof TIPOS_CRON !== 'undefined' ? TIPOS_CRON : Object.keys(TIPO_STYLE || {})).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join(''));
   if (prevTipo && $('a_tipo') && [...$('a_tipo').options].some(o => o.value === prevTipo)) $('a_tipo').value = prevTipo;
+  const prevEt = $('a_etapa') ? $('a_etapa').value : '';
+  _setH('a_etapa', (ETAPAS_BASE || []).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join(''));
+  if (prevEt && $('a_etapa') && [...$('a_etapa').options].some(o => o.value === prevEt)) $('a_etapa').value = prevEt;
   
   if (_prevAo && o.includes(_prevAo)) $('ao').value = _prevAo;
   cargarTextoActa();
@@ -5096,6 +5177,7 @@ function renderCronograma(anim) {
   const vista = CRON_FILTRO === 'todas' ? CRON : CRON.filter(a => estadoCron(a, hoy) === CRON_FILTRO);
   estadoGuardado();
   $('cronList').innerHTML = cronListaHTML(vista, hoy, true) || `<p class="empty">${CRON.length ? 'No hay actividades en este filtro.' : 'No hay actividades.'}</p>`;
+  try { renderCronAprobacion(); } catch (e) {}
   deshabilitarBotonesEdicion();
 }
 /* ===== Gestor de listas (facultades, tipos, novedades, errores) ===== */
@@ -5104,7 +5186,8 @@ const LISTA_TITULOS = {
   facultades: '🏛 Facultades / Departamentos',
   tipos: '🎨 Tipos de actividad (colores)',
   novedades: '📌 Novedades de candidatos',
-  errores: '⚠️ Errores de postulación'
+  errores: '⚠️ Errores de postulación',
+  etapas: '📅 Etapas del proceso'
 };
 function previewTipoRow(el) {
   const row = el && el.closest('.lista-row');
@@ -5158,6 +5241,16 @@ function renderGestorListas() {
       <div class="lista-rows">${rows}</div>
       <div class="bar" style="margin-top:12px"><button class="btn sm p" onclick="agregarItemLista()">＋ Agregar opción</button>
       <button class="btn sm" onclick="guardarListaActual()">💾 Guardar</button></div>`;
+  } else if (_listaModo === 'etapas') {
+    const rows = ETAPAS_BASE.map((e, i) => `<div class="lista-row" style="--i:${i}">
+      <span class="lista-num">${i + 1}</span>
+      <input class="in" id="et_nom_${i}" value="${esc(e)}" style="flex:1">
+      <button class="ic" onclick="eliminarItemLista(${i})" title="Eliminar">🗑</button>
+    </div>`).join('');
+    body.innerHTML = `<p class="help" style="margin-top:0">Etapas del proceso electoral (aparecen en el desplegable al crear/editar actividades).</p>
+      <div class="lista-rows">${rows || '<p class="empty">Sin etapas.</p>'}</div>
+      <div class="bar" style="margin-top:12px"><button class="btn sm p" onclick="agregarItemLista()">＋ Agregar etapa</button>
+      <button class="btn sm" onclick="guardarListaActual()">💾 Guardar</button></div>`;
   } else {
     const rows = FACULTADES.map((f, i) => `<div class="lista-row" style="--i:${i}">
       <span class="lista-num">${i + 1}</span>
@@ -5179,6 +5272,8 @@ function agregarItemLista() {
     NOV['Nueva novedad ' + Object.keys(NOV).length] = 'Nueva novedad';
   } else if (_listaModo === 'errores') {
     ERRORS['Nuevo error ' + Object.keys(ERRORS).length] = 'Nuevo error';
+  } else if (_listaModo === 'etapas') {
+    ETAPAS_BASE.push('Nueva etapa');
   } else {
     FACULTADES.push('Nueva facultad');
   }
@@ -5200,6 +5295,9 @@ function eliminarItemLista(i) {
     if (keys[i] === '') return;
     if (keys.length <= 2) { toast('Deja al menos un error'); return; }
     delete ERRORS[keys[i]];
+  } else if (_listaModo === 'etapas') {
+    if (ETAPAS_BASE.length <= 1) { toast('Debe quedar al menos una etapa'); return; }
+    ETAPAS_BASE.splice(i, 1);
   } else {
     if (FACULTADES.length <= 1) { toast('Debe quedar al menos una facultad'); return; }
     FACULTADES.splice(i, 1);
@@ -5252,6 +5350,17 @@ function guardarListaActual() {
     saveConfigListas(); fillSel();
     try { draw(); } catch (e) {}
     toast('✅ Lista actualizada');
+  } else if (_listaModo === 'etapas') {
+    const nuevas = [];
+    ETAPAS_BASE.forEach((_, i) => {
+      const nom = ($('et_nom_' + i)?.value || '').trim();
+      if (nom) nuevas.push(nom);
+    });
+    if (!nuevas.length) { toast('Debe haber al menos una etapa'); return; }
+    ETAPAS_BASE = [...new Set(nuevas)];
+    saveConfigListas();
+    fillSel();
+    toast('✅ Etapas actualizadas');
   } else {
     const nuevas = [];
     FACULTADES.forEach((_, i) => {
@@ -5269,8 +5378,192 @@ function guardarListaActual() {
   renderGestorListas();
 }
 
+
+/* ===== Aprobación del cronograma ===== */
+function esAprobadorCron() {
+  if (!SESSION) return false;
+  if (SESSION.rol === 'administrador') return true;
+  const m = SESSION.modulos || [];
+  return m.includes('aprobador') || m.includes('aprobador:cron');
+}
+function esFirmanteActa() {
+  if (!SESSION) return false;
+  if (SESSION.rol === 'administrador') return true;
+  const m = SESSION.modulos || [];
+  return m.includes('firmante_acta');
+}
+function cronBloqueado() {
+  return !!(CRON_APROB && CRON_APROB.locked);
+}
+function puedeEditarCronograma() {
+  if (!SESSION) return false;
+  if (cronBloqueado() && SESSION.rol !== 'administrador') return false;
+  if (cronBloqueado() && SESSION.rol === 'administrador') return true; // admin puede, pero pedirá nueva ronda
+  return puedeEditar('vCron');
+}
+function aprobadoresRequeridos() {
+  // required list of usernames; if empty, any user with token aprobador counts as pool from USERS_CACHE
+  if (CRON_APROB.required && CRON_APROB.required.length) return CRON_APROB.required.slice();
+  const pool = (USERS_CACHE || []).filter(u => {
+    if (!u[CONFIG.col_activo]) return false;
+    const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
+    const rol = u[CONFIG.col_rol];
+    return rol === 'administrador' || mods.includes('aprobador') || mods.includes('aprobador:cron');
+  }).map(u => u[CONFIG.col_user]);
+  return [...new Set(pool)];
+}
+function aprobacionesRondaActual() {
+  const r = CRON_APROB.ronda || 1;
+  return (CRON_APROB.approvals || []).filter(a => (a.ronda || 1) === r);
+}
+function yaAprobe() {
+  if (!SESSION) return false;
+  return aprobacionesRondaActual().some(a => a.username === SESSION.username);
+}
+function todosAprobaron() {
+  const req = aprobadoresRequeridos();
+  if (!req.length) return false;
+  const done = new Set(aprobacionesRondaActual().map(a => a.username));
+  return req.every(u => done.has(u));
+}
+function renderCronAprobacion() {
+  const el = $('cronAprobPanel');
+  if (!el) return;
+  const ronda = CRON_APROB.ronda || 1;
+  const locked = !!CRON_APROB.locked;
+  const req = aprobadoresRequeridos();
+  const acts = aprobacionesRondaActual();
+  const done = new Set(acts.map(a => a.username));
+  const filas = req.length ? req.map(u => {
+    const a = acts.find(x => x.username === u);
+    if (a) {
+      const cuando = a.fecha ? new Date(a.fecha).toLocaleString('es-CO') : '';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:#e3f4ea;margin-bottom:6px">
+        <span style="font-size:18px">✅</span>
+        <div style="flex:1"><b>${esc(a.nombre || u)}</b><small style="display:block;color:#14744a">Aprobó · ${esc(cuando)} · Ronda ${a.ronda || ronda}</small></div>
+      </div>`;
+    }
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:#fff7e0;margin-bottom:6px">
+      <span style="font-size:18px">⏳</span>
+      <div style="flex:1"><b>${esc(u)}</b><small style="display:block;color:#b35a06">Pendiente de aprobación</small></div>
+    </div>`;
+  }).join('') : '<p class="help">No hay aprobadores configurados. Marca el permiso <b>Aprobador</b> en usuarios.</p>';
+
+  const pct = req.length ? Math.round(acts.length / req.length * 100) : 0;
+  let acciones = '';
+  if (esAprobadorCron() && !locked && !yaAprobe()) {
+    acciones += `<button class="btn p sm" onclick="aprobarCronograma()">✅ Aprobar cronograma (ronda ${ronda})</button>`;
+  }
+  if (yaAprobe() && !locked) {
+    acciones += `<span class="tag g">Ya aprobaste esta ronda</span>`;
+  }
+  if (SESSION?.rol === 'administrador') {
+    if (locked) {
+      acciones += ` <button class="btn sm" onclick="nuevaRondaAprobacion()">🔄 Nueva ronda (desbloquear para editar)</button>`;
+    } else if (acts.length) {
+      acciones += ` <button class="btn sm" style="border-color:#d1433a;color:#d1433a" onclick="adminResetAprobaciones()">↩ Reiniciar aprobaciones de la ronda</button>`;
+    }
+    acciones += ` <button class="btn sm" onclick="configurarAprobadoresCron()">👥 Definir aprobadores</button>`;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+      <div>
+        <h3 style="margin:0 0 4px;font-size:16px">📋 Aprobación del cronograma · Ronda ${ronda}</h3>
+        <p class="help" style="margin:0">${locked
+          ? '🔒 <b>Bloqueado:</b> todos aprobaron. No se puede modificar salvo que un administrador abra una nueva ronda.'
+          : 'Los aprobadores deben validar el cronograma. Nadie puede deshacer su aprobación (solo el administrador puede reiniciar la ronda).'}</p>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:22px;font-weight:800;color:${locked ? '#14744a' : '#1f6fd1'}">${acts.length}/${req.length || '—'}</div>
+        <small style="color:var(--mut)">${locked ? 'Aprobado' : pct + '%'}</small>
+      </div>
+    </div>
+    <div style="margin-top:12px">${filas}</div>
+    <div class="bar" style="margin-top:10px;gap:8px;flex-wrap:wrap">${acciones}</div>`;
+}
+async function aprobarCronograma() {
+  if (!esAprobadorCron()) { toast('⛔ No eres aprobador'); return; }
+  if (cronBloqueado()) { toast('El cronograma ya está bloqueado'); return; }
+  if (yaAprobe()) { toast('Ya aprobaste esta ronda'); return; }
+  if (!(await uiConfirm('Confirmas que revisaste el cronograma y lo apruebas. No podrás deshacer esta acción.', { titulo: '¿Aprobar cronograma?', ok: 'Aprobar', peligro: false }))) return;
+  const ronda = CRON_APROB.ronda || 1;
+  CRON_APROB.approvals = CRON_APROB.approvals || [];
+  CRON_APROB.approvals.push({
+    username: SESSION.username,
+    nombre: SESSION.nombre || SESSION.username,
+    fecha: new Date().toISOString(),
+    ronda
+  });
+  if (todosAprobaron()) {
+    CRON_APROB.locked = true;
+    toast('✅ Aprobado. El cronograma quedó bloqueado (todos firmaron la ronda ' + ronda + ').');
+  } else {
+    toast('✅ Tu aprobación quedó registrada (ronda ' + ronda + ').');
+  }
+  saveCronAprob();
+  renderCronAprobacion();
+  try { renderCronograma(false); } catch (e) {}
+  registrarLog('Aprobar cronograma', 'Cronograma', 'Ronda ' + ronda);
+}
+async function nuevaRondaAprobacion() {
+  if (SESSION?.rol !== 'administrador') { toast('⛔ Solo administrador'); return; }
+  if (!(await uiConfirm('Se abrirá una nueva ronda de aprobación. El cronograma se podrá editar hasta que todos vuelvan a aprobar.', { titulo: '¿Nueva ronda de aprobación?', ok: 'Abrir ronda' }))) return;
+  CRON_APROB.ronda = (CRON_APROB.ronda || 1) + 1;
+  CRON_APROB.locked = false;
+  saveCronAprob();
+  renderCronAprobacion();
+  toast('🔄 Ronda ' + CRON_APROB.ronda + ' abierta. Pueden editar y deben volver a aprobar.');
+  registrarLog('Nueva ronda aprobación', 'Cronograma', 'Ronda ' + CRON_APROB.ronda);
+}
+async function adminResetAprobaciones() {
+  if (SESSION?.rol !== 'administrador') return;
+  if (!(await uiConfirm('Se borrarán las aprobaciones de la ronda actual. Nadie quedará como aprobado.', { titulo: '¿Reiniciar aprobaciones?', ok: 'Reiniciar', peligro: true }))) return;
+  const r = CRON_APROB.ronda || 1;
+  CRON_APROB.approvals = (CRON_APROB.approvals || []).filter(a => (a.ronda || 1) !== r);
+  CRON_APROB.locked = false;
+  saveCronAprob();
+  renderCronAprobacion();
+  toast('Aprobaciones de la ronda reiniciadas');
+}
+async function configurarAprobadoresCron() {
+  if (SESSION?.rol !== 'administrador') return;
+  if (!USERS_CACHE.length) await cargarUsuariosDeSupabase();
+  const pool = (USERS_CACHE || []).filter(u => u[CONFIG.col_activo] !== false);
+  const actual = new Set(CRON_APROB.required || []);
+  const lista = pool.map(u => {
+    const user = u[CONFIG.col_user];
+    const nom = u[CONFIG.col_nombre] || user;
+    const ck = actual.has(user) ? 'checked' : '';
+    return `<label style="display:flex;gap:8px;align-items:center;padding:6px 0"><input type="checkbox" class="ck-aprob-req" value="${esc(user)}" ${ck}> <b>${esc(nom)}</b> <small>(${esc(user)})</small></label>`;
+  }).join('') || '<p class="empty">No hay usuarios</p>';
+  // reuse dlgListas
+  $('dlgListasTitulo').textContent = '👥 Aprobadores del cronograma';
+  $('dlgListasBody').innerHTML = `<p class="help">Quiénes deben aprobar para bloquear el cronograma. Si no marcas a nadie, se usan todos los usuarios con permiso Aprobador.</p>
+    <div style="max-height:40vh;overflow:auto">${lista}</div>
+    <div class="bar" style="margin-top:12px"><button class="btn p sm" onclick="guardarAprobadoresCron()">💾 Guardar lista</button></div>`;
+  $('dlgListas').showModal();
+}
+function guardarAprobadoresCron() {
+  CRON_APROB.required = [...document.querySelectorAll('.ck-aprob-req:checked')].map(i => i.value);
+  saveCronAprob();
+  renderCronAprobacion();
+  toast('Lista de aprobadores guardada');
+  try { $('dlgListas').close(); } catch (e) {}
+}
+function guardCronSiBloqueado() {
+  if (!cronBloqueado()) return false;
+  if (SESSION?.rol === 'administrador') {
+    toast('🔒 Cronograma bloqueado. Abre una nueva ronda de aprobación para poder editarlo.');
+  } else {
+    toast('🔒 Cronograma aprobado y bloqueado. Solo un administrador puede abrir una nueva ronda.');
+  }
+  return true;
+}
+
 function addActividad() {
   if (SESSION && !puedeEditar('vCron')) { toast('⛔ Sin permiso'); return; }
+  if (guardCronSiBloqueado()) return;
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   $('dtAct').textContent = 'Nueva Actividad';
   $('a_nombre').value = ''; $('a_fecha').value = new Date().toISOString().slice(0, 10); $('a_fin').value = '';
@@ -5284,6 +5577,7 @@ function addActividad() {
 }
 function editAct(id) {
   if (SESSION && !puedeEditar('vCron')) { toast('⛔ Sin permiso'); return; }
+  if (guardCronSiBloqueado()) return;
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   const a = CRON.find(x => x.id === id); if (!a) return;
   $('dtAct').textContent = 'Editar Actividad';
@@ -5297,6 +5591,7 @@ function editAct(id) {
 }
 function saveActividad() {
   if (SESSION && !puedeEditar('vCron')) { toast('⛔ Sin permiso'); return; }
+  if (guardCronSiBloqueado()) return;
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   const nombre = $('a_nombre').value.trim();
   if (!nombre) { toast('Escribe un nombre'); return; }
@@ -5320,6 +5615,7 @@ function saveActividad() {
 }
 function toggleAct(id) {
   if (SESSION && !puedeEditar('vCron')) { toast('⛔ Sin permiso'); return; }
+  if (guardCronSiBloqueado()) return;
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   const a = CRON.find(x => x.id === id);
   if (a) {
@@ -5330,6 +5626,7 @@ function toggleAct(id) {
 }
 async function delAct(id) {
   if (SESSION && !puedeEditar('vCron')) { toast('⛔ Sin permiso'); return; }
+  if (guardCronSiBloqueado()) return;
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   if (await uiConfirm('Se eliminará la actividad del cronograma.', { titulo: '¿Eliminar actividad?', ok: 'Eliminar' })) { CRON = CRON.filter(x => x.id !== id); saveCron(); renderCronograma(false); }
 }
@@ -5393,7 +5690,7 @@ function descargarPlantillaCronograma() {
   XLSX.utils.book_append_sheet(wb, ws, 'Cronograma');
   XLSX.writeFile(wb, 'plantilla-cronograma.xlsx');
 }
-const ETAPAS_BASE = ['Preelectoral', 'Electoral', 'Postelectoral', 'Segunda Vuelta', 'Posesión'];
+let ETAPAS_BASE = ['Preelectoral', 'Electoral', 'Postelectoral', 'Segunda Vuelta', 'Posesión'];
 function normEtapa(v) {
   const raw = String(v ?? '').trim();
   if (!raw) return 'Preelectoral';
