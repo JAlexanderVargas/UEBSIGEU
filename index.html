@@ -1342,7 +1342,7 @@ dialog#dlgListas{width:min(640px,96vw)}
       <div style="margin-top:12px;">
         <label style="font-weight:700">Módulos del sistema</label>
         <div id="u_new_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
-        <div class="perm-legend">✎ = puede editar ese módulo · sin ✎ = solo consulta. Los roles con módulos fijos se marcan automáticamente.</div>
+        <div class="perm-legend">Por módulo: Sin acceso · 👁 Lectura · ✎ Editar. Puedes mezclar (ej. lectura en varios y editar solo en uno).</div>
       </div>
       <div id="u_new_cronbox" class="hide" style="margin-top:12px;">
         <label style="font-weight:700">📅 Cronograma visible</label>
@@ -1390,7 +1390,7 @@ dialog#dlgListas{width:min(640px,96vw)}
       <div style="margin-top:12px;">
         <label style="font-weight:700">Módulos del sistema</label>
         <div id="u_edit_mods" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
-        <div class="perm-legend">✎ = puede editar ese módulo · sin ✎ = solo consulta. Los roles con módulos fijos se marcan automáticamente.</div>
+        <div class="perm-legend">Por módulo: Sin acceso · 👁 Lectura · ✎ Editar. Puedes mezclar (ej. lectura en varios y editar solo en uno).</div>
       </div>
       <div id="u_edit_cronbox" class="hide" style="margin-top:12px;">
         <label style="font-weight:700">📅 Cronograma visible</label>
@@ -1563,8 +1563,8 @@ const ROLES = {
 
 const ROLES_DESC = {
   administrador: 'Acceso total: usuarios, auditoría, cierre de elecciones y todos los módulos.',
-  editor: 'Ve y edita únicamente los módulos que se le asignen.',
-  lectura: 'Solo consulta los módulos asignados. No edita, elimina, modifica ni carga archivos.',
+  editor: 'Acceso a los módulos asignados. Puedes marcar Lectura o Editar por cada uno.',
+  lectura: 'Por defecto solo consulta. Si marcas ✎ Editar en un módulo, podrá editar solo ese.',
   agente_mesa: 'Registra casos de soporte; consulta directorio de ganadores y censo.',
   coordinador: 'Gestiona cronograma, seguimiento, votos y actas; consulta el resto de sus módulos.',
   auditor: 'Consulta todos los módulos y el registro de auditoría. No modifica nada.',
@@ -2120,7 +2120,24 @@ async function aplicarSesion() {
    ===================================================================== */
 function modulosDeLista(arr) {
   const k = MODULOS.map(m => m.key);
-  return (Array.isArray(arr) ? arr : []).filter(x => k.includes(x));
+  return (Array.isArray(arr) ? arr : []).map(x => {
+    const s = String(x || '');
+    if (s.startsWith('edit:')) return s.slice(5);
+    return s;
+  }).filter(x => k.includes(x));
+}
+function editsDeLista(arr) {
+  const k = new Set(MODULOS.map(m => m.key));
+  return (Array.isArray(arr) ? arr : [])
+    .map(x => String(x || ''))
+    .filter(x => x.startsWith('edit:') && k.has(x.slice(5)))
+    .map(x => x.slice(5));
+}
+function nivelModuloEnLista(arr, modKey) {
+  const a = Array.isArray(arr) ? arr : [];
+  if (a.includes('edit:' + modKey)) return 'edit';
+  if (a.includes(modKey) || modulosDeLista(a).includes(modKey)) return 'read';
+  return 'none';
 }
 function cronVistaDeLista(arr, rolKey) {
   const a = Array.isArray(arr) ? arr : [];
@@ -2181,8 +2198,12 @@ function puedeEditar(modulo) {
   if (ELECCIONES_CERRADAS) return false;
   const rol = ROLES[SESSION.rol]; if (!rol) return false;
   if (rol.validador) return false;
-  if (SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;
   if (!getModulosPermitidos().includes(modulo)) return false;
+  const lista = SESSION.modulos || [];
+  const edits = editsDeLista(lista);
+  const tieneTokensEdit = (Array.isArray(lista) ? lista : []).some(x => String(x).startsWith('edit:'));
+  if (tieneTokensEdit) return edits.includes(modulo);
+  if (SESSION.rol === 'lectura' || SESSION.rol === 'auditor') return false;
   if (SESSION.rol === 'editor') return true;
   if (rol.puedeEditar === '*') return true;
   return Array.isArray(rol.puedeEditar) && rol.puedeEditar.includes(modulo);
@@ -2317,7 +2338,13 @@ function renderTablaUsuarios() {
     let modsLabel = '—';
     if (rolDef && rolDef.mods === '*') modsLabel = 'Todos';
     else if (Array.isArray(rolDef?.mods) && rolDef.mods.length) modsLabel = rolDef.mods.map(k => MODULOS.find(m => m.key === k)?.label || k).join(', ');
-    else if (modulosDeLista(mods).length) modsLabel = modulosDeLista(mods).map(k => MODULOS.find(m => m.key === k)?.label || k).join(', ');
+    else if (modulosDeLista(mods).length) {
+      const edits = new Set(editsDeLista(mods));
+      modsLabel = modulosDeLista(mods).map(k => {
+        const lab = MODULOS.find(m => m.key === k)?.label || k;
+        return edits.has(k) ? lab + ' ✎' : lab + ' 👁';
+      }).join(', ');
+    }
     const _incCron = rolDef?.mods === '*' || (Array.isArray(rolDef?.mods) && rolDef.mods.includes('vCron')) || mods.includes('vCron');
     const cronBadge = (_incCron && rol !== 'administrador') ? ` <span class="rol-validador-badge">Cron: ${({ ambos: 'público + interno', publico: 'solo público', interno: 'solo interno' })[cronVistaDeLista(mods, rol)]}</span>` : '';
     return `<tr>
@@ -2346,7 +2373,7 @@ function abrirEditarUsuario(id) {
   $('u_edit_rol').value = u[CONFIG.col_rol] || 'lectura';
   $('u_edit_activo').value = u[CONFIG.col_activo] ? 'true' : 'false';
   const mods = Array.isArray(u[CONFIG.col_modulos]) ? u[CONFIG.col_modulos] : [];
-  actualizarPermisosUI('u_edit', false, { mods: modulosDeLista(mods), cron: cronVistaDeLista(mods, u[CONFIG.col_rol] || 'lectura'), fac: facultadDeLista(mods) });
+  actualizarPermisosUI('u_edit', false, { mods: mods, cron: cronVistaDeLista(mods, u[CONFIG.col_rol] || 'lectura'), fac: facultadDeLista(mods) });
   dlgEditarUsuario.showModal();
 }
 
@@ -2630,29 +2657,53 @@ function _capacidadesRol(rolKey) {
 function actualizarPermisosUI(pre, cambioRol, init) {
   const rolKey = $(pre + '_rol').value;
   const { def, fijo, puedeEd } = _capacidadesRol(rolKey);
-  const cls = pre === 'u_new' ? 'u_mod' : 'u_edit_mod';
-  let sel;
-  if (init && Array.isArray(init.mods)) sel = init.mods.slice();
-  else if (!cambioRol) sel = [...document.querySelectorAll('.' + cls + ':checked')].map(i => i.value);
-  else sel = [];
   const todos = def?.mods === '*';
-  let baseFijos = [];
-  if (fijo && !todos && Array.isArray(def.mods)) baseFijos = def.mods.slice();
-  const seleccionFinal = todos ? MODULOS.map(m => m.key) : [...new Set([...baseFijos, ...sel])];
-  const chips = MODULOS.map(m => {
-    const marcado = seleccionFinal.includes(m.key);
-    const edita = marcado && puedeEd(m.key, seleccionFinal);
-    return `<label class="chip-t"><input type="checkbox" value="${m.key}" class="${cls}" ${marcado ? 'checked' : ''} ${todos ? 'disabled' : ''} onchange="actualizarPermisosUI('${pre}',false)"><span>${esc(m.label)}${edita ? ' <em class="chip-edit">✎</em>' : ''}</span></label>`;
+  const esVal = !!def?.validador;
+  let niveles = {};
+  if (init && Array.isArray(init.mods)) {
+    MODULOS.forEach(m => { niveles[m.key] = nivelModuloEnLista(init.mods, m.key); });
+    if (rolKey === 'editor' && !init.mods.some(x => String(x).startsWith('edit:'))) {
+      modulosDeLista(init.mods).forEach(k => { niveles[k] = 'edit'; });
+    }
+  } else if (!cambioRol) {
+    MODULOS.forEach(m => {
+      const sel = document.querySelector(`select[data-mod-level][data-pre="${pre}"][data-mod="${m.key}"]`);
+      niveles[m.key] = sel ? sel.value : 'none';
+    });
+  } else {
+    MODULOS.forEach(m => {
+      if (todos) niveles[m.key] = 'edit';
+      else if (Array.isArray(def?.mods) && def.mods.includes(m.key)) {
+        niveles[m.key] = puedeEd(m.key, def.mods) ? 'edit' : 'read';
+      } else {
+        niveles[m.key] = 'none';
+      }
+    });
+  }
+  const bloqueado = todos || esVal;
+  const rows = MODULOS.map(m => {
+    const niv = niveles[m.key] || 'none';
+    const disabled = bloqueado ? 'disabled' : '';
+    return `<div class="perm-mod-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid var(--line)">
+      <span style="font-weight:700;font-size:13px;color:var(--oscuro)">${esc(m.label)}</span>
+      <select class="in" data-mod-level data-pre="${pre}" data-mod="${m.key}" ${disabled} onchange="actualizarPermisosUI('${pre}',false)" style="width:140px;padding:6px 8px;font-size:12.5px;font-weight:700">
+        <option value="none" ${niv === 'none' ? 'selected' : ''}>— Sin acceso</option>
+        <option value="read" ${niv === 'read' ? 'selected' : ''}>👁 Lectura</option>
+        <option value="edit" ${niv === 'edit' ? 'selected' : ''}>✎ Editar</option>
+      </select>
+    </div>`;
   }).join('');
-  $(pre + '_mods').innerHTML = chips;
-  $(pre + '_perm').innerHTML = `<b>${esc(def?.label || rolKey)}</b>: ${esc(ROLES_DESC[rolKey] || '')}${fijo ? ' <span style="color:var(--naranja)">— Puedes ajustar los módulos marcados.</span>' : ''}`;
-  const selFinal = [...document.querySelectorAll('.' + cls + ':checked')].map(i => i.value);
-  const incCron = rolKey !== 'administrador' && (todos || selFinal.includes('vCron'));
+  $(pre + '_mods').innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${rows}</div>
+    <p class="perm-legend" style="margin-top:8px">Por cada módulo: <b>Lectura</b> (solo ver) o <b>Editar</b> (crear/modificar). Ej.: lectura en A, B, C y editar solo en J.</p>`;
+  $(pre + '_perm').innerHTML = `<b>${esc(def?.label || rolKey)}</b>: ${esc(ROLES_DESC[rolKey] || '')}
+    <span style="color:var(--naranja)"> — Personaliza Lectura/Editar por módulo.</span>`;
+  const nivCron = niveles['vCron'] || 'none';
+  const incCron = rolKey !== 'administrador' && nivCron !== 'none';
   const box = $(pre + '_cronbox');
   let fb = $(pre + '_facbox');
   if (!fb) {
     fb = document.createElement('div'); fb.id = pre + '_facbox'; fb.style.marginTop = '12px';
-    fb.innerHTML = `<label style="font-weight:700">🏛️ Facultad asignada</label><select class="in" id="${pre}_fac" style="width:100%;margin-top:6px"></select><div class="perm-legend">Esta persona solo verá y podrá aprobar a los candidatos de la facultad que elijas.</div>`;
+    fb.innerHTML = `<label style="font-weight:700">🏛️ Facultad asignada</label><select class="in" id="${pre}_fac" style="width:100%;margin-top:6px"></select><div class="perm-legend">Solo verá candidatos de esa facultad.</div>`;
     box.insertAdjacentElement('afterend', fb);
   }
   const esFp = rolKey === 'fac_prog';
@@ -2676,10 +2727,18 @@ function actualizarPermisosUI(pre, cambioRol, init) {
 function leerPermisos(pre) {
   const rolKey = $(pre + '_rol').value;
   const def = ROLES[rolKey];
-  const cls = pre === 'u_new' ? 'u_mod' : 'u_edit_mod';
   const todos = def?.mods === '*';
-  let mods = todos ? [] : [...document.querySelectorAll('.' + cls + ':checked')].map(i => i.value);
-  const incCron = rolKey !== 'administrador' && (todos || mods.includes('vCron'));
+  let mods = [];
+  if (!todos) {
+    document.querySelectorAll(`select[data-mod-level][data-pre="${pre}"]`).forEach(sel => {
+      const key = sel.getAttribute('data-mod');
+      const niv = sel.value;
+      if (niv === 'read') mods.push(key);
+      else if (niv === 'edit') { mods.push(key); mods.push('edit:' + key); }
+    });
+  }
+  const tieneCron = mods.includes('vCron') || mods.includes('edit:vCron');
+  const incCron = rolKey !== 'administrador' && (todos || tieneCron);
   const cv = document.querySelector(`input[name="${pre}_cronv"]:checked`)?.value || (def?.cronVista || 'ambos');
   if (incCron) {
     if (cv === 'ambos' || cv === 'publico') mods.push(CRON_TOK.publico);
