@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Elecciones · Sistema Integral</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -727,6 +729,29 @@ body.logged-in #topbar { display: flex; }
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+/* === Listas editables === */
+.lista-rows{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto;padding-right:4px}
+.lista-row{display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid var(--line);
+  box-shadow:0 6px 14px -12px rgba(11,59,44,.35);animation:listaIn .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*40ms);transition:transform .18s,box-shadow .18s}
+.lista-row:hover{transform:translateY(-2px);box-shadow:0 12px 22px -14px rgba(11,59,44,.45)}
+.lista-num{display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:8px;background:var(--oscuro);color:#fff;font-size:12px;font-weight:800}
+@keyframes listaIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+
+/* === Micro-animaciones extra === */
+.nav.on{position:relative}
+.nav.on::after{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:0 3px 3px 0;background:var(--naranja);animation:slideRight .35s ease both}
+.kpi-card,.vac-card,.cron-panel,.card{will-change:transform}
+.btn.p{position:relative;overflow:hidden}
+.btn.p::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);transition:none}
+.btn.p:hover::after{animation:shine .7s ease}
+@keyframes shine{to{transform:translateX(100%)}}
+.brand img{animation:float 4.5s ease-in-out infinite}
+#cardListas{border:1px dashed #9ac0b0;background:linear-gradient(160deg,#fff 0%,#f3faf6 100%)}
+#cardListas h3{display:flex;align-items:center;gap:8px}
+.vac-card[style*="grid-column"]{animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both, pulseRing 2.8s ease-in-out 1s 1}
+dialog#dlgListas{width:min(640px,96vw)}
+
 </style>
 </head>
 <body class="logged-out">
@@ -833,10 +858,12 @@ body.logged-in #topbar { display: flex; }
  </div>
  <div class="card" id="cardListas">
    <h3>📋 Listas editables</h3>
-   <p class="help" style="margin-top:0">Administra facultades y tipos de actividad del cronograma (colores incluidos).</p>
-   <div class="bar" style="margin-top:10px">
-     <button class="btn sm p" onclick="abrirGestorListas('facultades')">🏛 Facultades / Departamentos</button>
-     <button class="btn sm p" onclick="abrirGestorListas('tipos')">🎨 Tipos de actividad (colores)</button>
+   <p class="help" style="margin-top:0">Agrega, edita o elimina opciones de los desplegables del sistema. Los cambios se aplican de inmediato.</p>
+   <div class="bar" style="margin-top:10px;flex-wrap:wrap;gap:8px">
+     <button class="btn sm p" onclick="abrirGestorListas('facultades')">🏛 Facultades</button>
+     <button class="btn sm p" onclick="abrirGestorListas('tipos')">🎨 Tipos (colores)</button>
+     <button class="btn sm p" onclick="abrirGestorListas('novedades')">📌 Novedades</button>
+     <button class="btn sm p" onclick="abrirGestorListas('errores')">⚠️ Errores de postulación</button>
    </div>
  </div>
  <div class="cron-grid">
@@ -1484,8 +1511,8 @@ const $ = id => document.getElementById(id);
 const ORG = { 'Consejo de Facultad': ['Estudiante', 'Egresado', 'Docente'], 'Consejo Directivo': ['Estudiante', 'Docente'], 'Consejo Académico': ['Estudiante', 'Egresado', 'Docente'], 'Comité de Posgrado': ['Estudiante', 'Egresado'] };
 const CH = { Docente: ['th'], Egresado: ['eg'], Estudiante: ['sg', 'fp'] };
 const KEYS = ['th', 'eg', 'sg', 'fp'];
-const NOV = { '': 'Sin novedad', 'Renuncia': 'Renuncia', 'Ubicación semestre': 'No cumple: ubicación semestre', 'Llamado de atención': 'Llamado de atención', 'Error postulación': 'Error postulación', 'Otra novedad': 'Otra novedad' };
-const ERRORS = { '': 'Seleccione error...', 'No quiero postularme': 'No quiero postularme', 'Me postulé como principal pero quería ser suplente': 'Me postulé como principal pero quería ser suplente', 'Me postulé como suplente pero quiero ser principal': 'Me postulé como suplente pero quiero ser principal', 'Nos postulamos por la facultad errada': 'Nos postulamos por la facultad errada', 'Nos postulamos con error equivocado': 'Nos postulamos con error equivocado', 'Me postulé pero me arrepentí': 'Me postulé pero me arrepentí' };
+let NOV = { '': 'Sin novedad', 'Renuncia': 'Renuncia', 'Ubicación semestre': 'No cumple: ubicación semestre', 'Llamado de atención': 'Llamado de atención', 'Error postulación': 'Error postulación', 'Otra novedad': 'Otra novedad' };
+let ERRORS = { '': 'Seleccione error...', 'No quiero postularme': 'No quiero postularme', 'Me postulé como principal pero quería ser suplente': 'Me postulé como principal pero quería ser suplente', 'Me postulé como suplente pero quiero ser principal': 'Me postulé como suplente pero quiero ser principal', 'Nos postulamos por la facultad errada': 'Nos postulamos por la facultad errada', 'Nos postulamos con error equivocado': 'Nos postulamos con error equivocado', 'Me postulé pero me arrepentí': 'Me postulé pero me arrepentí' };
 
 const CRON_TOK = { publico: 'cron:publico', interno: 'cron:interno' };
 const FAC_TOK = 'fac:';
@@ -1689,7 +1716,7 @@ const SYNC_KEYS = {
 const _syncGet = {
   cand_v2: () => D, cronograma_v2: () => CRON, votantes_v2: () => VOTANTES,
   censo_data_v1: () => CENSO_DATA, org_activos_v1: () => ORG_ACTIVOS, soporte_data_v1: () => SOPORTES,
-  config_listas_v1: () => ({ facultades: FACULTADES, tiposCron: TIPO_STYLE })
+  config_listas_v1: () => ({ facultades: FACULTADES, tiposCron: TIPO_STYLE, novedades: NOV, errores: ERRORS })
 };
 
 let _syncEnabled = false;
@@ -1771,6 +1798,8 @@ async function syncPullAll() {
         TIPO_STYLE = v.tiposCron;
         TIPOS_CRON = Object.keys(TIPO_STYLE);
       }
+      if (v.novedades && typeof v.novedades === 'object') NOV = v.novedades;
+      if (v.errores && typeof v.errores === 'object') ERRORS = v.errores;
     });
     return changed;
   } catch (e) { console.warn('syncPullAll:', e.message); return false; }
@@ -4961,12 +4990,20 @@ function renderCronograma(anim) {
   $('cronList').innerHTML = cronListaHTML(vista, hoy, true) || `<p class="empty">${CRON.length ? 'No hay actividades en este filtro.' : 'No hay actividades.'}</p>`;
   deshabilitarBotonesEdicion();
 }
-/* ===== Gestor de listas (facultades + tipos con color) ===== */
+/* ===== Gestor de listas (facultades, tipos, novedades, errores) ===== */
 let _listaModo = 'facultades';
+const LISTA_TITULOS = {
+  facultades: '🏛 Facultades / Departamentos',
+  tipos: '🎨 Tipos de actividad (colores)',
+  novedades: '📌 Novedades de candidatos',
+  errores: '⚠️ Errores de postulación'
+};
 function abrirGestorListas(modo) {
-  if (SESSION && SESSION.rol !== 'administrador' && !(typeof puedeEditar === 'function' && puedeEditar('vCron'))) { toast('⛔ Solo administrador o con permiso de edición'); return; }
+  if (SESSION && SESSION.rol !== 'administrador' && !(typeof puedeEditar === 'function' && puedeEditar('vCron'))) {
+    toast('⛔ Solo administrador o con permiso de edición'); return;
+  }
   _listaModo = modo || 'facultades';
-  $('dlgListasTitulo').textContent = modo === 'tipos' ? 'Tipos de actividad (colores)' : 'Facultades / Departamentos';
+  $('dlgListasTitulo').textContent = LISTA_TITULOS[_listaModo] || 'Listas';
   renderGestorListas();
   $('dlgListas').showModal();
 }
@@ -4974,89 +5011,124 @@ function renderGestorListas() {
   const body = $('dlgListasBody');
   if (!body) return;
   if (_listaModo === 'tipos') {
-    let rows = TIPOS_CRON.map((t, i) => {
+    const rows = TIPOS_CRON.map((t, i) => {
       const st = TIPO_STYLE[t] || ['📌', '#4a6572', '#e6eef2'];
-      return `<div class="firma-item" style="display:grid;grid-template-columns:40px 1fr 90px 90px auto;gap:8px;align-items:center">
-        <input class="in" id="tp_ico_${i}" value="${esc(st[0])}" style="text-align:center;padding:6px" title="Emoji / icono">
-        <input class="in" id="tp_nom_${i}" value="${esc(t)}" placeholder="Nombre del tipo">
-        <input class="in" type="color" id="tp_col_${i}" value="${st[1]}" title="Color principal" style="height:36px;padding:2px">
-        <input class="in" type="color" id="tp_soft_${i}" value="${st[2]}" title="Color suave de fondo" style="height:36px;padding:2px">
-        <button class="ic" onclick="eliminarTipoLista(${i})" title="Eliminar">🗑</button>
+      return `<div class="lista-row" style="--i:${i}">
+        <input class="in" id="tp_ico_${i}" value="${esc(st[0])}" style="text-align:center;padding:6px;width:48px" title="Emoji">
+        <input class="in" id="tp_nom_${i}" value="${esc(t)}" placeholder="Nombre del tipo" style="flex:1">
+        <input class="in" type="color" id="tp_col_${i}" value="${st[1]}" title="Color principal" style="height:36px;width:52px;padding:2px">
+        <input class="in" type="color" id="tp_soft_${i}" value="${st[2]}" title="Color suave" style="height:36px;width:52px;padding:2px">
+        <button class="ic" onclick="eliminarItemLista(${i})" title="Eliminar">🗑</button>
       </div>`;
     }).join('');
-    body.innerHTML = `<p class="help" style="margin-top:0">Define el nombre, el icono y los dos colores de cada tipo. Se usan en el cronograma.</p>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">${rows || '<p class="empty">No hay tipos.</p>'}</div>
-      <div class="bar"><button class="btn sm p" onclick="agregarTipoLista()">+ Agregar tipo</button>
-      <button class="btn sm" onclick="guardarTiposLista()">💾 Guardar cambios</button></div>`;
+    body.innerHTML = `<p class="help" style="margin-top:0">Nombre, icono y colores de cada tipo del cronograma.</p>
+      <div class="lista-rows">${rows || '<p class="empty">Sin tipos.</p>'}</div>
+      <div class="bar" style="margin-top:12px"><button class="btn sm p" onclick="agregarItemLista()">＋ Agregar tipo</button>
+      <button class="btn sm" onclick="guardarListaActual()">💾 Guardar</button></div>`;
+  } else if (_listaModo === 'novedades' || _listaModo === 'errores') {
+    const src = _listaModo === 'novedades' ? NOV : ERRORS;
+    const keys = Object.keys(src);
+    const rows = keys.map((k, i) => {
+      const isEmpty = k === '';
+      return `<div class="lista-row" style="--i:${i}">
+        <input class="in" id="li_key_${i}" value="${esc(k)}" placeholder="Valor interno" ${isEmpty ? 'readonly style="flex:1;opacity:.7"' : 'style="flex:1"'}>
+        <input class="in" id="li_lab_${i}" value="${esc(src[k])}" placeholder="Texto visible" style="flex:1.4">
+        ${isEmpty ? '<span style="width:32px"></span>' : `<button class="ic" onclick="eliminarItemLista(${i})" title="Eliminar">🗑</button>`}
+      </div>`;
+    }).join('');
+    body.innerHTML = `<p class="help" style="margin-top:0">Valor interno (clave) y texto que ve el usuario. La primera fila vacía es la opción por defecto.</p>
+      <div class="lista-rows">${rows}</div>
+      <div class="bar" style="margin-top:12px"><button class="btn sm p" onclick="agregarItemLista()">＋ Agregar opción</button>
+      <button class="btn sm" onclick="guardarListaActual()">💾 Guardar</button></div>`;
   } else {
-    let rows = FACULTADES.map((f, i) => `<div class="firma-item" style="display:flex;gap:8px;align-items:center">
+    const rows = FACULTADES.map((f, i) => `<div class="lista-row" style="--i:${i}">
+      <span class="lista-num">${i + 1}</span>
       <input class="in" id="fac_nom_${i}" value="${esc(f)}" style="flex:1">
-      <button class="ic" onclick="eliminarFacultadLista(${i})" title="Eliminar">🗑</button>
+      <button class="ic" onclick="eliminarItemLista(${i})" title="Eliminar">🗑</button>
     </div>`).join('');
-    body.innerHTML = `<p class="help" style="margin-top:0">Agrega, edita o elimina facultades y departamentos. Los cambios se reflejan en todos los selectores.</p>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">${rows || '<p class="empty">No hay facultades.</p>'}</div>
-      <div class="bar"><button class="btn sm p" onclick="agregarFacultadLista()">+ Agregar facultad</button>
-      <button class="btn sm" onclick="guardarFacultadesLista()">💾 Guardar cambios</button></div>`;
+    body.innerHTML = `<p class="help" style="margin-top:0">Facultades y departamentos que aparecen en todos los filtros y formularios.</p>
+      <div class="lista-rows">${rows || '<p class="empty">Sin facultades.</p>'}</div>
+      <div class="bar" style="margin-top:12px"><button class="btn sm p" onclick="agregarItemLista()">＋ Agregar facultad</button>
+      <button class="btn sm" onclick="guardarListaActual()">💾 Guardar</button></div>`;
   }
 }
-function agregarTipoLista() {
-  const nombre = 'Nuevo tipo ' + (TIPOS_CRON.length + 1);
-  TIPOS_CRON.push(nombre);
-  TIPO_STYLE[nombre] = ['📌', '#4a6572', '#e6eef2'];
+function agregarItemLista() {
+  if (_listaModo === 'tipos') {
+    const nombre = 'Nuevo tipo ' + (TIPOS_CRON.length + 1);
+    TIPOS_CRON.push(nombre);
+    TIPO_STYLE[nombre] = ['📌', '#4a6572', '#e6eef2'];
+  } else if (_listaModo === 'novedades') {
+    NOV['Nueva novedad ' + Object.keys(NOV).length] = 'Nueva novedad';
+  } else if (_listaModo === 'errores') {
+    ERRORS['Nuevo error ' + Object.keys(ERRORS).length] = 'Nuevo error';
+  } else {
+    FACULTADES.push('Nueva facultad');
+  }
   renderGestorListas();
 }
-function eliminarTipoLista(i) {
-  const t = TIPOS_CRON[i];
-  if (!t) return;
-  if (TIPOS_CRON.length <= 1) { toast('Debe quedar al menos un tipo'); return; }
-  TIPOS_CRON.splice(i, 1);
-  delete TIPO_STYLE[t];
+function eliminarItemLista(i) {
+  if (_listaModo === 'tipos') {
+    if (TIPOS_CRON.length <= 1) { toast('Debe quedar al menos un tipo'); return; }
+    const t = TIPOS_CRON[i];
+    TIPOS_CRON.splice(i, 1);
+    delete TIPO_STYLE[t];
+  } else if (_listaModo === 'novedades') {
+    const keys = Object.keys(NOV);
+    if (keys[i] === '') return;
+    if (keys.length <= 2) { toast('Deja al menos una novedad'); return; }
+    delete NOV[keys[i]];
+  } else if (_listaModo === 'errores') {
+    const keys = Object.keys(ERRORS);
+    if (keys[i] === '') return;
+    if (keys.length <= 2) { toast('Deja al menos un error'); return; }
+    delete ERRORS[keys[i]];
+  } else {
+    if (FACULTADES.length <= 1) { toast('Debe quedar al menos una facultad'); return; }
+    FACULTADES.splice(i, 1);
+  }
   renderGestorListas();
 }
-function guardarTiposLista() {
-  const nuevo = {};
-  const orden = [];
-  TIPOS_CRON.forEach((_, i) => {
-    const nom = ($('tp_nom_' + i)?.value || '').trim();
-    if (!nom) return;
-    const ico = ($('tp_ico_' + i)?.value || '📌').trim() || '📌';
-    const col = $('tp_col_' + i)?.value || '#4a6572';
-    const soft = $('tp_soft_' + i)?.value || '#e6eef2';
-    orden.push(nom);
-    nuevo[nom] = [ico, col, soft];
-  });
-  if (!orden.length) { toast('Debe haber al menos un tipo'); return; }
-  TIPO_STYLE = nuevo;
-  TIPOS_CRON = orden;
-  saveConfigListas();
-  fillSel();
-  renderCronograma(false);
-  toast('✅ Tipos y colores guardados');
-  renderGestorListas();
-}
-function agregarFacultadLista() {
-  FACULTADES.push('Nueva facultad');
-  renderGestorListas();
-}
-function eliminarFacultadLista(i) {
-  if (FACULTADES.length <= 1) { toast('Debe quedar al menos una facultad'); return; }
-  FACULTADES.splice(i, 1);
-  renderGestorListas();
-}
-function guardarFacultadesLista() {
-  const nuevas = [];
-  FACULTADES.forEach((_, i) => {
-    const nom = ($('fac_nom_' + i)?.value || '').trim();
-    if (nom) nuevas.push(nom);
-  });
-  if (!nuevas.length) { toast('Debe haber al menos una facultad'); return; }
-  FACULTADES = [...new Set(nuevas)];
-  saveConfigListas();
-  fillSel();
-  try { normalizarFacultadesGlobal(); } catch (e) {}
-  try { renderVacantes(); } catch (e) {}
-  try { renderCensoData(); } catch (e) {}
-  toast('✅ Facultades actualizadas');
+function guardarListaActual() {
+  if (_listaModo === 'tipos') {
+    const nuevo = {}, orden = [];
+    TIPOS_CRON.forEach((_, i) => {
+      const nom = ($('tp_nom_' + i)?.value || '').trim();
+      if (!nom) return;
+      orden.push(nom);
+      nuevo[nom] = [($('tp_ico_' + i)?.value || '📌').trim() || '📌', $('tp_col_' + i)?.value || '#4a6572', $('tp_soft_' + i)?.value || '#e6eef2'];
+    });
+    if (!orden.length) { toast('Debe haber al menos un tipo'); return; }
+    TIPO_STYLE = nuevo; TIPOS_CRON = orden;
+    saveConfigListas(); fillSel(); renderCronograma(false);
+    toast('✅ Tipos y colores guardados');
+  } else if (_listaModo === 'novedades' || _listaModo === 'errores') {
+    const target = {};
+    const n = document.querySelectorAll('#dlgListasBody [id^="li_key_"]').length;
+    for (let i = 0; i < n; i++) {
+      const k = ($('li_key_' + i)?.value ?? '').trim();
+      const lab = ($('li_lab_' + i)?.value || '').trim() || k || 'Opción';
+      if (i === 0 && k === '') { target[''] = lab; continue; }
+      if (!k) continue;
+      target[k] = lab;
+    }
+    if (_listaModo === 'novedades') NOV = target; else ERRORS = target;
+    saveConfigListas(); fillSel();
+    try { draw(); } catch (e) {}
+    toast('✅ Lista actualizada');
+  } else {
+    const nuevas = [];
+    FACULTADES.forEach((_, i) => {
+      const nom = ($('fac_nom_' + i)?.value || '').trim();
+      if (nom) nuevas.push(nom);
+    });
+    if (!nuevas.length) { toast('Debe haber al menos una facultad'); return; }
+    FACULTADES = [...new Set(nuevas)];
+    saveConfigListas(); fillSel();
+    try { normalizarFacultadesGlobal(); } catch (e) {}
+    try { renderVacantes(); } catch (e) {}
+    try { renderCensoData(); } catch (e) {}
+    toast('✅ Facultades actualizadas');
+  }
   renderGestorListas();
 }
 
@@ -5336,7 +5408,7 @@ setInterval(() => {
    RESPALDO
    ===================================================================== */
 function descargarRespaldo() {
-  const data = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, ORG_ACTIVOS, FACULTADES, TIPO_STYLE, fecha: new Date().toISOString() };
+  const data = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, ORG_ACTIVOS, FACULTADES, TIPO_STYLE, NOV, ERRORS, fecha: new Date().toISOString() };
   const a = document.createElement('a');
   a.setAttribute('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data)));
   a.setAttribute('download', 'respaldo_elecciones.json');
@@ -5359,6 +5431,8 @@ function importarRespaldo(input) {
       if (data.ORG_ACTIVOS) ORG_ACTIVOS = data.ORG_ACTIVOS;
       if (Array.isArray(data.FACULTADES) && data.FACULTADES.length) FACULTADES = data.FACULTADES;
       if (data.TIPO_STYLE && typeof data.TIPO_STYLE === 'object') { TIPO_STYLE = data.TIPO_STYLE; TIPOS_CRON = Object.keys(TIPO_STYLE); }
+      if (data.NOV && typeof data.NOV === 'object') NOV = data.NOV;
+      if (data.ERRORS && typeof data.ERRORS === 'object') ERRORS = data.ERRORS;
       save(); saveCron(); saveFirmas(); saveVotantes(); saveCenso(); saveSoportes(); saveOrgActivos(); saveConfigListas();
       toast('Datos importados. Recargando...');
       setTimeout(() => { window.location.reload(); }, 3000);
