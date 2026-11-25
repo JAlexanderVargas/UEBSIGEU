@@ -1531,6 +1531,9 @@ const ORG_GLOBALES = ['Consejo Directivo', 'Consejo Académico', 'Comité de Pos
 const esGlobal = (org) => ORG_GLOBALES.includes(org);
 /** Mínimo de fórmulas (habilitadas o en revisión) para considerar un cargo cubierto. Evita que una sola dupla compita solo contra el voto en blanco. */
 const MIN_FORMULAS_CARGO = 2;
+let TIPO_STYLE = { 'Inscripción': ['📝', '#1f6fd1', '#e4f0fd'], 'Campaña': ['📣', '#e8590c', '#ffe8d9'], 'Votación': ['🗳️', '#0B9B5B', '#dcf6e7'], 'Escrutinio': ['🧮', '#7d3c98', '#f1e4f7'], 'Poselectoral': ['🏛️', '#c2255c', '#fde4ee'], 'Otro': ['📌', '#4a6572', '#e6eef2'] };
+let TIPOS_CRON = Object.keys(TIPO_STYLE);
+
 
 const MODULOS = [
   { key: 'vCron', label: 'Cronograma' },
@@ -1794,12 +1797,15 @@ async function syncPullAll() {
     apply('config_listas_v1', v => {
       if (!v || typeof v !== 'object') return;
       if (Array.isArray(v.facultades) && v.facultades.length) FACULTADES = v.facultades;
-      if (v.tiposCron && typeof v.tiposCron === 'object') {
+      if (v.tiposCron && typeof v.tiposCron === 'object' && Object.keys(v.tiposCron).length) {
         TIPO_STYLE = v.tiposCron;
         TIPOS_CRON = Object.keys(TIPO_STYLE);
       }
       if (v.novedades && typeof v.novedades === 'object') NOV = v.novedades;
       if (v.errores && typeof v.errores === 'object') ERRORS = v.errores;
+      try { localStorage.setItem('elecciones_config_listas_v1', JSON.stringify({
+        facultades: FACULTADES, tiposCron: TIPO_STYLE, novedades: NOV, errores: ERRORS
+      })); } catch (e) {}
     });
     return changed;
   } catch (e) { console.warn('syncPullAll:', e.message); return false; }
@@ -1845,7 +1851,50 @@ const saveVotantes = () => _syncPush('votantes_v2');
 const saveCenso = () => _syncPush('censo_data_v1');
 const saveSoportes = () => _syncPush('soporte_data_v1');
 const saveOrgActivos = () => _syncPush('org_activos_v1');
-const saveConfigListas = () => _syncPush('config_listas_v1');
+function saveConfigListas() {
+  const payload = { facultades: FACULTADES, tiposCron: TIPO_STYLE, novedades: NOV, errores: ERRORS };
+  try {
+    localStorage.setItem('elecciones_config_listas_v1', JSON.stringify(payload));
+  } catch (e) { console.warn('localStorage config', e); }
+  // Push inmediato a Supabase (tabla sis_config, clave sync_config_listas)
+  try { _syncPush('config_listas_v1'); } catch (e) { console.warn(e); }
+  // Escritura directa adicional para no depender solo del debounce
+  if (supabaseClient && typeof SESSION !== 'undefined' && SESSION) {
+    (async () => {
+      try {
+        const raw = JSON.stringify(payload);
+        const { error } = await supabaseClient.from(CONFIG.tabla_config).upsert({
+          [CONFIG.col_config_clave]: 'sync_config_listas',
+          [CONFIG.col_config_valor]: raw
+        }, { onConflict: CONFIG.col_config_clave });
+        if (error) {
+          console.error('Supabase config_listas:', error);
+          toast('⚠️ Guardado local OK, pero Supabase falló: ' + (error.message || error));
+        } else {
+          setSyncBadge('ok', 'Listas en Supabase · ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }));
+        }
+      } catch (e) {
+        console.error(e);
+        toast('⚠️ No se pudo escribir en Supabase: ' + (e.message || e));
+      }
+    })();
+  }
+}
+function loadConfigListasLocal() {
+  try {
+    const raw = localStorage.getItem('elecciones_config_listas_v1');
+    if (!raw) return;
+    const v = JSON.parse(raw);
+    if (!v || typeof v !== 'object') return;
+    if (Array.isArray(v.facultades) && v.facultades.length) FACULTADES = v.facultades;
+    if (v.tiposCron && typeof v.tiposCron === 'object' && Object.keys(v.tiposCron).length) {
+      TIPO_STYLE = v.tiposCron;
+      TIPOS_CRON = Object.keys(TIPO_STYLE);
+    }
+    if (v.novedades && typeof v.novedades === 'object') NOV = v.novedades;
+    if (v.errores && typeof v.errores === 'object') ERRORS = v.errores;
+  } catch (e) { console.warn('loadConfigListasLocal', e); }
+}
 
 /* =====================================================================
    LOG
@@ -4911,8 +4960,8 @@ const ICO_USER = '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 
 const ICO_TAG = '<svg viewBox="0 0 24 24"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
 function partesFecha(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); if (!m) return { d: '–', m: 'sin fecha' }; return { d: String(+m[3]), m: MES_CORTO[+m[2] - 1] + ' ' + m[1] }; }
 function diasEntre(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5) + 1; }
-let TIPO_STYLE = { 'Inscripción': ['📝', '#1f6fd1', '#e4f0fd'], 'Campaña': ['📣', '#e8590c', '#ffe8d9'], 'Votación': ['🗳️', '#0B9B5B', '#dcf6e7'], 'Escrutinio': ['🧮', '#7d3c98', '#f1e4f7'], 'Poselectoral': ['🏛️', '#c2255c', '#fde4ee'], 'Otro': ['📌', '#4a6572', '#e6eef2'] };
-let TIPOS_CRON = Object.keys(TIPO_STYLE);
+/* TIPO_STYLE declarado arriba */
+
 
 function estadoGuardado() {
   const el = $('cronGuardado'); if (!el) return;
@@ -4998,6 +5047,14 @@ const LISTA_TITULOS = {
   novedades: '📌 Novedades de candidatos',
   errores: '⚠️ Errores de postulación'
 };
+function previewTipoRow(el) {
+  const row = el && el.closest('.lista-row');
+  if (!row) return;
+  const col = row.querySelector('[id^="tp_col_"]')?.value || '#4a6572';
+  const soft = row.querySelector('[id^="tp_soft_"]')?.value || '#e6eef2';
+  row.style.borderLeft = '4px solid ' + col;
+  row.style.background = 'linear-gradient(90deg,' + soft + ' 0%,#fff 55%)';
+}
 function abrirGestorListas(modo) {
   if (SESSION && SESSION.rol !== 'administrador' && !(typeof puedeEditar === 'function' && puedeEditar('vCron'))) {
     toast('⛔ Solo administrador o con permiso de edición'); return;
@@ -5013,11 +5070,13 @@ function renderGestorListas() {
   if (_listaModo === 'tipos') {
     const rows = TIPOS_CRON.map((t, i) => {
       const st = TIPO_STYLE[t] || ['📌', '#4a6572', '#e6eef2'];
-      return `<div class="lista-row" style="--i:${i}">
-        <input class="in" id="tp_ico_${i}" value="${esc(st[0])}" style="text-align:center;padding:6px;width:48px" title="Emoji">
+      const col = st[1] || '#4a6572';
+      const soft = st[2] || '#e6eef2';
+      return `<div class="lista-row" style="--i:${i};border-left:4px solid ${esc(col)};background:linear-gradient(90deg,${esc(soft)} 0%,#fff 55%)">
+        <input class="in" id="tp_ico_${i}" value="${esc(st[0])}" style="text-align:center;padding:6px;width:48px" title="Emoji" oninput="previewTipoRow(this)">
         <input class="in" id="tp_nom_${i}" value="${esc(t)}" placeholder="Nombre del tipo" style="flex:1">
-        <input class="in" type="color" id="tp_col_${i}" value="${st[1]}" title="Color principal" style="height:36px;width:52px;padding:2px">
-        <input class="in" type="color" id="tp_soft_${i}" value="${st[2]}" title="Color suave" style="height:36px;width:52px;padding:2px">
+        <label style="font-size:11px;font-weight:700;color:#6b8378">Principal<br><input class="in" type="color" id="tp_col_${i}" value="${esc(col)}" title="Color principal" style="height:32px;width:52px;padding:2px" oninput="previewTipoRow(this)"></label>
+        <label style="font-size:11px;font-weight:700;color:#6b8378">Suave<br><input class="in" type="color" id="tp_soft_${i}" value="${esc(soft)}" title="Color suave" style="height:32px;width:52px;padding:2px" oninput="previewTipoRow(this)"></label>
         <button class="ic" onclick="eliminarItemLista(${i})" title="Eliminar">🗑</button>
       </div>`;
     }).join('');
@@ -5091,16 +5150,35 @@ function eliminarItemLista(i) {
 function guardarListaActual() {
   if (_listaModo === 'tipos') {
     const nuevo = {}, orden = [];
-    TIPOS_CRON.forEach((_, i) => {
-      const nom = ($('tp_nom_' + i)?.value || '').trim();
+    const rows = document.querySelectorAll('#dlgListasBody .lista-row');
+    rows.forEach((row, i) => {
+      const nomEl = row.querySelector('[id^="tp_nom_"]') || $('tp_nom_' + i);
+      const icoEl = row.querySelector('[id^="tp_ico_"]') || $('tp_ico_' + i);
+      const colEl = row.querySelector('[id^="tp_col_"]') || $('tp_col_' + i);
+      const softEl = row.querySelector('[id^="tp_soft_"]') || $('tp_soft_' + i);
+      const nom = (nomEl && nomEl.value || '').trim();
       if (!nom) return;
-      orden.push(nom);
-      nuevo[nom] = [($('tp_ico_' + i)?.value || '📌').trim() || '📌', $('tp_col_' + i)?.value || '#4a6572', $('tp_soft_' + i)?.value || '#e6eef2'];
+      let col = (colEl && colEl.value) || '#4a6572';
+      let soft = (softEl && softEl.value) || '#e6eef2';
+      if (col && !col.startsWith('#')) col = '#' + col;
+      if (soft && !soft.startsWith('#')) soft = '#' + soft;
+      const ico = ((icoEl && icoEl.value) || '📌').trim() || '📌';
+      // evitar nombres duplicados
+      let finalNom = nom;
+      let n = 2;
+      while (nuevo[finalNom]) { finalNom = nom + ' ' + n; n++; }
+      orden.push(finalNom);
+      nuevo[finalNom] = [ico, col, soft];
     });
     if (!orden.length) { toast('Debe haber al menos un tipo'); return; }
-    TIPO_STYLE = nuevo; TIPOS_CRON = orden;
-    saveConfigListas(); fillSel(); renderCronograma(false);
-    toast('✅ Tipos y colores guardados');
+    TIPO_STYLE = nuevo;
+    TIPOS_CRON = orden;
+    saveConfigListas();
+    try { fillSel(); } catch (e) {}
+    try { renderCronograma(false); } catch (e) {}
+    toast('✅ Tipos y colores guardados (' + orden.length + ')');
+    renderGestorListas();
+    return;
   } else if (_listaModo === 'novedades' || _listaModo === 'errores') {
     const target = {};
     const n = document.querySelectorAll('#dlgListasBody [id^="li_key_"]').length;
