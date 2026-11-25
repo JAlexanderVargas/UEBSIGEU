@@ -831,6 +831,14 @@ body.logged-in #topbar { display: flex; }
      <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" class="ck-org" value="Comité de Posgrado" onchange="updateOrgActivos()" style="width:18px;height:18px;accent-color:var(--oscuro)"> Comité de Posgrado</label>
    </div>
  </div>
+ <div class="card" id="cardListas">
+   <h3>📋 Listas editables</h3>
+   <p class="help" style="margin-top:0">Administra facultades y tipos de actividad del cronograma (colores incluidos).</p>
+   <div class="bar" style="margin-top:10px">
+     <button class="btn sm p" onclick="abrirGestorListas('facultades')">🏛 Facultades / Departamentos</button>
+     <button class="btn sm p" onclick="abrirGestorListas('tipos')">🎨 Tipos de actividad (colores)</button>
+   </div>
+ </div>
  <div class="cron-grid">
    <div class="cron-panel" id="panelCronPub">
      <div class="cron-header"><h3>🌐 Cronograma Público</h3><button class="btn sm" onclick="descargarCronImagen('panelCronPub', 'Cronograma_Publico')">📸 Descargar Imagen</button></div>
@@ -1077,7 +1085,7 @@ body.logged-in #topbar { display: flex; }
  </section>
 
 <section id="vVac" class="hide">
- <div class="top"><h1>Seguimiento de Cargos y Vacantes</h1><p>Verifica que todas las facultades tengan candidatos en todos los roles.</p></div>
+ <div class="top"><h1>Seguimiento de Cargos y Vacantes</h1><p>Verifica cobertura de todos los órganos (facultades y nivel institucional). Un cargo se considera cubierto con mínimo <b>2 fórmulas</b> habilitadas o en revisión.</p></div>
  <div class="bar">
    <span class="sp"></span>
    <button class="btn" style="background:#1d6f42;color:white;border-color:#1d6f42" onclick="expVacantesXL()">Descargar Reporte Excel</button>
@@ -1258,9 +1266,7 @@ body.logged-in #topbar { display: flex; }
      <div><label>Fecha de inicio</label><input class="in" type="date" id="a_fecha"></div>
       <div><label>Fecha de fin</label><input class="in" type="date" id="a_fin"></div>
       <div><label>Responsable</label><input class="in" id="a_resp" placeholder="Ej. Secretaría General"></div>
-     <div><label>Tipo</label><select class="in" id="a_tipo">
-        <option>Inscripción</option><option>Campaña</option><option>Votación</option><option>Escrutinio</option><option>Poselectoral</option><option>Otro</option>
-     </select></div>
+     <div><label>Tipo</label><select class="in" id="a_tipo"></select></div>
      <div><label>Etapa del Proceso</label><select class="in" id="a_etapa">
         <option>Preelectoral</option><option>Electoral</option><option>Postelectoral</option><option>Posesión</option><option>Segunda Vuelta</option>
      </select></div>
@@ -1269,6 +1275,14 @@ body.logged-in #topbar { display: flex; }
    <div><label style="margin-top:12px"><input type="checkbox" id="a_publica" style="width:16px;height:16px;vertical-align:middle"> Visible en el cronograma público</label></div>
  </div>
  <div class="df"><button class="btn" onclick="dlgAct.close()">Cancelar</button><button class="btn p" onclick="saveActividad()">Guardar</button></div>
+</dialog>
+
+<dialog id="dlgListas">
+  <div class="dh"><h3 id="dlgListasTitulo">Listas</h3><button onclick="dlgListas.close()">✕</button></div>
+  <div class="db">
+    <div id="dlgListasBody"></div>
+  </div>
+  <div class="df"><button class="btn" onclick="dlgListas.close()">Cerrar</button></div>
 </dialog>
 
 <dialog id="dlgUsuarios">
@@ -1485,9 +1499,11 @@ const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 const CARGOS_TITULAR = ['Vicerrector(a) Académico', 'Secretaría General', 'Director (a) de Tecnología', 'Director (a) Registro y Control Académico', 'Director (a) de Auditoría Interna'];
 const CARGOS_DELEGADO = ['Delegado (a) de la Vicerrectoría Académica', 'Delegado (a) de la Secretaría General', 'Delegado (a) de la Dirección de Tecnología', 'Delegado (a) de la Dirección de Registro y Control Académico', 'Delegado (a) de la Dirección de Auditoría Interna'];
 
-const FACULTADES = ['Facultad de Medicina', 'Facultad de Ciencias', 'Facultad de Ciencias Económicas y Administrativas', 'Facultad de Ciencias Jurídicas y Políticas', 'Facultad de Creación y Comunicación', 'Facultad de Educación', 'Facultad de Enfermería', 'Facultad de Ingeniería', 'Facultad de Odontología', 'Facultad de Psicología', 'Departamento de Bioética', 'Departamento de Humanidades'];
+let FACULTADES = ['Facultad de Medicina', 'Facultad de Ciencias', 'Facultad de Ciencias Económicas y Administrativas', 'Facultad de Ciencias Jurídicas y Políticas', 'Facultad de Creación y Comunicación', 'Facultad de Educación', 'Facultad de Enfermería', 'Facultad de Ingeniería', 'Facultad de Odontología', 'Facultad de Psicología', 'Departamento de Bioética', 'Departamento de Humanidades'];
 const ORG_GLOBALES = ['Consejo Directivo', 'Consejo Académico', 'Comité de Posgrado'];
 const esGlobal = (org) => ORG_GLOBALES.includes(org);
+/** Mínimo de fórmulas (habilitadas o en revisión) para considerar un cargo cubierto. Evita que una sola dupla compita solo contra el voto en blanco. */
+const MIN_FORMULAS_CARGO = 2;
 
 const MODULOS = [
   { key: 'vCron', label: 'Cronograma' },
@@ -1667,11 +1683,13 @@ window.addEventListener('unhandledrejection', ev => _reportarErrorGlobal(ev.reas
    ===================================================================== */
 const SYNC_KEYS = {
   cand_v2: 'candidatos', cronograma_v2: 'cronograma', votantes_v2: 'votantes',
-  censo_data_v1: 'censo', org_activos_v1: 'org_activos', soporte_data_v1: 'soporte'
+  censo_data_v1: 'censo', org_activos_v1: 'org_activos', soporte_data_v1: 'soporte',
+  config_listas_v1: 'config_listas'
 };
 const _syncGet = {
   cand_v2: () => D, cronograma_v2: () => CRON, votantes_v2: () => VOTANTES,
-  censo_data_v1: () => CENSO_DATA, org_activos_v1: () => ORG_ACTIVOS, soporte_data_v1: () => SOPORTES
+  censo_data_v1: () => CENSO_DATA, org_activos_v1: () => ORG_ACTIVOS, soporte_data_v1: () => SOPORTES,
+  config_listas_v1: () => ({ facultades: FACULTADES, tiposCron: TIPO_STYLE })
 };
 
 let _syncEnabled = false;
@@ -1746,6 +1764,14 @@ async function syncPullAll() {
     apply('censo_data_v1', v => { if (Array.isArray(v)) CENSO_DATA = v; });
     apply('org_activos_v1', v => { if (Array.isArray(v)) { ORG_ACTIVOS = v.length ? v : Object.keys(ORG); if (!v.length) setTimeout(saveOrgActivos, 0); } });
     apply('soporte_data_v1', v => { if (Array.isArray(v)) SOPORTES = v; });
+    apply('config_listas_v1', v => {
+      if (!v || typeof v !== 'object') return;
+      if (Array.isArray(v.facultades) && v.facultades.length) FACULTADES = v.facultades;
+      if (v.tiposCron && typeof v.tiposCron === 'object') {
+        TIPO_STYLE = v.tiposCron;
+        TIPOS_CRON = Object.keys(TIPO_STYLE);
+      }
+    });
     return changed;
   } catch (e) { console.warn('syncPullAll:', e.message); return false; }
 }
@@ -1790,6 +1816,7 @@ const saveVotantes = () => _syncPush('votantes_v2');
 const saveCenso = () => _syncPush('censo_data_v1');
 const saveSoportes = () => _syncPush('soporte_data_v1');
 const saveOrgActivos = () => _syncPush('org_activos_v1');
+const saveConfigListas = () => _syncPush('config_listas_v1');
 
 /* =====================================================================
    LOG
@@ -2696,6 +2723,11 @@ function fillSel() {
   _setH('gOrgFilter', '<option value="">Todos los órganos</option>' + opcionesOrg);
   _setH('gFacFilter', '<option value="">Todas las facultades</option>' + FACULTADES.map(x => `<option value="${x}">${x}</option>`).join(''));
   _setH('cargaOrgano', '<option value="">Detectar automáticamente</option>' + opcionesOrg);
+  
+  // Tipos de actividad del cronograma (dinámicos + colores)
+  const prevTipo = $('a_tipo') ? $('a_tipo').value : '';
+  _setH('a_tipo', (typeof TIPOS_CRON !== 'undefined' ? TIPOS_CRON : Object.keys(TIPO_STYLE || {})).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join(''));
+  if (prevTipo && $('a_tipo') && [...$('a_tipo').options].some(o => o.value === prevTipo)) $('a_tipo').value = prevTipo;
   
   if (_prevAo && o.includes(_prevAo)) $('ao').value = _prevAo;
   cargarTextoActa();
@@ -4545,58 +4577,108 @@ function renderAnalitica() {
 /* =====================================================================
    VACANTES
    ===================================================================== */
+function _vacRoleBox(org, r) {
+  const ok = r.ok;
+  const label = ok ? '✓ OK' : (r.count === 1 ? '⚠ Solo 1 fórmula' : '⚠ Falta');
+  const color = ok ? 'var(--ok)' : 'var(--alert-line)';
+  let body = '';
+  if (r.candidatos.length > 0) {
+    body = `<div style="margin:4px 0 0 0;padding:0;">` +
+      r.candidatos.map(c => `<div style="margin-bottom:4px;line-height:1.3;"><b>P:</b> ${esc(c.pri.nombre)}<br><b>S:</b> ${esc(c.sup ? c.sup.nombre : 'Sin suplente')}</div>`).join('') +
+      `</div>`;
+  } else {
+    body = `<div style="font-size:11px;color:var(--alert-line);font-style:italic;margin-top:4px;">Sin candidatos</div>`;
+  }
+  if (r.count > 0 && r.count < MIN_FORMULAS_CARGO) {
+    body += `<div style="font-size:11px;color:#b35a06;margin-top:4px;font-weight:600;">Se requieren mínimo ${MIN_FORMULAS_CARGO} fórmulas (ahora ${r.count})</div>`;
+  }
+  return `<div class="vac-role-box ${ok ? 'vac-role-ok' : 'vac-role-miss'}"><div class="vac-role-title"><span>${esc(org)} - <span class="chip ${r.rol}">${r.rol}</span></span><span style="font-size:11px;color:${color}">${label}</span></div>${body}</div>`;
+}
 function renderVacantes() {
   const facs = FACULTADES;
-  const obligatorios = { 'Consejo de Facultad': ['Estudiante', 'Docente', 'Egresado'], 'Consejo Directivo': ['Estudiante', 'Docente'], 'Consejo Académico': ['Estudiante', 'Docente', 'Egresado'], 'Comité de Posgrado': ['Estudiante', 'Egresado'] };
+  const obligatorios = ORG;
   let totalCubiertas = 0, totalFaltantes = 0;
   let html = '';
+
+  // Órganos globales (nivel institucional)
+  const globalesActivos = ORG_ACTIVOS.filter(o => esGlobal(o));
+  if (globalesActivos.length) {
+    let htmlRolesG = '';
+    let ocupadosG = 0, totalesG = 0;
+    globalesActivos.forEach(org => {
+      const roles = (obligatorios[org] || []).map(rol => {
+        const candidatos = D.filter(c => c.org === org && c.rol === rol && c.pri.nombre.toUpperCase() !== 'VOTO EN BLANCO');
+        const validos = candidatos.filter(c => { try { const est = estado(c, c.pri)[0]; return est === 'Habilitado' || est === 'En revisión'; } catch (e) { return true; } });
+        totalesG++;
+        const ok = validos.length >= MIN_FORMULAS_CARGO;
+        if (ok) ocupadosG++;
+        if (ok) totalCubiertas++; else totalFaltantes++;
+        return { rol, count: validos.length, candidatos: validos, required: MIN_FORMULAS_CARGO, ok };
+      });
+      roles.forEach(r => { htmlRolesG += _vacRoleBox(org, r); });
+    });
+    const faltanG = totalesG - ocupadosG;
+    html += `<div class="vac-card" style="border:2px solid #1f6fd1;grid-column:1/-1"><div class="vac-card-header" style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><div style="width:100%;">🌐 Órganos de nivel institucional</div><div style="display:flex;justify-content:space-between;width:100%;font-size:12px;font-weight:600"><span style="color:var(--ok)">Ocupados: ${ocupadosG}/${totalesG}</span><span style="color:${faltanG === 0 ? 'var(--ok)' : 'var(--alert-line)'}">${faltanG === 0 ? '✓ Completo' : `⚠ Faltan: ${faltanG}`}</span></div><small style="color:var(--mut)">Mínimo ${MIN_FORMULAS_CARGO} fórmulas por cargo (evita competencia solo contra voto en blanco)</small></div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${htmlRolesG}</div></div>`;
+  }
+
+  // Por facultad
   facs.forEach(fac => {
     const porOrgano = {}; let facOcupados = 0; let facTotales = 0;
     ORG_ACTIVOS.forEach(org => {
       if (esGlobal(org)) return;
-      porOrgano[org] = obligatorios[org].map(rol => {
+      const rolesReq = obligatorios[org] || [];
+      porOrgano[org] = rolesReq.map(rol => {
         const candidatos = D.filter(c => c.fac === fac && c.org === org && c.rol === rol && c.pri.nombre.toUpperCase() !== 'VOTO EN BLANCO');
-        const validos = candidatos.filter(c => { const est = estado(c, c.pri)[0]; return est === 'Habilitado' || est === 'En revisión'; });
+        const validos = candidatos.filter(c => { try { const est = estado(c, c.pri)[0]; return est === 'Habilitado' || est === 'En revisión'; } catch (e) { return true; } });
         facTotales++;
-        if (validos.length >= 1) facOcupados++;
-        return { rol, count: validos.length, candidatos: validos, required: 1, ok: validos.length >= 1 };
+        const ok = validos.length >= MIN_FORMULAS_CARGO;
+        if (ok) facOcupados++;
+        return { rol, count: validos.length, candidatos: validos, required: MIN_FORMULAS_CARGO, ok };
       });
     });
-    let htmlRoles = ''; let faltantesFac = facTotales - facOcupados;
+    let htmlRoles = '';
     Object.entries(porOrgano).forEach(([org, roles]) => {
       roles.forEach(r => {
         if (r.ok) totalCubiertas++; else totalFaltantes++;
-        htmlRoles += `<div class="vac-role-box ${r.ok ? 'vac-role-ok' : 'vac-role-miss'}"><div class="vac-role-title"><span>${esc(org)} - <span class="chip ${r.rol}">${r.rol}</span></span><span style="font-size:11px;color:${r.ok ? 'var(--ok)' : 'var(--alert-line)'}">${r.ok ? '✓ OK' : '⚠ Falta'}</span></div>`;
-        if (r.candidatos.length > 0) {
-          htmlRoles += `<div style="margin:4px 0 0 0; padding:0;">`;
-          r.candidatos.forEach(c => { htmlRoles += `<div style="margin-bottom:4px; line-height:1.3;"><b>P:</b> ${esc(c.pri.nombre)}<br><b>S:</b> ${esc(c.sup ? c.sup.nombre : 'Sin suplente')}</div>`; });
-          htmlRoles += `</div>`;
-        } else {
-          htmlRoles += `<div style="font-size:11px; color:var(--alert-line); font-style:italic; margin-top:4px;">Sin candidatos</div>`;
-        }
-        htmlRoles += `</div>`;
+        htmlRoles += _vacRoleBox(org, r);
       });
     });
     if (Object.keys(porOrgano).length > 0) {
-      html += `<div class="vac-card"><div class="vac-card-header" style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;"><div style="width:100%;">🏛️ ${esc(fac)}</div><div style="display:flex; justify-content:space-between; width:100%; font-size:12px; font-weight:600;"><span style="color:var(--ok)">Ocupados: ${facOcupados}/${facTotales}</span><span style="color:${faltantesFac === 0 ? 'var(--ok)' : 'var(--alert-line)'}">${faltantesFac === 0 ? '✓ Completo' : `⚠ Faltan: ${faltantesFac}`}</span></div></div><div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">${htmlRoles}</div></div>`;
+      const faltantesFac = facTotales - facOcupados;
+      html += `<div class="vac-card"><div class="vac-card-header" style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><div style="width:100%;">🏛️ ${esc(fac)}</div><div style="display:flex;justify-content:space-between;width:100%;font-size:12px;font-weight:600"><span style="color:var(--ok)">Ocupados: ${facOcupados}/${facTotales}</span><span style="color:${faltantesFac === 0 ? 'var(--ok)' : 'var(--alert-line)'}">${faltantesFac === 0 ? '✓ Completo' : `⚠ Faltan: ${faltantesFac}`}</span></div></div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">${htmlRoles}</div></div>`;
     }
   });
+
   $('vacList').innerHTML = html || '<p class="empty" style="grid-column:1/-1">No hay órganos activos.</p>';
-  $('vacKpis').innerHTML = [['Facultades / Deptos', facs.length, 'var(--oscuro)'], ['Coberturas OK', totalCubiertas, 'var(--ok)'], ['Faltantes', totalFaltantes, 'var(--alert-line)'], ['% Cobertura', totalCubiertas + totalFaltantes > 0 ? Math.round(totalCubiertas / (totalCubiertas + totalFaltantes) * 100) + '%' : '0%', 'var(--naranja)']].map(k => `<div class="kpi" style="--c:${k[2]}"><b>${k[1]}</b><span>${k[0]}</span></div>`).join('');
+  $('vacKpis').innerHTML = [
+    ['Facultades / Deptos', facs.length, 'var(--oscuro)'],
+    ['Coberturas OK (≥' + MIN_FORMULAS_CARGO + ')', totalCubiertas, 'var(--ok)'],
+    ['Faltantes', totalFaltantes, 'var(--alert-line)'],
+    ['% Cobertura', totalCubiertas + totalFaltantes > 0 ? Math.round(totalCubiertas / (totalCubiertas + totalFaltantes) * 100) + '%' : '0%', 'var(--naranja)']
+  ].map(k => `<div class="kpi" style="--c:${k[2]}"><b>${k[1]}</b><span>${k[0]}</span></div>`).join('');
 }
 function expVacantesXL() {
   const facs = FACULTADES;
-  const obligatorios = { 'Consejo de Facultad': ['Estudiante', 'Docente', 'Egresado'], 'Consejo Directivo': ['Estudiante', 'Docente'], 'Consejo Académico': ['Estudiante', 'Docente', 'Egresado'], 'Comité de Posgrado': ['Estudiante', 'Egresado'] };
-  const aoa = [['Facultad', 'Órgano', 'Rol Requerido', 'Estado', 'Candidatos Postulados']];
+  const obligatorios = ORG;
+  const aoa = [['Ámbito', 'Órgano', 'Rol Requerido', 'Fórmulas', 'Estado', 'Candidatos Postulados']];
+  ORG_ACTIVOS.filter(o => esGlobal(o)).forEach(org => {
+    (obligatorios[org] || []).forEach(rol => {
+      const candidatos = D.filter(c => c.org === org && c.rol === rol && c.pri.nombre.toUpperCase() !== 'VOTO EN BLANCO');
+      const validos = candidatos.filter(c => { try { const est = estado(c, c.pri)[0]; return est === 'Habilitado' || est === 'En revisión'; } catch (e) { return true; } });
+      const estadoStr = validos.length >= MIN_FORMULAS_CARGO ? 'Cubierto' : (validos.length === 1 ? 'Solo 1 fórmula' : 'Falta Candidato');
+      const nombres = validos.map(c => `P: ${c.pri.nombre}${c.sup ? ' / S: ' + c.sup.nombre : ''}`).join(' | ');
+      aoa.push(['Institucional', org, rol, validos.length, estadoStr, nombres]);
+    });
+  });
   facs.forEach(fac => {
     ORG_ACTIVOS.forEach(org => {
       if (esGlobal(org)) return;
-      obligatorios[org].forEach(rol => {
+      (obligatorios[org] || []).forEach(rol => {
         const candidatos = D.filter(c => c.fac === fac && c.org === org && c.rol === rol && c.pri.nombre.toUpperCase() !== 'VOTO EN BLANCO');
-        const validos = candidatos.filter(c => { const est = estado(c, c.pri)[0]; return est === 'Habilitado' || est === 'En revisión'; });
-        const estadoStr = validos.length > 0 ? 'Cubierto' : 'Falta Candidato';
+        const validos = candidatos.filter(c => { try { const est = estado(c, c.pri)[0]; return est === 'Habilitado' || est === 'En revisión'; } catch (e) { return true; } });
+        const estadoStr = validos.length >= MIN_FORMULAS_CARGO ? 'Cubierto' : (validos.length === 1 ? 'Solo 1 fórmula' : 'Falta Candidato');
         const nombres = validos.map(c => `P: ${c.pri.nombre}${c.sup ? ' / S: ' + c.sup.nombre : ''}`).join(' | ');
-        aoa.push([fac, org, rol, estadoStr, nombres]);
+        aoa.push([fac, org, rol, validos.length, estadoStr, nombres]);
       });
     });
   });
@@ -4800,7 +4882,8 @@ const ICO_USER = '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 
 const ICO_TAG = '<svg viewBox="0 0 24 24"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
 function partesFecha(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); if (!m) return { d: '–', m: 'sin fecha' }; return { d: String(+m[3]), m: MES_CORTO[+m[2] - 1] + ' ' + m[1] }; }
 function diasEntre(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5) + 1; }
-const TIPO_STYLE = { 'Inscripción': ['📝', '#1f6fd1', '#e4f0fd'], 'Campaña': ['📣', '#e8590c', '#ffe8d9'], 'Votación': ['🗳️', '#0B9B5B', '#dcf6e7'], 'Escrutinio': ['🧮', '#7d3c98', '#f1e4f7'], 'Poselectoral': ['🏛️', '#c2255c', '#fde4ee'], 'Otro': ['📌', '#4a6572', '#e6eef2'] };
+let TIPO_STYLE = { 'Inscripción': ['📝', '#1f6fd1', '#e4f0fd'], 'Campaña': ['📣', '#e8590c', '#ffe8d9'], 'Votación': ['🗳️', '#0B9B5B', '#dcf6e7'], 'Escrutinio': ['🧮', '#7d3c98', '#f1e4f7'], 'Poselectoral': ['🏛️', '#c2255c', '#fde4ee'], 'Otro': ['📌', '#4a6572', '#e6eef2'] };
+let TIPOS_CRON = Object.keys(TIPO_STYLE);
 
 function estadoGuardado() {
   const el = $('cronGuardado'); if (!el) return;
@@ -4878,12 +4961,115 @@ function renderCronograma(anim) {
   $('cronList').innerHTML = cronListaHTML(vista, hoy, true) || `<p class="empty">${CRON.length ? 'No hay actividades en este filtro.' : 'No hay actividades.'}</p>`;
   deshabilitarBotonesEdicion();
 }
+/* ===== Gestor de listas (facultades + tipos con color) ===== */
+let _listaModo = 'facultades';
+function abrirGestorListas(modo) {
+  if (SESSION && SESSION.rol !== 'administrador' && !(typeof puedeEditar === 'function' && puedeEditar('vCron'))) { toast('⛔ Solo administrador o con permiso de edición'); return; }
+  _listaModo = modo || 'facultades';
+  $('dlgListasTitulo').textContent = modo === 'tipos' ? 'Tipos de actividad (colores)' : 'Facultades / Departamentos';
+  renderGestorListas();
+  $('dlgListas').showModal();
+}
+function renderGestorListas() {
+  const body = $('dlgListasBody');
+  if (!body) return;
+  if (_listaModo === 'tipos') {
+    let rows = TIPOS_CRON.map((t, i) => {
+      const st = TIPO_STYLE[t] || ['📌', '#4a6572', '#e6eef2'];
+      return `<div class="firma-item" style="display:grid;grid-template-columns:40px 1fr 90px 90px auto;gap:8px;align-items:center">
+        <input class="in" id="tp_ico_${i}" value="${esc(st[0])}" style="text-align:center;padding:6px" title="Emoji / icono">
+        <input class="in" id="tp_nom_${i}" value="${esc(t)}" placeholder="Nombre del tipo">
+        <input class="in" type="color" id="tp_col_${i}" value="${st[1]}" title="Color principal" style="height:36px;padding:2px">
+        <input class="in" type="color" id="tp_soft_${i}" value="${st[2]}" title="Color suave de fondo" style="height:36px;padding:2px">
+        <button class="ic" onclick="eliminarTipoLista(${i})" title="Eliminar">🗑</button>
+      </div>`;
+    }).join('');
+    body.innerHTML = `<p class="help" style="margin-top:0">Define el nombre, el icono y los dos colores de cada tipo. Se usan en el cronograma.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">${rows || '<p class="empty">No hay tipos.</p>'}</div>
+      <div class="bar"><button class="btn sm p" onclick="agregarTipoLista()">+ Agregar tipo</button>
+      <button class="btn sm" onclick="guardarTiposLista()">💾 Guardar cambios</button></div>`;
+  } else {
+    let rows = FACULTADES.map((f, i) => `<div class="firma-item" style="display:flex;gap:8px;align-items:center">
+      <input class="in" id="fac_nom_${i}" value="${esc(f)}" style="flex:1">
+      <button class="ic" onclick="eliminarFacultadLista(${i})" title="Eliminar">🗑</button>
+    </div>`).join('');
+    body.innerHTML = `<p class="help" style="margin-top:0">Agrega, edita o elimina facultades y departamentos. Los cambios se reflejan en todos los selectores.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">${rows || '<p class="empty">No hay facultades.</p>'}</div>
+      <div class="bar"><button class="btn sm p" onclick="agregarFacultadLista()">+ Agregar facultad</button>
+      <button class="btn sm" onclick="guardarFacultadesLista()">💾 Guardar cambios</button></div>`;
+  }
+}
+function agregarTipoLista() {
+  const nombre = 'Nuevo tipo ' + (TIPOS_CRON.length + 1);
+  TIPOS_CRON.push(nombre);
+  TIPO_STYLE[nombre] = ['📌', '#4a6572', '#e6eef2'];
+  renderGestorListas();
+}
+function eliminarTipoLista(i) {
+  const t = TIPOS_CRON[i];
+  if (!t) return;
+  if (TIPOS_CRON.length <= 1) { toast('Debe quedar al menos un tipo'); return; }
+  TIPOS_CRON.splice(i, 1);
+  delete TIPO_STYLE[t];
+  renderGestorListas();
+}
+function guardarTiposLista() {
+  const nuevo = {};
+  const orden = [];
+  TIPOS_CRON.forEach((_, i) => {
+    const nom = ($('tp_nom_' + i)?.value || '').trim();
+    if (!nom) return;
+    const ico = ($('tp_ico_' + i)?.value || '📌').trim() || '📌';
+    const col = $('tp_col_' + i)?.value || '#4a6572';
+    const soft = $('tp_soft_' + i)?.value || '#e6eef2';
+    orden.push(nom);
+    nuevo[nom] = [ico, col, soft];
+  });
+  if (!orden.length) { toast('Debe haber al menos un tipo'); return; }
+  TIPO_STYLE = nuevo;
+  TIPOS_CRON = orden;
+  saveConfigListas();
+  fillSel();
+  renderCronograma(false);
+  toast('✅ Tipos y colores guardados');
+  renderGestorListas();
+}
+function agregarFacultadLista() {
+  FACULTADES.push('Nueva facultad');
+  renderGestorListas();
+}
+function eliminarFacultadLista(i) {
+  if (FACULTADES.length <= 1) { toast('Debe quedar al menos una facultad'); return; }
+  FACULTADES.splice(i, 1);
+  renderGestorListas();
+}
+function guardarFacultadesLista() {
+  const nuevas = [];
+  FACULTADES.forEach((_, i) => {
+    const nom = ($('fac_nom_' + i)?.value || '').trim();
+    if (nom) nuevas.push(nom);
+  });
+  if (!nuevas.length) { toast('Debe haber al menos una facultad'); return; }
+  FACULTADES = [...new Set(nuevas)];
+  saveConfigListas();
+  fillSel();
+  try { normalizarFacultadesGlobal(); } catch (e) {}
+  try { renderVacantes(); } catch (e) {}
+  try { renderCensoData(); } catch (e) {}
+  toast('✅ Facultades actualizadas');
+  renderGestorListas();
+}
+
 function addActividad() {
   if (SESSION && !puedeEditar('vCron')) { toast('⛔ Sin permiso'); return; }
   if (ELECCIONES_CERRADAS && SESSION?.rol !== 'administrador') { toast('🔒 Elecciones cerradas'); return; }
   $('dtAct').textContent = 'Nueva Actividad';
   $('a_nombre').value = ''; $('a_fecha').value = new Date().toISOString().slice(0, 10); $('a_fin').value = '';
-  $('a_resp').value = ''; $('a_desc').value = ''; $('a_tipo').value = 'Otro'; $('a_etapa').value = 'Preelectoral'; $('a_publica').checked = true;
+  $('a_resp').value = ''; $('a_desc').value = '';
+  fillSel();
+  if ($('a_tipo') && TIPOS_CRON.includes('Otro')) $('a_tipo').value = 'Otro';
+  else if ($('a_tipo') && TIPOS_CRON[0]) $('a_tipo').value = TIPOS_CRON[0];
+  $('a_etapa').value = 'Preelectoral'; $('a_publica').checked = true;
   $('dlgAct').dataset.editId = '';
   $('dlgAct').showModal();
 }
@@ -4893,7 +5079,9 @@ function editAct(id) {
   const a = CRON.find(x => x.id === id); if (!a) return;
   $('dtAct').textContent = 'Editar Actividad';
   $('a_nombre').value = a.nombre; $('a_fecha').value = a.fecha; $('a_fin').value = a.fechaFin || '';
-  $('a_resp').value = a.responsable || ''; $('a_desc').value = a.desc || ''; $('a_tipo').value = a.tipo || 'Otro';
+  $('a_resp').value = a.responsable || ''; $('a_desc').value = a.desc || '';
+  fillSel();
+  if ($('a_tipo')) $('a_tipo').value = TIPOS_CRON.includes(a.tipo) ? a.tipo : (TIPOS_CRON[0] || 'Otro');
   $('a_etapa').value = a.etapa || 'Preelectoral'; $('a_publica').checked = !!a.publica;
   $('dlgAct').dataset.editId = id;
   $('dlgAct').showModal();
@@ -4997,7 +5185,6 @@ function descargarPlantillaCronograma() {
   XLSX.writeFile(wb, 'plantilla-cronograma.xlsx');
 }
 const ETAPAS_BASE = ['Preelectoral', 'Electoral', 'Postelectoral', 'Segunda Vuelta', 'Posesión'];
-const TIPOS_CRON = ['Inscripción', 'Campaña', 'Votación', 'Escrutinio', 'Poselectoral', 'Otro'];
 function normEtapa(v) {
   const raw = String(v ?? '').trim();
   if (!raw) return 'Preelectoral';
@@ -5149,7 +5336,7 @@ setInterval(() => {
    RESPALDO
    ===================================================================== */
 function descargarRespaldo() {
-  const data = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, ORG_ACTIVOS, fecha: new Date().toISOString() };
+  const data = { D, CRON, FIRMAS, VOTANTES, CENSO_DATA, SOPORTES, ORG_ACTIVOS, FACULTADES, TIPO_STYLE, fecha: new Date().toISOString() };
   const a = document.createElement('a');
   a.setAttribute('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data)));
   a.setAttribute('download', 'respaldo_elecciones.json');
@@ -5170,7 +5357,9 @@ function importarRespaldo(input) {
       if (data.CENSO_DATA) CENSO_DATA = data.CENSO_DATA;
       if (data.SOPORTES) SOPORTES = data.SOPORTES;
       if (data.ORG_ACTIVOS) ORG_ACTIVOS = data.ORG_ACTIVOS;
-      save(); saveCron(); saveFirmas(); saveVotantes(); saveCenso(); saveSoportes(); saveOrgActivos();
+      if (Array.isArray(data.FACULTADES) && data.FACULTADES.length) FACULTADES = data.FACULTADES;
+      if (data.TIPO_STYLE && typeof data.TIPO_STYLE === 'object') { TIPO_STYLE = data.TIPO_STYLE; TIPOS_CRON = Object.keys(TIPO_STYLE); }
+      save(); saveCron(); saveFirmas(); saveVotantes(); saveCenso(); saveSoportes(); saveOrgActivos(); saveConfigListas();
       toast('Datos importados. Recargando...');
       setTimeout(() => { window.location.reload(); }, 3000);
     } catch (error) { console.error(error); toast('Error al importar el archivo.'); }
